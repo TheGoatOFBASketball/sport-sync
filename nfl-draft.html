@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFL Draft 2026 | SPORTSYNC</title>
+  <meta name="description" content="NFL Draft 2026 - Complete coverage with 7-round mock draft, trades, and big board. Your NFL draft headquarters.">
+  <meta name="theme-color" content="#0a0a10">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏈</text></svg>">
+  <link rel="stylesheet" href="index.css">
+  <script src="espn-api.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .draft-page { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    
+    .draft-hero {
+      background: linear-gradient(135deg, #1a1a24 0%, #0a1628 50%, #1a0a0a 100%);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .draft-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 50%);
+      animation: rotate 20s linear infinite;
+    }
+    @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .draft-hero h1 {
+      font-family: var(--h);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .draft-hero h1 span { color: #3b82f6; }
+    .draft-hero p { color: #888; font-size: 1.1rem; margin-bottom: 20px; position: relative; z-index: 1; }
+    
+    .draft-meta {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .draft-meta-item {
+      background: rgba(255,255,255,0.05);
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .draft-meta-item .label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .draft-meta-item .value { font-family: var(--h); font-size: 1.3rem; color: #3b82f6; }
+
+    .draft-controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .draft-search {
+      flex: 1;
+      min-width: 200px;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .draft-search i { color: var(--t2); }
+    .draft-search input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--tx);
+      font-size: 0.9rem;
+    }
+    .round-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: 10px;
+      border: 1px solid var(--brd);
+    }
+    .round-tab {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--t2);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      white-space: nowrap;
+    }
+    .round-tab:hover { color: var(--tx); }
+    .round-tab.active { background: #3b82f6; color: #fff; }
+
+    .draft-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) { .draft-grid { grid-template-columns: 1fr; } }
+
+    .draft-picks {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .pick-header {
+      display: grid;
+      grid-template-columns: 50px 90px 1fr 70px 50px;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--brd);
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--t2);
+    }
+    @media (max-width: 768px) {
+      .pick-header { grid-template-columns: 40px 80px 1fr 60px; }
+      .pick-header span:last-child { display: none; }
+    }
+    .pick-row {
+      display: grid;
+      grid-template-columns: 50px 90px 1fr 70px 50px;
+      gap: 8px;
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--brd);
+      align-items: center;
+      transition: 0.15s;
+    }
+    @media (max-width: 768px) {
+      .pick-row { grid-template-columns: 40px 80px 1fr 60px; }
+      .pick-row span:last-child { display: none; }
+    }
+    .pick-row:hover { background: var(--bg3); }
+    .pick-row:last-child { border-bottom: none; }
+    .pick-num {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .pick-team {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .team-logo {
+      width: 24px;
+      height: 24px;
+      background: var(--bg3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .team-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .team-logo.nfl-logo {
+      background: linear-gradient(135deg, #013369, #69B3E7);
+    }
+    .team-name { font-size: 0.75rem; font-weight: 600; }
+    
+    .odds-team-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .pick-player { font-size: 0.85rem; font-weight: 700; }
+    .pick-pos {
+      background: rgba(59,130,246,0.2);
+      color: #3b82f6;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .pos-qb { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .pos-rb { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .pos-wr { background: rgba(168,85,247,0.2); color: #a855f7; }
+    .pos-te { background: rgba(236,72,153,0.2); color: #ec4899; }
+    .pos-ol { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .pos-dl { background: rgba(249,115,22,0.2); color: #f97316; }
+    .pos-lb { background: rgba(20,184,166,0.2); color: #14b8a6; }
+    .pos-db { background: rgba(99,102,241,0.2); color: #6366f1; }
+    .pick-grade {
+      font-family: var(--h);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #22c55e;
+      text-align: center;
+    }
+
+    .draft-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .sidebar-card h3 {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-card h3 i { color: #3b82f6; }
+    
+    .top-picks-list { display: flex; flex-direction: column; gap: 6px; }
+    .top-pick-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--bg3);
+      border-radius: 6px;
+    }
+    .top-pick-rank {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fbbf24;
+      min-width: 28px;
+    }
+    .top-pick-name { font-size: 0.85rem; font-weight: 700; }
+    .top-pick-detail { font-size: 0.65rem; color: var(--t2); }
+
+    .trades-list { display: flex; flex-direction: column; gap: 10px; }
+    .trade-item {
+      padding: 12px;
+      background: var(--bg3);
+      border-radius: 8px;
+      border-left: 3px solid #3b82f6;
+    }
+    .trade-teams { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .trade-team { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; }
+    .trade-team .team-logo-sm { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--card); }
+    .trade-team .team-logo-sm img { width: 100%; height: 100%; object-fit: contain; }
+    .trade-team .team-abbr-text { font-size: 0.75rem; }
+    .trade-arrow { color: var(--t2); }
+    .trade-detail { font-size: 0.7rem; color: var(--t2); }
+
+    .prospect-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 600px) { .prospect-grid { grid-template-columns: repeat(2, 1fr); } }
+    .prospect-card {
+      background: var(--bg3);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .prospect-card:hover { transform: translateY(-2px); }
+    .prospect-rank {
+      font-family: var(--h);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .prospect-name { font-size: 0.75rem; font-weight: 700; margin-top: 4px; }
+    .prospect-pos { font-size: 0.65rem; color: var(--t2); }
+
+    .bigboard-list { display: flex; flex-direction: column; gap: 6px; }
+    .bigboard-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--bg3);
+      border-radius: 6px;
+    }
+    .bb-rank {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--h);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .bb-name { font-size: 0.8rem; font-weight: 700; }
+    .bb-detail { font-size: 0.65rem; color: var(--t2); }
+    .bb-grade { font-family: var(--h); font-size: 0.9rem; font-weight: 700; color: #22c55e; }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 8px;
+      color: var(--t2);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); }
+    
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(239,68,68,0.2);
+      color: #ef4444;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #ef4444;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to SportSync</a>
+
+  <div class="draft-page">
+    <div class="draft-hero">
+      <h1>🏈 NFL <span>Draft</span> 2026</h1>
+      <p>Complete 7-round NFL draft coverage with trades, big board, and team needs</p>
+      <p style="margin-top:8px;font-size:0.9rem;">
+        <a href="index.html" style="color:var(--blue)">Dashboard</a> | 
+        <a href="nba.html" style="color:var(--orange)">NBA Hub</a> | 
+        <a href="nba-draft.html" style="color:var(--orange)">NBA Draft</a> |
+        <a href="march-madness.html" style="color:var(--green)">March Madness</a>
+      </p>
+      <div class="draft-meta">
+        <div class="draft-meta-item">
+          <div class="label">Date</div>
+          <div class="value">Apr 24-26</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Location</div>
+          <div class="value">Green Bay</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Rounds</div>
+          <div class="value">7 Rounds</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Picks</div>
+          <div class="value">258 Total</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="draft-controls">
+      <div class="draft-search">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="draft-search" placeholder="Search players, teams, positions...">
+      </div>
+      <div class="round-tabs">
+        <button class="round-tab active" data-round="1">R1</button>
+        <button class="round-tab" data-round="2">R2</button>
+        <button class="round-tab" data-round="3">R3</button>
+        <button class="round-tab" data-round="4">R4</button>
+        <button class="round-tab" data-round="5">R5</button>
+        <button class="round-tab" data-round="6">R6</button>
+        <button class="round-tab" data-round="7">R7</button>
+      </div>
+    </div>
+
+    <div class="draft-grid">
+      <div class="draft-picks">
+        <div class="pick-header">
+          <span>#</span>
+          <span>Team</span>
+          <span>Player</span>
+          <span>Pos</span>
+          <span>GRD</span>
+        </div>
+        <div id="picks-container"></div>
+      </div>
+
+      <div class="draft-sidebar">
+        <div class="sidebar-card">
+          <h3>🏆 Top 10 Prospects</h3>
+          <div class="top-picks-list" id="top-picks"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>🔄 Mock Trades</h3>
+          <div class="trades-list" id="trades"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>📊 Position Rankings</h3>
+          <div class="prospect-grid" id="position-rankings"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>⭐ Big Board</h3>
+          <div class="bigboard-list" id="bigboard"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const draftData = {
+      1: [
+        { pick: 1, team: 'Titans', logo: 'TEN', player: 'Cam Ward', pos: 'QB', grade: 98 },
+        { pick: 2, team: 'Browns', logo: 'CLE', player: 'Travis Hunter', pos: 'CB/WR', grade: 97 },
+        { pick: 3, team: 'Giants', logo: 'NYG', player: 'Shedeur Sanders', pos: 'QB', grade: 96 },
+        { pick: 4, team: 'Patriots', logo: 'NE', player: 'Abdul Carter', pos: 'EDGE', grade: 95 },
+        { pick: 5, team: 'Jaguars', logo: 'JAX', player: 'Tet McMillan', pos: 'WR', grade: 94 },
+        { pick: 6, team: 'Raiders', logo: 'LV', player: 'Will Johnson', pos: 'CB', grade: 94 },
+        { pick: 7, team: 'Jets', logo: 'NYJ', player: 'Mason Graham', pos: 'DT', grade: 93 },
+        { pick: 8, team: 'Panthers', logo: 'CAR', player: 'Jalon Walker', pos: 'LB', grade: 93 },
+        { pick: 9, team: 'Ravens', logo: 'BAL', player: 'James Pearce Jr', pos: 'EDGE', grade: 92 },
+        { pick: 10, team: 'Bengals', logo: 'CIN', player: 'Warren Zapoloa', pos: 'OT', grade: 92 },
+        { pick: 11, team: 'Cardinals', logo: 'ARI', player: 'Jihaad Campbell', pos: 'LB', grade: 91 },
+        { pick: 12, team: 'Chargers', logo: 'LAC', player: 'Colston Loveland', pos: 'TE', grade: 91 },
+        { pick: 13, team: 'Colts', logo: 'IND', player: 'Preston Stone', pos: 'QB', grade: 90 },
+        { pick: 14, team: 'Saints', logo: 'NO', player: 'Shemar Stewart', pos: 'DL', grade: 90 },
+        { pick: 15, team: 'Bears', logo: 'CHI', player: 'Malaki Starks', pos: 'S', grade: 89 },
+        { pick: 16, team: 'Commanders', logo: 'WAS', player: 'Deone Walker', pos: 'DL', grade: 89 },
+        { pick: 17, team: 'Buccaneers', logo: 'TB', player: 'Emeka Egbuka', pos: 'WR', grade: 88 },
+        { pick: 18, team: 'Broncos', logo: 'DEN', player: 'Benjamin Morrison', pos: 'CB', grade: 88 },
+        { pick: 19, team: 'Cowboys', logo: 'DAL', player: 'Trey Amos', pos: 'CB', grade: 87 },
+        { pick: 20, team: 'Dolphins', logo: 'MIA', player: 'Jordan Jefferson', pos: 'OT', grade: 87 },
+        { pick: 21, team: 'Vikings', logo: 'MIN', player: 'Luther Burden', pos: 'WR', grade: 86 },
+        { pick: 22, team: 'Texans', logo: 'HOU', player: 'Kelvin Banks Jr', pos: 'OT', grade: 86 },
+        { pick: 23, team: 'Eagles', logo: 'PHI', player: 'Denzel O\'Rand', pos: 'LB', grade: 85 },
+        { pick: 24, team: 'Rams', logo: 'LAR', player: 'Jared Wilson', pos: 'OC', grade: 85 },
+        { pick: 25, team: 'Bills', logo: 'BUF', player: 'Jontah Gilbert', pos: 'DE', grade: 84 },
+        { pick: 26, team: '49ers', logo: 'SF', player: 'Jayden Metchie', pos: 'OG', grade: 84 },
+        { pick: 27, team: 'Packers', logo: 'GB', player: 'Josh McCaskey', pos: 'RB', grade: 83 },
+        { pick: 28, team: 'Lions', logo: 'DET', player: 'Harold Faufata', pos: 'DL', grade: 83 },
+        { pick: 29, team: 'Chiefs', logo: 'KC', player: 'Harold Faufata', pos: 'WR', grade: 82 },
+        { pick: 30, team: 'Steelers', logo: 'PIT', player: 'Kaleb Johnson', pos: 'RB', grade: 82 },
+        { pick: 31, team: 'Seahawks', logo: 'SEA', player: 'Kevin Winston Jr', pos: 'S', grade: 81 },
+        { pick: 32, team: 'Falcons', logo: 'ATL', player: 'Mykel Williams', pos: 'DL', grade: 81 }
+      ],
+      2: [
+        { pick: 33, team: 'Titans', logo: 'TEN', player: 'Ollie Gordon', pos: 'RB', grade: 89 },
+        { pick: 34, team: 'Browns', logo: 'CLE', player: 'Dylan Glover', pos: 'LB', grade: 88 },
+        { pick: 35, team: 'Patriots', logo: 'NE', player: 'Quincy Riley', pos: 'CB', grade: 88 },
+        { pick: 36, team: 'Giants', logo: 'NYG', player: 'Ja\'Don James', pos: 'WR', grade: 87 },
+        { pick: 37, team: 'Jaguars', logo: 'JAX', player: 'Marcus Jackson', pos: 'DT', grade: 87 },
+        { pick: 38, team: 'Raiders', logo: 'LV', player: 'Brock Glenn', pos: 'QB', grade: 86 },
+        { pick: 39, team: 'Jets', logo: 'NYJ', player: 'Marcus Williams', pos: 'DE', grade: 86 },
+        { pick: 40, team: 'Panthers', logo: 'CAR', player: 'Jared Smith', pos: 'OG', grade: 85 }
+      ],
+      3: [
+        { pick: 65, team: 'Titans', logo: 'TEN', player: 'Lamar Murray', pos: 'RB', grade: 82 },
+        { pick: 66, team: 'Browns', logo: 'CLE', player: 'Tyreek Jackson', pos: 'DT', grade: 81 },
+        { pick: 67, team: 'Patriots', logo: 'NE', player: 'Jordan Ross', pos: 'TE', grade: 81 },
+        { pick: 68, team: 'Giants', logo: 'NYG', player: 'Elijah Davis', pos: 'CB', grade: 80 },
+        { pick: 69, team: 'Jaguars', logo: 'JAX', player: 'Caleb Jones', pos: 'OT', grade: 80 }
+      ],
+      4: [
+        { pick: 97, team: 'Titans', logo: 'TEN', player: 'Ryan Brooks', pos: 'S', grade: 78 },
+        { pick: 98, team: 'Browns', logo: 'CLE', player: 'Chris Miller', pos: 'WR', grade: 78 },
+        { pick: 99, team: 'Patriots', logo: 'NE', player: 'Jake Thompson', pos: 'LB', grade: 77 }
+      ],
+      5: [
+        { pick: 129, team: 'Titans', logo: 'TEN', player: 'Mike White', pos: 'OL', grade: 75 },
+        { pick: 130, team: 'Browns', logo: 'CLE', player: 'Sam Jackson', pos: 'QB', grade: 75 },
+        { pick: 131, team: 'Patriots', logo: 'NE', player: 'David Lee', pos: 'TE', grade: 74 }
+      ],
+      6: [
+        { pick: 185, team: 'Titans', logo: 'TEN', player: 'Carlos Rivera', pos: 'K', grade: 70 },
+        { pick: 186, team: 'Browns', logo: 'CLE', player: 'Tom Adams', pos: 'P', grade: 70 }
+      ],
+      7: [
+        { pick: 249, team: 'Titans', logo: 'TEN', player: 'James Wilson', pos: 'LS', grade: 65 },
+        { pick: 250, team: 'Browns', logo: 'CLE', player: 'Frank Lopez', pos: 'DL', grade: 65 }
+      ]
+    };
+
+    const trades = [
+      { from: 'Browns', to: 'Titans', detail: 'Browns trade 2nd round pick for Marcus Stone (QB)' },
+      { from: 'Giants', to: 'Patriots', detail: 'Giants trade up from 15 to 4 for Abdul Carter' },
+      { from: '49ers', to: 'Eagles', detail: '49ers acquire 2026 3rd for Brandon Aiyuk' }
+    ];
+
+    const bigBoard = [
+      { rank: 1, name: 'Cam Ward', pos: 'QB', team: 'Miami', grade: 98 },
+      { rank: 2, name: 'Travis Hunter', pos: 'CB/WR', team: 'Colorado', grade: 97 },
+      { rank: 3, name: 'Shedeur Sanders', pos: 'QB', team: 'Colorado', grade: 96 },
+      { rank: 4, name: 'Abdul Carter', pos: 'EDGE', team: 'Penn State', grade: 95 },
+      { rank: 5, name: 'Tet McMillan', pos: 'WR', team: 'Ole Miss', grade: 94 }
+    ];
+
+    function getPosClass(pos) {
+      const p = pos?.toUpperCase() || '';
+      if (p.includes('QB')) return 'pos-qb';
+      if (p.includes('RB')) return 'pos-rb';
+      if (p.includes('WR')) return 'pos-wr';
+      if (p.includes('TE')) return 'pos-te';
+      if (p.includes('OT') || p.includes('OG') || p.includes('OC')) return 'pos-ol';
+      if (p.includes('DE') || p.includes('DT') || p.includes('DL')) return 'pos-dl';
+      if (p.includes('LB')) return 'pos-lb';
+      if (p.includes('CB') || p.includes('S')) return 'pos-db';
+      return '';
+    }
+
+    const teamNameToAbbr = {
+      'Browns': 'CLE', 'Titans': 'TEN', 'Giants': 'NYG', 'Patriots': 'NE',
+      '49ers': 'SF', 'Eagles': 'PHI', 'Bills': 'BUF', 'Dolphins': 'MIA',
+      'Jets': 'NYJ', 'Ravens': 'BAL', 'Bengals': 'CIN', 'Steelers': 'PIT',
+      'Texans': 'HOU', 'Colts': 'IND', 'Jaguars': 'JAX', 'Chiefs': 'KC',
+      'Raiders': 'LV', 'Chargers': 'LAC', 'Broncos': 'DEN', 'Cowboys': 'DAL',
+      'Redskins': 'WAS', 'Bears': 'CHI', 'Lions': 'DET', 'Packers': 'GB',
+      'Vikings': 'MIN', 'Panthers': 'CAR', 'Saints': 'NO', 'Falcons': 'ATL',
+      'Buccaneers': 'TB', 'Seahawks': 'SEA', 'Rams': 'LAR', 'Cardinals': 'ARI'
+    };
+
+    function getNFLLogo(abbr) {
+      const logo = TeamLogos.getLogo('nfl', abbr);
+      if (logo) {
+        return `<img src="${logo}" alt="${abbr}" onerror="this.parentElement.style.background='var(--bg3)';this.remove();">`;
+      }
+      return `<i class="fa-solid fa-shield-halved"></i>`;
+    }
+
+    function getTeamLogoByName(name) {
+      const abbr = teamNameToAbbr[name] || name;
+      return getNFLLogo(abbr);
+    }
+
+    function renderPicks(round) {
+      const container = document.getElementById('picks-container');
+      const picks = draftData[round] || draftData[1];
+      container.innerHTML = picks.map(p => `
+        <div class="pick-row">
+          <span class="pick-num">${p.pick}</span>
+          <span class="pick-team">
+            <span class="team-logo nfl-logo">${getNFLLogo(p.logo)}</span>
+            <span class="team-name">${p.team}</span>
+          </span>
+          <span class="pick-player">${p.player}</span>
+          <span class="pick-pos ${getPosClass(p.pos)}">${p.pos}</span>
+          <span class="pick-grade">${p.grade}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderTopPicks() {
+      const container = document.getElementById('top-picks');
+      container.innerHTML = draftData[1].slice(0, 10).map(p => `
+        <div class="top-pick-item">
+          <span class="top-pick-rank">${p.pick}</span>
+          <div class="odds-team-cell">
+            <span class="team-logo nfl-logo">${getNFLLogo(p.logo)}</span>
+            <div>
+              <div class="top-pick-name">${p.player}</div>
+              <div class="top-pick-detail">${p.team} • ${p.pos}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTrades() {
+      const container = document.getElementById('trades');
+      container.innerHTML = trades.map(t => `
+        <div class="trade-item">
+          <div class="trade-teams">
+            <span class="trade-team">
+              <span class="team-logo-sm">${getTeamLogoByName(t.from)}</span>
+              <span class="team-abbr-text">${t.from}</span>
+            </span>
+            <i class="fa-solid fa-arrow-right trade-arrow"></i>
+            <span class="trade-team">
+              <span class="team-logo-sm">${getTeamLogoByName(t.to)}</span>
+              <span class="team-abbr-text">${t.to}</span>
+            </span>
+          </div>
+          <div class="trade-detail">${t.detail}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderPositionRankings() {
+      const container = document.getElementById('position-rankings');
+      const positions = ['QB', 'WR', 'RB', 'TE', 'OT', 'DL', 'LB', 'CB'];
+      container.innerHTML = positions.map((pos, i) => `
+        <div class="prospect-card">
+          <div class="prospect-rank">${i + 1}</div>
+          <div class="prospect-name">${pos}</div>
+          <div class="prospect-pos">View All</div>
+        </div>
+      `).join('');
+    }
+
+    function renderBigBoard() {
+      const container = document.getElementById('bigboard');
+      container.innerHTML = bigBoard.map(b => `
+        <div class="bigboard-item">
+          <span class="bb-rank">${b.rank}</span>
+          <div>
+            <div class="bb-name">${b.name}</div>
+            <div class="bb-detail">${b.team} • ${b.pos}</div>
+          </div>
+          <span class="bb-grade">${b.grade}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize with Team Logos
+    async function init() {
+      await TeamLogos.loadAll();
+      renderPicks(1);
+      renderTopPicks();
+      renderTrades();
+      renderPositionRankings();
+      renderBigBoard();
+    }
+    init();
+
+    // Round tabs
+    document.querySelectorAll('.round-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderPicks(parseInt(tab.dataset.round));
+      });
+    });
+
+    // Search
+    document.getElementById('draft-search').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('.pick-row');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? 'grid' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

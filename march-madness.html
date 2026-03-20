@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>March Madness 2026 | SPORTSYNC</title>
+  <meta name="description" content="March Madness 2026 bracket, live scores, schedules, and coverage. Complete NCAA tournament coverage by SPORTSYNC.">
+  <meta name="theme-color" content="#0a0a10">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+  <link rel="stylesheet" href="index.css">
+  <script src="espn-api.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .mm-page { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    
+    .mm-hero {
+      background: linear-gradient(135deg, #1a1a24 0%, #0a2a0a 50%, #1a1a24 100%);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .mm-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(0,230,118,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(255,152,0,0.1) 0%, transparent 50%);
+    }
+    .mm-hero h1 {
+      font-family: var(--h);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .mm-hero h1 span { color: var(--green); }
+    .mm-hero p { color: #888; font-size: 1.1rem; margin-bottom: 20px; position: relative; z-index: 1; }
+    
+    .mm-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .mm-tab {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .mm-tab:hover { background: rgba(255,255,255,0.2); }
+    .mm-tab.active { background: var(--green); border-color: var(--green); color: #000; }
+    
+    .mm-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) { .mm-grid { grid-template-columns: 1fr; } }
+    
+    .mm-main { display: flex; flex-direction: column; gap: 24px; }
+    .mm-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    
+    .mm-card {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .mm-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--brd);
+    }
+    .mm-card-header h3 {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mm-card-header h3 i { color: var(--green); }
+    
+    .bracket-container { padding: 20px; }
+    .bracket-region-title {
+      font-family: var(--h);
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--green);
+    }
+    .bracket-matchups {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .round-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--t2);
+      margin-bottom: 4px;
+    }
+    
+    .bracket-game {
+      background: var(--bg3);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--brd);
+    }
+    .bracket-team {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--brd);
+      transition: 0.2s;
+    }
+    .bracket-team:last-child { border-bottom: none; }
+    .bracket-team:hover { background: var(--card); }
+    .bracket-team.winner { background: rgba(0,230,118,0.1); }
+    .bracket-team.lost { opacity: 0.5; }
+    .team-seed {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--card);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-right: 8px;
+    }
+    .team-seed.top-seed { background: var(--green); color: #000; }
+    .team-name { font-weight: 600; flex: 1; }
+    .team-score {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      min-width: 24px;
+      text-align: center;
+    }
+    .winner .team-score { color: var(--green); }
+    
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,68,68,0.2);
+      color: #ff4444;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #ff4444;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    
+    .games-list { padding: 12px; }
+    .game-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      background: var(--bg3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .game-card:hover { transform: translateX(4px); }
+    .game-card:last-child { margin-bottom: 0; }
+    .game-card.live { border-left: 3px solid #ff4444; }
+    
+    .game-teams {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    .game-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .team-logo-sm {
+      width: 36px;
+      height: 36px;
+      background: var(--card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      overflow: hidden;
+    }
+    .team-logo-sm img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .team-abbr { font-size: 0.7rem; font-weight: 700; }
+    .game-score {
+      font-family: var(--h);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+      min-width: 40px;
+      text-align: center;
+    }
+    .game-vs { font-size: 0.7rem; color: var(--t2); }
+    
+    .game-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .game-time { font-size: 0.75rem; font-weight: 600; }
+    .game-tv { font-size: 0.65rem; color: var(--t2); }
+    
+    .picks-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+    .pick-card {
+      background: var(--bg3);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid var(--brd);
+    }
+    .pick-card:hover { transform: translateY(-2px); border-color: var(--green); }
+    .pick-rank {
+      font-family: var(--h);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .pick-name { font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
+    .pick-seed { font-size: 0.7rem; color: var(--t2); }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 12px;
+    }
+    .stat-item {
+      background: var(--bg3);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-num {
+      font-family: var(--h);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .stat-label { font-size: 0.7rem; color: var(--t2); margin-top: 4px; }
+    
+    .news-list { padding: 12px; }
+    .news-item {
+      display: flex;
+      gap: 14px;
+      padding: 12px;
+      background: var(--bg3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .news-item:hover { transform: translateY(-2px); }
+    .news-item:last-child { margin-bottom: 0; }
+    .news-img {
+      width: 60px;
+      height: 50px;
+      background: var(--card);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .news-img i { font-size: 1.2rem; color: var(--t2); }
+    .news-content { flex: 1; min-width: 0; }
+    .news-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+    .news-meta { font-size: 0.65rem; color: var(--t2); }
+    
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px;
+      overflow-x: auto;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      color: var(--t2);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--bh); }
+    .filter-btn.active { background: var(--green); color: #000; border-color: var(--green); }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 8px;
+      color: var(--t2);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); }
+    
+    .four-regions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 16px;
+    }
+    @media (max-width: 768px) { .four-regions { grid-template-columns: 1fr; } }
+    .region-card {
+      background: var(--bg3);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--brd);
+    }
+    .region-title {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .region-title.east { color: #3b82f6; }
+    .region-title.south { color: #ef4444; }
+    .region-title.midwest { color: #22c55e; }
+    .region-title.west { color: #f59e0b; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to SportSync</a>
+
+  <div class="mm-page">
+    <div class="mm-hero">
+      <h1>🏀 <span>March Madness</span> 2026</h1>
+      <p>Complete NCAA Tournament coverage - Bracket, live scores, and predictions</p>
+      <p style="margin-top:8px;font-size:0.9rem;">
+        <a href="index.html" style="color:var(--blue)">Dashboard</a> | 
+        <a href="nba.html" style="color:var(--orange)">NBA Hub</a> | 
+        <a href="nba-draft.html" style="color:var(--orange)">NBA Draft</a> |
+        <a href="nfl-draft.html" style="color:var(--blue)">NFL Draft</a>
+      </p>
+      <div class="mm-tabs">
+        <button class="mm-tab active" data-tab="bracket">Bracket</button>
+        <button class="mm-tab" data-tab="games">Live Games</button>
+        <button class="mm-tab" data-tab="upsets">Upset Alerts</button>
+        <button class="mm-tab" data-tab="news">News</button>
+      </div>
+    </div>
+
+    <div class="mm-grid">
+      <div class="mm-main">
+        <div class="mm-card" id="bracket-section">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-fire"></i> Tournament Bracket</h3>
+            <span class="live-indicator"><span class="live-dot"></span> Round 1 In Progress</span>
+          </div>
+          <div class="four-regions">
+            <div class="region-card">
+              <div class="region-title east">🏰 East Region</div>
+              <div class="bracket-matchups">
+                <div class="bracket-game">
+                  <div class="bracket-team winner"><span class="team-seed top-seed">1</span><span class="team-name">Duke</span><span class="team-score">85</span></div>
+                  <div class="bracket-team lost"><span class="team-seed">16</span><span class="team-name">Mount St. Mary's</span><span class="team-score">62</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team winner"><span class="team-seed">8</span><span class="team-name">Nebraska</span><span class="team-score">72</span></div>
+                  <div class="bracket-team lost"><span class="team-seed">9</span><span class="team-name">VCU</span><span class="team-score">68</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">4</span><span class="team-name">Illinois</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">13</span><span class="team-name">Charleston</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">5</span><span class="team-name">Michigan</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">12</span><span class="team-name">UCF</span><span class="team-score">-</span></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="region-card">
+              <div class="region-title south">☀️ South Region</div>
+              <div class="bracket-matchups">
+                <div class="bracket-game">
+                  <div class="bracket-team winner"><span class="team-seed top-seed">1</span><span class="team-name">Houston</span><span class="team-score">91</span></div>
+                  <div class="bracket-team lost"><span class="team-seed">16</span><span class="team-name">SIU-Edwardsville</span><span class="team-score">52</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">8</span><span class="team-name">Texas Tech</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">9</span><span class="team-name">Purdue</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">4</span><span class="team-name">Missouri</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">13</span><span class="team-name">High Point</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">5</span><span class="team-name">Oregon</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">12</span><span class="team-name">Liberty</span><span class="team-score">-</span></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="region-card">
+              <div class="region-title midwest">🌽 Midwest Region</div>
+              <div class="bracket-matchups">
+                <div class="bracket-game">
+                  <div class="bracket-team winner"><span class="team-seed top-seed">1</span><span class="team-name">Auburn</span><span class="team-score">78</span></div>
+                  <div class="bracket-team lost"><span class="team-seed">16</span><span class="team-name">Alabama State</span><span class="team-score">45</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">8</span><span class="team-name">Louisville</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">9</span><span class="team-name">Creighton</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">4</span><span class="team-name">Maryland</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">13</span><span class="team-name">Grand Canyon</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">5</span><span class="team-name">Utah State</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">12</span><span class="team-name">McNeese State</span><span class="team-score">-</span></div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="region-card">
+              <div class="region-title west">🏔️ West Region</div>
+              <div class="bracket-matchups">
+                <div class="bracket-game">
+                  <div class="bracket-team winner"><span class="team-seed top-seed">1</span><span class="team-name">Florida</span><span class="team-score">88</span></div>
+                  <div class="bracket-team lost"><span class="team-seed">16</span><span class="team-name">Norfolk State</span><span class="team-score">56</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">8</span><span class="team-name">UConn</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">9</span><span class="team-name">Oklahoma</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">4</span><span class="team-name">Louisiana Tech</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">13</span><span class="team-name">Towson</span><span class="team-score">-</span></div>
+                </div>
+                <div class="bracket-game">
+                  <div class="bracket-team"><span class="team-seed">5</span><span class="team-name">San Diego State</span><span class="team-score">-</span></div>
+                  <div class="bracket-team"><span class="team-seed">12</span><span class="team-name">Georgia Tech</span><span class="team-score">-</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-card" id="games-section" style="display:none;">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-basketball"></i> Today's Games</h3>
+            <span class="live-indicator"><span class="live-dot"></span> 6 LIVE</span>
+          </div>
+          <div class="filter-bar">
+            <button class="filter-btn active">All Games</button>
+            <button class="filter-btn">First Round</button>
+            <button class="filter-btn">Upset Alert</button>
+          </div>
+          <div class="games-list" id="mm-games"></div>
+        </div>
+
+        <div class="mm-card" id="upsets-section" style="display:none;">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-bolt"></i> Upset Alerts</h3>
+          </div>
+          <div class="picks-grid" id="upset-picks"></div>
+        </div>
+      </div>
+
+      <div class="mm-sidebar">
+        <div class="mm-card">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-chart-line"></i> Tournament Stats</h3>
+          </div>
+          <div class="stats-row">
+            <div class="stat-item">
+              <div class="stat-num">48</div>
+              <div class="stat-label">Games Played</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">12</div>
+              <div class="stat-label">Upsets</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-num">4</div>
+              <div class="stat-label">OT Games</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-card">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-crown"></i> Top Seeds Remaining</h3>
+          </div>
+          <div class="picks-grid">
+            <div class="pick-card">
+              <div class="pick-rank">1</div>
+              <div class="pick-name">Duke</div>
+              <div class="pick-seed">East</div>
+            </div>
+            <div class="pick-card">
+              <div class="pick-rank">1</div>
+              <div class="pick-name">Houston</div>
+              <div class="pick-seed">South</div>
+            </div>
+            <div class="pick-card">
+              <div class="pick-rank">1</div>
+              <div class="pick-name">Auburn</div>
+              <div class="pick-seed">Midwest</div>
+            </div>
+            <div class="pick-card">
+              <div class="pick-rank">1</div>
+              <div class="pick-name">Florida</div>
+              <div class="pick-seed">West</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-card">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-fire"></i> Hot Picks</h3>
+          </div>
+          <div class="news-list">
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-basketball"></i></div>
+              <div class="news-content">
+                <div class="news-title">Duke advances to Sweet 16 with dominant win</div>
+                <div class="news-meta">Duke 85 - 62 Mt. St Mary's</div>
+              </div>
+            </div>
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-bolt"></i></div>
+              <div class="news-content">
+                <div class="news-title">Nebraska upsets VCU in thriller</div>
+                <div class="news-meta">72 - 68 | OT</div>
+              </div>
+            </div>
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-fire"></i></div>
+              <div class="news-content">
+                <div class="news-title">Houston coasts past SIU-E</div>
+                <div class="news-meta">91 - 52 | Round 1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-card">
+          <div class="mm-card-header">
+            <h3><i class="fa-solid fa-calendar"></i> Schedule</h3>
+          </div>
+          <div class="news-list">
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-clock"></i></div>
+              <div class="news-content">
+                <div class="news-title">Round 1 continues</div>
+                <div class="news-meta">Today - All Day</div>
+              </div>
+            </div>
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-clock"></i></div>
+              <div class="news-content">
+                <div class="news-title">Round 2 begins</div>
+                <div class="news-meta">Sat Mar 22</div>
+              </div>
+            </div>
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-clock"></i></div>
+              <div class="news-content">
+                <div class="news-title">Sweet 16</div>
+                <div class="news-meta">Thu Mar 27</div>
+              </div>
+            </div>
+            <div class="news-item">
+              <div class="news-img"><i class="fa-solid fa-trophy"></i></div>
+              <div class="news-content">
+                <div class="news-title">Final Four</div>
+                <div class="news-meta">Sat Apr 5</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mmGames = [
+      { time: 'LIVE', home: { abbr: 'DUKE', name: 'Duke', seed: 1, score: 85 }, away: { abbr: 'MSM', name: "Mt St Mary's", seed: 16, score: 62 }, region: 'East', live: true },
+      { time: 'LIVE', home: { abbr: 'HOU', name: 'Houston', seed: 1, score: 91 }, away: { abbr: 'SIUE', name: 'SIU-E', seed: 16, score: 52 }, region: 'South', live: true },
+      { time: 'LIVE', home: { abbr: 'AUB', name: 'Auburn', seed: 1, score: 78 }, away: { abbr: 'ALST', name: 'Alabama St', seed: 16, score: 45 }, region: 'Midwest', live: true },
+      { time: 'LIVE', home: { abbr: 'FLA', name: 'Florida', seed: 1, score: 88 }, away: { abbr: 'NSU', name: 'Norfolk St', seed: 16, score: 56 }, region: 'West', live: true },
+      { time: '12:15 PM', home: { abbr: 'ILL', name: 'Illinois', seed: 4, score: null }, away: { abbr: 'CHAR', name: 'Charleston', seed: 13, score: null }, region: 'East', live: false },
+      { time: '2:30 PM', home: { abbr: 'MICH', name: 'Michigan', seed: 5, score: null }, away: { abbr: 'UCF', name: 'UCF', seed: 12, score: null }, region: 'East', live: false },
+      { time: '6:30 PM', home: { abbr: 'LOU', name: 'Louisville', seed: 8, score: null }, away: { abbr: 'CREI', name: 'Creighton', seed: 9, score: null }, region: 'Midwest', live: false },
+      { time: '8:45 PM', home: { abbr: 'UConn', name: 'UConn', seed: 8, score: null }, away: { abbr: 'OKLA', name: 'Oklahoma', seed: 9, score: null }, region: 'West', live: false }
+    ];
+
+    const upsetPicks = [
+      { rank: 12, name: 'McNeese State', upset: 'over Utah State', confidence: 72 },
+      { rank: 12, name: 'Liberty', upset: 'over Oregon', confidence: 68 },
+      { rank: 11, name: 'Vanderbilt', upset: 'over Arizona', confidence: 65 },
+      { rank: 10, name: 'Arkansas', upset: 'over St. John\'s', confidence: 61 },
+      { rank: 13, name: 'Grand Canyon', upset: 'over Maryland', confidence: 58 },
+      { rank: 13, name: 'Towson', upset: 'over Louisiana Tech', confidence: 52 }
+    ];
+
+    function getNCAALogo(abbr) {
+      const logo = TeamLogos.getLogo('ncaam', abbr);
+      if (logo) {
+        return `<img src="${logo}" alt="${abbr}" onerror="this.parentElement.innerHTML='${abbr}';this.remove();" style="width:100%;height:100%;object-fit:contain;">`;
+      }
+      return abbr;
+    }
+
+    function renderGames() {
+      const container = document.getElementById('mm-games');
+      container.innerHTML = mmGames.map(g => `
+        <div class="game-card${g.live ? ' live' : ''}">
+          <div class="game-teams">
+            <div class="game-team">
+              <span class="team-logo-sm">${getNCAALogo(g.home.abbr)}</span>
+              <span class="team-abbr">${g.home.abbr} (${g.home.seed})</span>
+            </div>
+            <div class="game-score">${g.home.score ?? '-'}</div>
+            <span class="game-vs">${g.live ? 'vs' : '@'}</span>
+            <div class="game-score">${g.away.score ?? '-'}</div>
+            <div class="game-team">
+              <span class="team-logo-sm">${getNCAALogo(g.away.abbr)}</span>
+              <span class="team-abbr">${g.away.abbr} (${g.away.seed})</span>
+            </div>
+          </div>
+          <div class="game-info">
+            <span class="game-time" style="${g.live ? 'color:var(--red)' : ''}">${g.live ? '● ' + g.time : g.time}</span>
+            <span class="game-tv">${g.region}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderUpsets() {
+      const container = document.getElementById('upset-picks');
+      container.innerHTML = upsetPicks.map(p => `
+        <div class="pick-card">
+          <div class="pick-rank">${p.rank}</div>
+          <div class="pick-name">${p.name}</div>
+          <div class="pick-seed">${p.upset}</div>
+        </div>
+      `).join('');
+    }
+
+    // Tab switching
+    document.querySelectorAll('.mm-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.mm-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        const tabName = tab.dataset.tab;
+        document.getElementById('bracket-section').style.display = tabName === 'bracket' ? 'block' : 'none';
+        document.getElementById('games-section').style.display = tabName === 'games' ? 'block' : 'none';
+        document.getElementById('upsets-section').style.display = tabName === 'upsets' ? 'block' : 'none';
+      });
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Initialize with Team Logos
+    async function init() {
+      await TeamLogos.loadAll();
+      renderGames();
+      renderUpsets();
+    }
+    init();
+  </script>
+</body>
+</html>
