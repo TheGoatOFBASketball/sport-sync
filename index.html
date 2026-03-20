@@ -54,6 +54,7 @@
     </div>
   </header>
 
+  <script>window.SPORTSYNC_SSE_URL = '/live-updates';</script>
   <!-- MAIN LAYOUT -->
   <div class="shell">
 
@@ -196,62 +197,7 @@
         <div class="feed-list" id="feed-list"></div>
       </section>
 
-      <!-- Top Players -->
-      <section class="sec" id="sec-player-stats">
-        <div class="sec-bar"><h2><span class="ab"></span> TOP PLAYERS</h2></div>
-        <nav class="player-filters">
-          <button class="sf active" data-player="nba">NBA</button>
-          <button class="sf" data-player="nfl">NFL</button>
-          <button class="sf" data-player="mlb">MLB</button>
-        </nav>
-        <div class="player-grid" id="player-stats"></div>
-      </section>
-
-      <!-- Quick Poll -->
-      <section class="sec">
-        <div class="sec-bar"><h2><span class="ab"></span> QUICK POLL</h2></div>
-        <div class="poll-widget">
-          <p class="poll-q">Who wins the WBC Final?</p>
-          <div class="poll-options">
-            <button class="po"><span>🇺🇸 USA</span><span class="po-p">55%</span></button>
-            <button class="po"><span>🇻🇪 Venezuela</span><span class="po-p">45%</span></button>
-          </div>
-          <div class="poll-meta"><i class="fa-solid fa-users"></i> 2,847 votes</div>
-        </div>
-      </section>
-
-      <!-- NFL Mock Draft -->
-      <section class="sec" id="sec-draft">
-        <div class="sec-bar">
-          <h2><span class="ab" style="background:var(--blue)"></span> 2026 NFL MOCK DRAFT</h2>
-          <a href="mock-draft.html" class="sec-link">View Full Draft <i class="fa-solid fa-external-link-alt"></i></a>
-        </div>
-        <div class="draft-container">
-          <div class="draft-header">
-            <div class="draft-round-selector">
-              <button class="dr-btn active" data-round="1">Round 1</button>
-              <button class="dr-btn" data-round="2">Round 2</button>
-              <button class="dr-btn" data-round="3">Round 3</button>
-            </div>
-            <div class="draft-live-badge"><span class="live-dot">●</span> LIVE</div>
-          </div>
-          <div class="draft-board" id="draft-board">
-            <!-- Populated by JS -->
-          </div>
-          <div class="draft-teams-grid" id="draft-teams">
-            <div class="dt-card"><span class="dt-pick">1</span><span class="dt-team">Titans</span><span class="dt-player">Cam Ward • QB</span></div>
-            <div class="dt-card"><span class="dt-pick">2</span><span class="dt-team">Browns</span><span class="dt-player">Travis Hunter • CB/WR</span></div>
-            <div class="dt-card"><span class="dt-pick">3</span><span class="dt-team">Giants</span><span class="dt-player">Shedeur Sanders • QB</span></div>
-            <div class="dt-card"><span class="dt-pick">4</span><span class="dt-team">Patriots</span><span class="dt-player">Abdul Carter • EDGE</span></div>
-            <div class="dt-card"><span class="dt-pick">5</span><span class="dt-team">Jaguars</span><span class="dt-player">Tet McMillan • WR</span></div>
-            <div class="dt-card"><span class="dt-pick">6</span><span class="dt-team">Raiders</span><span class="dt-player">Will Johnson • CB</span></div>
-            <div class="dt-card"><span class="dt-pick">7</span><span class="dt-team">Jets</span><span class="dt-player">Mason Graham • DT</span></div>
-            <div class="dt-card"><span class="dt-pick">8</span><span class="dt-team">Panthers</span><span class="dt-player">Jalon Walker • LB</span></div>
-            <div class="dt-card"><span class="dt-pick">9</span><span class="dt-team">Lamar</span><span class="dt-player">James Pearce Jr • EDGE</span></div>
-            <div class="dt-card"><span class="dt-pick">10</span><span class="dt-team">Raiders</span><span class="dt-player">Warren Zapoloa • OT</span></div>
-          </div>
-        </div>
-      </section>
+      <!-- Top Players (moved to NBA dashboard) -->
 
     </main>
 
@@ -320,10 +266,10 @@
 
   <!-- ESPN API -->
   <script src="espn-api.js" defer></script>
-  <!-- TheSportsDB API wrapper (live data) -->
+  <!-- The sports live data stack -->
   <script src="thesportsdb-api.js" defer></script>
-  <!-- Multi-Source Livescores (reconciled) -->
   <script src="multisource-livescores.js" defer></script>
+  <script src="live-sync-sse.js" defer></script>
   <!-- TheSportsDB API wrapper (live data) -->
   <script src="thesportsdb-api.js" defer></script>
   <script src="main.js" defer></script>

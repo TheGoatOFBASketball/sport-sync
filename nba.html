@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Basketball | SPORTSYNC</title>
+  <meta name="description" content="Complete NBA coverage - Live scores, standings, player stats, news, and March Madness. Your basketball headquarters.">
+  <meta name="theme-color" content="#0a0a10">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+  <link rel="stylesheet" href="index.css">
+  <script src="espn-api.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .nba-page { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    
+    .nba-hero {
+      background: linear-gradient(135deg, #1a1a24 0%, #2d1f3d 50%, #1a2433 100%);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .nba-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(255,140,0,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(0,0,255,0.1) 0%, transparent 50%);
+    }
+    .nba-hero h1 {
+      font-family: var(--h);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .nba-hero h1 span { color: #ff8c00; }
+    .nba-hero p { color: #888; font-size: 1.1rem; margin-bottom: 20px; position: relative; z-index: 1; }
+    
+    .nba-tabs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .nba-tab {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .nba-tab:hover { background: rgba(255,255,255,0.2); }
+    .nba-tab.active { background: #ff8c00; border-color: #ff8c00; }
+    
+    .nba-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) { .nba-grid { grid-template-columns: 1fr; } }
+    
+    .nba-main { display: flex; flex-direction: column; gap: 24px; }
+    .nba-sidebar { display: flex; flex-direction: column; gap: 20px; }
+    
+    .nba-card {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .nba-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--brd);
+    }
+    .nba-card-header h3 {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nba-card-header h3 i { color: #ff8c00; }
+    .nba-card-header span { font-size: 0.75rem; color: var(--t2); }
+    
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,68,68,0.2);
+      color: #ff4444;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #ff4444;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    
+    .game-list { padding: 12px; }
+    .game-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      background: var(--bg3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: 0.2s;
+    }
+    .game-item:hover { transform: translateX(4px); }
+    .game-item:last-child { margin-bottom: 0; }
+    .game-item.live { border-left: 3px solid #ff4444; }
+    
+    .game-teams {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+    .game-team {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .team-logo-sm {
+      width: 36px;
+      height: 36px;
+      background: var(--card);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      overflow: hidden;
+    }
+    .team-logo-sm img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .team-abbr { font-size: 0.7rem; font-weight: 700; }
+    .game-score {
+      font-family: var(--h);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green);
+      min-width: 40px;
+      text-align: center;
+    }
+    .game-vs { font-size: 0.7rem; color: var(--t2); }
+    
+    .game-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .game-time { font-size: 0.75rem; font-weight: 600; }
+    .game-tv { font-size: 0.65rem; color: var(--t2); }
+    
+    .standings-table { width: 100%; }
+    .standings-header {
+      display: grid;
+      grid-template-columns: 40px 1fr 60px 60px 60px;
+      gap: 8px;
+      padding: 12px 16px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--t2);
+      border-bottom: 1px solid var(--brd);
+    }
+    .standings-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 60px 60px 60px;
+      gap: 8px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      align-items: center;
+      border-bottom: 1px solid var(--brd);
+      transition: 0.2s;
+    }
+    .standings-row:hover { background: var(--bg3); }
+    .standings-row:last-child { border-bottom: none; }
+    .standings-row .rank { font-family: var(--h); font-size: 1rem; font-weight: 700; }
+    .standings-row .rank.top-3 { color: var(--green); }
+    .standings-row .rank.playoff { color: #ff8c00; }
+    .standings-row .rank.in-10 { color: #6366f1; }
+    
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-cell .team-logo-sm { width: 28px; height: 28px; font-size: 0.5rem; }
+    .team-cell strong { font-size: 0.85rem; }
+    
+    .stats-cell { text-align: center; font-weight: 600; }
+    .stats-cell.wins { color: var(--green); }
+    
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+    @media (min-width: 600px) { .players-grid { grid-template-columns: repeat(4, 1fr); } }
+    
+    .player-card {
+      background: var(--bg3);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .player-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .player-avatar {
+      width: 50px;
+      height: 50px;
+      background: var(--card);
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-avatar i { font-size: 1.2rem; color: var(--t2); }
+    .player-name { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+    .player-team { font-size: 0.7rem; color: var(--t2); margin-bottom: 6px; }
+    .player-stat {
+      font-family: var(--h);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ff8c00;
+    }
+    .player-stat-label { font-size: 0.6rem; color: var(--t2); }
+    
+    .news-list { padding: 12px; }
+    .news-item {
+      display: flex;
+      gap: 14px;
+      padding: 12px;
+      background: var(--bg3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .news-item:hover { transform: translateY(-2px); }
+    .news-item:last-child { margin-bottom: 0; }
+    .news-img {
+      width: 80px;
+      height: 60px;
+      background: var(--card);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .news-img i { font-size: 1.5rem; color: var(--t2); }
+    .news-content { flex: 1; min-width: 0; }
+    .news-tag {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #ff8c00;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .news-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+    .news-meta { font-size: 0.7rem; color: var(--t2); }
+    
+    .bracket-section { padding: 16px; }
+    .bracket-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 768px) { .bracket-grid { grid-template-columns: repeat(2, 1fr); } }
+    .bracket-region {
+      background: var(--bg3);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .bracket-region h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--green);
+    }
+    .bracket-team {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .bracket-team:hover { background: var(--card); }
+    .bracket-team.seed { font-weight: 700; }
+    .bracket-team .seed-num { color: var(--t2); margin-right: 8px; }
+    
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px;
+      overflow-x: auto;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      color: var(--t2);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--bh); }
+    .filter-btn.active { background: #ff8c00; color: #fff; border-color: #ff8c00; }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 8px;
+      color: var(--t2);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to SportSync</a>
+
+  <div class="nba-page">
+    <div class="nba-hero">
+      <h1>🏀 <span>NBA</span> Basketball</h1>
+      <p>Live scores, standings, player stats, <a href="march-madness.html" style="color:var(--green)">March Madness</a>, and <a href="nba-draft.html" style="color:var(--orange)">NBA Draft</a> coverage</p>
+      <div class="nba-tabs">
+        <button class="nba-tab active" data-tab="scores">Live Scores</button>
+        <button class="nba-tab" data-tab="standings">Standings</button>
+        <button class="nba-tab" data-tab="players">Top Players</button>
+        <button class="nba-tab" data-tab="news">News</button>
+        <button class="nba-tab" data-tab="bracket"><a href="march-madness.html" style="color:inherit">March Madness</a></button>
+        <button class="nba-tab" data-tab="draft"><a href="nba-draft.html" style="color:inherit">Draft</a></button>
+      </div>
+    </div>
+
+    <!-- Top Players (moved from home) -->
+    <section class="sec" id="sec-top-players-nba" aria-label="Top NBA players">
+      <div class="sec-bar"><h2><span class="ab"></span> TOP PLAYERS</h2></div>
+      <div class="players-grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <div class="player-card">
+          <div class="player-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="player-name">Shai Gilgeous-Alexander</div>
+          <div class="player-team">OKC • 31.2 PPG</div>
+        </div>
+        <div class="player-card">
+          <div class="player-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="player-name">Nikola Jokic</div>
+          <div class="player-team">DEN • 26.4 PPG</div>
+        </div>
+        <div class="player-card">
+          <div class="player-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="player-name">Luka Dončić</div>
+          <div class="player-team">DAL • 28.9 PPG</div>
+        </div>
+        <div class="player-card">
+          <div class="player-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="player-name">Joel Embiid</div>
+          <div class="player-team">PHI • 34.7 PPG</div>
+        </div>
+      </div>
+    </section>
+    
+    <div class="nba-grid">
+      <div class="nba-main">
+        <div class="nba-card" id="scores-section">
+          <div class="nba-card-header">
+            <h3><i class="fa-solid fa-basketball"></i> Tonight's Games</h3>
+            <span class="live-indicator"><span class="live-dot"></span> LIVE</span>
+          </div>
+          <div class="filter-bar">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Eastern</button>
+            <button class="filter-btn">Western</button>
+            <button class="filter-btn">National TV</button>
+          </div>
+          <div class="game-list" id="nba-games"></div>
+        </div>
+
+        <div class="nba-card" id="bracket-section" style="display:none;">
+          <div class="nba-card-header">
+            <h3><i class="fa-solid fa-fire"></i> March Madness 2026</h3>
+            <span>Round 1 • Thu-Mar 20</span>
+          </div>
+          <div class="bracket-section">
+            <div class="bracket-grid">
+              <div class="bracket-region">
+                <h4>East Region</h4>
+                <div class="bracket-team seed"><span class="seed-num">1</span>Duke <span style="color:var(--green)">W</span></div>
+                <div class="bracket-team seed"><span class="seed-num">2</span>Alabama</div>
+                <div class="bracket-team"><span class="seed-num">3</span>Texas A&M</div>
+                <div class="bracket-team"><span class="seed-num">4</span>Illinois</div>
+                <div class="bracket-team"><span class="seed-num">5</span>Michigan</div>
+                <div class="bracket-team"><span class="seed-num">6</span>Arizona</div>
+              </div>
+              <div class="bracket-region">
+                <h4>South Region</h4>
+                <div class="bracket-team seed"><span class="seed-num">1</span>Houston <span style="color:var(--green)">W</span></div>
+                <div class="bracket-team seed"><span class="seed-num">2</span>St. John's</div>
+                <div class="bracket-team"><span class="seed-num">3</span>Texas Tech</div>
+                <div class="bracket-team"><span class="seed-num">4</span>Missouri</div>
+                <div class="bracket-team"><span class="seed-num">5</span>Oregon</div>
+                <div class="bracket-team"><span class="seed-num">6</span>BYU</div>
+              </div>
+              <div class="bracket-region">
+                <h4>Midwest Region</h4>
+                <div class="bracket-team seed"><span class="seed-num">1</span>Auburn <span style="color:var(--green)">W</span></div>
+                <div class="bracket-team seed"><span class="seed-num">2</span>Iowa State</div>
+                <div class="bracket-team"><span class="seed-num">3</span>Wisconsin</div>
+                <div class="bracket-team"><span class="seed-num">4</span>Maryland</div>
+                <div class="bracket-team"><span class="seed-num">5</span>Utah State</div>
+                <div class="bracket-team"><span class="seed-num">6</span>Louisville</div>
+              </div>
+              <div class="bracket-region">
+                <h4>West Region</h4>
+                <div class="bracket-team seed"><span class="seed-num">1</span>Florida <span style="color:var(--green)">W</span></div>
+                <div class="bracket-team seed"><span class="seed-num">2</span>UConn</div>
+                <div class="bracket-team"><span class="seed-num">3</span>Oklahoma</div>
+                <div class="bracket-team"><span class="seed-num">4</span>Louisiana Tech</div>
+                <div class="bracket-team"><span class="seed-num">5</span>San Diego State</div>
+                <div class="bracket-team"><span class="seed-num">6</span>Vanderbilt</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nba-sidebar">
+        <div class="nba-card">
+          <div class="nba-card-header">
+            <h3><i class="fa-solid fa-ranking-star"></i> NBA Standings</h3>
+            <select style="background:var(--card);border:1px solid var(--brd);padding:4px 8px;border-radius:4px;font-size:0.7rem;">
+              <option>Eastern</option>
+              <option>Western</option>
+            </select>
+          </div>
+          <div class="standings-table">
+            <div class="standings-header">
+              <span>#</span>
+              <span>Team</span>
+              <span>W</span>
+              <span>L</span>
+              <span>PCT</span>
+            </div>
+            <div id="standings-list"></div>
+          </div>
+        </div>
+
+        <div class="nba-card">
+          <div class="nba-card-header">
+            <h3><i class="fa-solid fa-star"></i> Top Scorers</h3>
+          </div>
+          <div class="players-grid" id="top-players"></div>
+        </div>
+
+        <div class="nba-card">
+          <div class="nba-card-header">
+            <h3><i class="fa-solid fa-newspaper"></i> Latest News</h3>
+          </div>
+          <div class="news-list" id="nba-news"></div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nba-card" id="draft-section" style="display:none;">
+      <div class="nba-card-header">
+        <h3><i class="fa-solid fa-fire"></i> NBA Draft 2026</h3>
+        <a href="nba-draft.html" class="sec-link">View Full Draft <i class="fa-solid fa-external-link-alt"></i></a>
+      </div>
+      <div class="bracket-section">
+        <div class="bracket-grid">
+          <div class="bracket-region">
+            <h4>Top 5 Prospects</h4>
+            <div class="bracket-team seed"><span class="seed-num">1</span>Cooper Flagg <span style="color:var(--green)">SF • Duke</span></div>
+            <div class="bracket-team seed"><span class="seed-num">2</span>Dylan Harper <span style="color:var(--orange)">SF • Rutgers</span></div>
+            <div class="bracket-team"><span class="seed-num">3</span>Ace Bailey <span style="color:var(--orange)">SG • Rutgers</span></div>
+            <div class="bracket-team"><span class="seed-num">4</span>VJ Edgecombe <span style="color:var(--blue)">SG • Baylor</span></div>
+            <div class="bracket-team"><span class="seed-num">5</span>Boogie Fland <span style="color:var(--purple)">PG • Alabama</span></div>
+          </div>
+          <div class="bracket-region">
+            <h4>Lottery Teams</h4>
+            <div class="bracket-team"><span class="seed-num">1</span>Washington <span style="color:var(--t2)">14% odds</span></div>
+            <div class="bracket-team"><span class="seed-num">2</span>Charlotte <span style="color:var(--t2)">14% odds</span></div>
+            <div class="bracket-team"><span class="seed-num">3</span>Portland <span style="color:var(--t2)">14% odds</span></div>
+            <div class="bracket-team"><span class="seed-num">4</span>San Antonio <span style="color:var(--t2)">12.5%</span></div>
+            <div class="bracket-team"><span class="seed-num">5</span>Utah <span style="color:var(--t2)">10.5%</span></div>
+          </div>
+          <div class="bracket-region">
+            <h4>Draft Info</h4>
+            <div class="bracket-team"><span style="color:var(--green)">📅</span> Lottery: May 12</div>
+            <div class="bracket-team"><span style="color:var(--blue)">📅</span> Draft: Jun 26</div>
+            <div class="bracket-team"><span style="color:var(--orange)">🏀</span> 60 Total Picks</div>
+            <div class="bracket-team"><span style="color:var(--purple)">🎰</span> 2 Rounds</div>
+          </div>
+          <div class="bracket-region">
+            <h4>Draft Tools</h4>
+            <a href="nba-draft.html" class="bracket-team" style="color:var(--orange);text-decoration:none;">
+              <span style="color:var(--orange)">🎰</span> Lottery Simulator
+            </a>
+            <a href="nba-draft.html" class="bracket-team" style="color:var(--blue);text-decoration:none;">
+              <span style="color:var(--blue)">⭐</span> Big Board
+            </a>
+            <a href="nba-draft.html" class="bracket-team" style="color:var(--green);text-decoration:none;">
+              <span style="color:var(--green)">📋</span> Mock Draft
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const nbaGames = [
+      { home: { abbr: 'LAL', name: 'Lakers', score: 89 }, away: { abbr: 'SAS', name: 'Spurs', score: 81 }, time: 'Q3 6:42', tv: 'ESPN+', live: true },
+      { home: { abbr: 'BOS', name: 'Celtics', score: 102 }, away: { abbr: 'MIL', name: 'Bucks', score: 98 }, time: 'Q4 2:15', tv: 'TNT', live: true },
+      { home: { abbr: 'NYK', name: 'Knicks', score: null }, away: { abbr: 'PHI', name: '76ers', score: null }, time: 'Thu 7:30 PM', tv: 'MSG', live: false },
+      { home: { abbr: 'GSW', name: 'Warriors', score: null }, away: { abbr: 'LAC', name: 'Clippers', score: null }, time: 'Thu 10:30 PM', tv: 'ESPN', live: false },
+      { home: { abbr: 'DEN', name: 'Nuggets', score: null }, away: { abbr: 'DAL', name: 'Mavericks', score: null }, time: 'Fri 9:30 PM', tv: 'TNT', live: false },
+      { home: { abbr: 'MIA', name: 'Heat', score: null }, away: { abbr: 'CLE', name: 'Cavaliers', score: null }, time: 'Fri 7:30 PM', tv: 'NBA TV', live: false }
+    ];
+
+    const nbaStandings = [
+      { rank: 1, team: 'Celtics', abbr: 'BOS', wins: 45, losses: 12, pct: '.789' },
+      { rank: 2, team: 'Knicks', abbr: 'NYK', wins: 35, losses: 22, pct: '.614' },
+      { rank: 3, team: 'Bucks', abbr: 'MIL', wins: 37, losses: 21, pct: '.638' },
+      { rank: 4, team: 'Cavaliers', abbr: 'CLE', wins: 34, losses: 24, pct: '.586' },
+      { rank: 5, team: 'Heat', abbr: 'MIA', wins: 32, losses: 25, pct: '.561' },
+      { rank: 6, team: 'Pistons', abbr: 'DET', wins: 28, losses: 29, pct: '.491' },
+      { rank: 7, team: 'Magic', abbr: 'ORL', wins: 26, losses: 31, pct: '.456' },
+      { rank: 8, team: 'Hawks', abbr: 'ATL', wins: 24, losses: 33, pct: '.421' },
+      { rank: 9, team: 'Bulls', abbr: 'CHI', wins: 22, losses: 35, pct: '.386' },
+      { rank: 10, team: 'Raptors', abbr: 'TOR', wins: 18, losses: 39, pct: '.316' },
+      { rank: 11, team: 'Nets', abbr: 'BKN', wins: 15, losses: 42, pct: '.263' },
+      { rank: 12, team: 'Hornets', abbr: 'CHA', wins: 12, losses: 45, pct: '.211' }
+    ];
+
+    const topPlayers = [
+      { name: 'Shai Gilgeous-Alexander', team: 'OKC', stat: '31.2', label: 'PPG' },
+      { name: 'Nikola Jokic', team: 'DEN', stat: '26.4', label: 'PPG' },
+      { name: 'Luka Doncic', team: 'DAL', stat: '28.9', label: 'PPG' },
+      { name: 'Giannis Antetokounmpo', team: 'MIL', stat: '30.5', label: 'PPG' },
+      { name: 'Anthony Davis', team: 'LAL', stat: '24.8', label: 'PPG' },
+      { name: 'Jayson Tatum', team: 'BOS', stat: '26.1', label: 'PPG' },
+      { name: 'Donovan Mitchell', team: 'CLE', stat: '27.4', label: 'PPG' },
+      { name: 'Tyrese Haliburton', team: 'IND', stat: '21.8', label: 'PPG' }
+    ];
+
+    const nbaNews = [
+      { tag: 'NBA', title: 'SGA passes Wilt — 127 straight 20-point games', meta: '2 hours ago' },
+      { tag: 'LAKERS', title: 'LeBron returns from injury for stretch run', meta: '4 hours ago' },
+      { tag: 'CAVS', title: 'Donovan Mitchell hits career-high 61 points', meta: '6 hours ago' },
+      { tag: 'MARCH MADNESS', title: 'Duke dominates Round 1, advances to Sweet 16', meta: '8 hours ago' },
+      { tag: 'NBA', title: 'Trade deadline moves shake up playoff race', meta: '1 day ago' }
+    ];
+
+    function getNBALogo(abbr) {
+      const logo = TeamLogos.getLogo('nba', abbr);
+      if (logo) {
+        return `<img src="${logo}" alt="${abbr}" onerror="this.parentElement.innerHTML='${abbr}';this.remove();" style="width:100%;height:100%;object-fit:contain;">`;
+      }
+      return abbr;
+    }
+
+    function renderGames() {
+      const container = document.getElementById('nba-games');
+      container.innerHTML = nbaGames.map(g => `
+        <div class="game-item${g.live ? ' live' : ''}">
+          <div class="game-teams">
+            <div class="game-team">
+              <span class="team-logo-sm">${getNBALogo(g.home.abbr)}</span>
+              <span class="team-abbr">${g.home.abbr}</span>
+            </div>
+            <div class="game-score">${g.home.score ?? '-'}</div>
+            <span class="game-vs">vs</span>
+            <div class="game-score">${g.away.score ?? '-'}</div>
+            <div class="game-team">
+              <span class="team-logo-sm">${getNBALogo(g.away.abbr)}</span>
+              <span class="team-abbr">${g.away.abbr}</span>
+            </div>
+          </div>
+          <div class="game-info">
+            <span class="game-time" style="${g.live ? 'color:var(--red)' : ''}">${g.live ? '● ' + g.time : g.time}</span>
+            <span class="game-tv">${g.tv}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderStandings() {
+      const container = document.getElementById('standings-list');
+      container.innerHTML = nbaStandings.map(s => {
+        let rankClass = '';
+        if (s.rank <= 3) rankClass = 'top-3';
+        else if (s.rank <= 6) rankClass = 'playoff';
+        else if (s.rank <= 10) rankClass = 'in-10';
+        return `
+          <div class="standings-row">
+            <span class="rank ${rankClass}">${s.rank}</span>
+            <div class="team-cell">
+              <span class="team-logo-sm">${getNBALogo(s.abbr)}</span>
+              <strong>${s.team}</strong>
+            </div>
+            <span class="stats-cell wins">${s.wins}</span>
+            <span class="stats-cell">${s.losses}</span>
+            <span class="stats-cell">${s.pct}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPlayers() {
+      const container = document.getElementById('top-players');
+      container.innerHTML = topPlayers.map(p => `
+        <div class="player-card">
+          <div class="player-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-team">${p.team}</div>
+          <div class="player-stat">${p.stat}</div>
+          <div class="player-stat-label">${p.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderNews() {
+      const container = document.getElementById('nba-news');
+      container.innerHTML = nbaNews.map(n => `
+        <div class="news-item">
+          <div class="news-img"><i class="fa-solid fa-newspaper"></i></div>
+          <div class="news-content">
+            <div class="news-tag">${n.tag}</div>
+            <div class="news-title">${n.title}</div>
+            <div class="news-meta">${n.meta}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Tab switching
+    document.querySelectorAll('.nba-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.querySelector('a')) return; // Skip links
+        
+        document.querySelectorAll('.nba-tab').forEach(t => {
+          if (!t.querySelector('a')) t.classList.remove('active');
+        });
+        tab.classList.add('active');
+        
+        const tabName = tab.dataset.tab;
+        document.getElementById('scores-section').style.display = tabName === 'scores' ? 'block' : 'none';
+        document.getElementById('bracket-section').style.display = tabName === 'bracket' ? 'block' : 'none';
+        document.getElementById('draft-section').style.display = tabName === 'draft' ? 'block' : 'none';
+      });
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Initialize with Team Logos
+    async function init() {
+      await TeamLogos.loadAll();
+      renderGames();
+      renderStandings();
+      renderPlayers();
+      renderNews();
+    }
+    init();
+  </script>
+</body>
+</html>
