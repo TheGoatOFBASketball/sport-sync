@@ -44,12 +44,32 @@
             const away = g.away?.abbr ?? g.away?.name ?? '';
             const hs = g.home?.score ?? g.home?.points ?? '';
             const as = g.away?.score ?? g.away?.points ?? '';
-            return `<div class="game-item live"><div class="game-teams"><span class="team-name">${away}</span></div><div class="game-score">${hs} - ${as}</div><div class="game-teams" style="justify-content:flex-end"><span class="team-name">${home}</span></div></div>`;
+            const awayLogo = (away || '').slice(0,2);
+            const homeLogo = (home || '').slice(0,2);
+            return `<div class="game-item live"><div class="game-teams"><span class="team-logo-sm">${awayLogo}</span><span class="team-name">${away}</span></div><div class="game-score">${hs} - ${as}</div><div class="game-teams" style="justify-content:flex-end"><span class="team-logo-sm">${homeLogo}</span><span class="team-name">${home}</span></div></div>`;
           }).join('');
         }
       } catch(e){ console.error(e); }
       const newsList = document.getElementById('nfl-news-list');
       if (newsList) newsList.innerHTML = '<div>NFL: Breaking news placeholder.</div>';
+    })();
+  </script>
+  <script>
+    (async function(){
+      try {
+        const standings = await API.ESPN.getStandings('nfl');
+        const container = document.getElementById('nfl-standings');
+        if (container && Array.isArray(standings)) {
+          container.innerHTML = standings.map(s => `
+            <div class="standings-row" aria-label="${s.name} standings">
+              <span class="rank">${s.rank}</span>
+              <span class="team-name">${s.name} <span class="team-abbr">${s.abbr || ''}</span></span>
+              <span class="stat">${s.wins}-${s.losses}</span>
+              <span class="stat">${s.gb ?? ''}</span>
+              <span class="stat">${s.pct ?? ''}</span>
+            </div>`).join('');
+        }
+      } catch(_){ /* no standings yet */ }
     })();
   </script>
 </body>

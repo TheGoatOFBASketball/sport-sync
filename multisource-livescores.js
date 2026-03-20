@@ -149,6 +149,7 @@
 
   // Fixture/cache state
   let fixtureList = [];
+  let fixtures = [];
   let lastFixtureRefresh = 0;
   function updateFixtureCache(all) {
     fixtureList = all || [];
@@ -185,7 +186,7 @@
         const wrapper = document.getElementById('ticker-wrapper');
         const dup = document.getElementById('ticker-wrapper-duplicate');
         if (wrapper && fixtures.length) {
-          const html = fixtures.map(e => `<span class="ticker-item">${e.home} vs ${e.away}${(e.homeScore!=null||e.awayScore!=null) ? ` ${e.homeScore ?? ''} - ${e.awayScore ?? ''}` : ''}</span>`).join(' ');
+        const html = fixtures.map(e => `<span class="ticker-item">${e.home} vs ${e.away}${(e.homeScore!=null||e.awayScore!=null) ? ` ${e.homeScore ?? ''} - ${e.awayScore ?? ''}` : ''} <span class="src-badge">${e.source ?? ''}</span></span>`).join(' ');
           wrapper.innerHTML = html;
           if (dup) dup.innerHTML = html;
         }
