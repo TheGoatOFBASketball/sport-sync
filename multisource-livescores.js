@@ -156,6 +156,39 @@
     lastFixtureRefresh = Date.now();
   }
 
+  // Schedule sources: TheSportsDB upcoming events (schedules)
+  const TSDB_LEAGUE_IDS = {
+    NBA: 4387,
+    NFL: 4391,
+    MLB: 4331,
+    NHL: 4346
+  };
+
+  async function fetchScheduleFromTheSportsDB(){
+    const leagues = Object.values(TSDB_LEAGUE_IDS);
+    const names = Object.keys(TSDB_LEAGUE_IDS);
+    const promises = leagues.map((id, idx) =>
+      fetch(`https://www.thesportsdb.com/api/v1/json/1/eventsnextleague.php?id=${id}`)
+        .then(r => r.json().catch(() => null))
+        .then(data => {
+          const arr = data?.events || [];
+          const sport = names[idx];
+          return arr.map(ev => ({
+            sport,
+            league: sport,
+            home: ev?.strHomeTeam || ev?.homeTeam || '',
+            away: ev?.strAwayTeam || ev?.awayTeam || '',
+            date: ev?.dateEvent || ev?.dateEventLocal || '',
+            time: ev?.strTime || '',
+            status: ev?.status || ''
+          }));
+        })
+        .catch(() => [])
+    );
+    const results = await Promise.all(promises);
+    return results.flat();
+  }
+
   window.SPORTSYNC = window.SPORTSYNC || {};
   window.SPORTSYNC.MultiSourceLive = {
     start: function(){
@@ -163,7 +196,8 @@
         const sources = await Promise.all([
           fetchFromAPISports(),
           fetchFromESPN(),
-          fetchFromBalldontlie()
+          fetchFromBalldontlie(),
+          fetchScheduleFromTheSportsDB()
         ]);
         const all = [].concat(...sources);
         // Hourly fixture refresh (simulate first-fetch-all fixtures)
@@ -182,6 +216,24 @@
         lastUpdated = Date.now();
         broadcast(fixtures);
         
+        // Schedule: render upcoming events via TheSportsDB data plus any other sources if present
+        const schedContainer = document.getElementById('sched-list');
+        if (schedContainer) {
+          const allSources = [].concat(...sources);
+          const schedItems = allSources
+            .filter(Boolean)
+            .map(s => {
+              const when = s.date || s.dateEvent || '';
+              const ts = s.time || '';
+              const home = s.home || '';
+              const away = s.away || '';
+              const label = (home || away) ? `${home} vs ${away}` : '';
+              return `${when ? when + ' ' : ''}${ts ? ts + ' ' : ''}${label}`;
+            })
+            .filter(l => l).slice(0, 20)
+            .map(l => `<div class="sched-item">${l}</div>`).join('');
+          schedContainer.innerHTML = schedItems;
+        }
         // Also render simple HTML on ticker (legacy path) if needed
         const wrapper = document.getElementById('ticker-wrapper');
         const dup = document.getElementById('ticker-wrapper-duplicate');

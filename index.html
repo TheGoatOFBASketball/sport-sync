@@ -26,10 +26,6 @@
         <nav class="snav" id="snav">
           <a href="#" class="sn active" data-s="all">Home</a>
         <a href="nba.html" class="sn">🏀 NBA</a>
-        <a href="nfl-hub.html" class="sn">🏈 NFL Hub</a>
-        <a href="mlb-hub.html" class="sn">⚾ MLB Hub</a>
-        <a href="soccer-hub.html" class="sn">⚽ Soccer Hub</a>
-        <a href="nhl-hub.html" class="sn">🏒 NHL Hub</a>
           <a href="march-madness.html" class="sn">🏆 March Madness</a>
           <a href="nba-draft.html" class="sn">📊 NBA Draft</a>
         <a href="nfl-draft.html" class="sn">🏈 NFL Draft</a>
@@ -91,6 +87,8 @@
       <section class="sl-s">
         <h4>🏈 Football</h4>
         <a href="nfl-draft.html" class="sl-lk"><i class="fa-solid fa-fire"></i> 🏈 NFL Draft</a>
+        <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-fire"></i> NFL Hub</a>
+        <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-fire"></i> NFL Hub</a>
         <a href="https://espn.com/nfl" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> NFL</a>
         <a href="https://espn.com/college-football" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> NCAA Football</a>
         <a href="https://espn.com/xfl" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> XFL</a>
@@ -98,6 +96,8 @@
       <section class="sl-s">
         <h4>⚾ Baseball</h4>
         <a href="https://espn.com/mlb" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> MLB</a>
+        <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-trophy"></i> MLB Hub</a>
+        <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-trophy"></i> MLB Hub</a>
         <a href="https://espn.com/wbc" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> WBC</a>
         <a href="https://espn.com/college-baseball" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> NCAA Baseball</a>
       </section>
@@ -107,6 +107,7 @@
         <a href="https://espn.com/soccer/teams/england" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> Premier League</a>
         <a href="https://espn.com/soccer/teams/spain" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> La Liga</a>
         <a href="https://espn.com/soccer/usa.1" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> MLS</a>
+        <a href="soccer-hub.html" class="sl-lk"><i class="fa-solid fa-soccer"></i> Soccer Hub</a>
       </section>
       <section class="sl-s">
         <h4>📺 Watch</h4>
@@ -125,28 +126,15 @@
       </section>
     </aside>
 
-    <!-- HUB TILES (left sidebar) -->
-    <section class="sl-s" id="hub-tiles">
-      <h4>🏁 Hubs</h4>
-      <div class="sidebar-hubs" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
-        <a class="hb-tile" href="nfl-hub.html" title="NFL Hub">
-          <div class="hb-icon">🏈</div>
-          <div class="hb-title">NFL Hub</div>
-        </a>
-        <a class="hb-tile" href="mlb-hub.html" title="MLB Hub">
-          <div class="hb-icon">⚾</div>
-          <div class="hb-title">MLB Hub</div>
-        </a>
-        <a class="hb-tile" href="soccer-hub.html" title="Soccer Hub">
-          <div class="hb-icon">⚽</div>
-          <div class="hb-title">Soccer Hub</div>
-        </a>
-        <a class="hb-tile" href="nhl-hub.html" title="NHL Hub">
-          <div class="hb-icon">🏒</div>
-          <div class="hb-title">NHL Hub</div>
-        </a>
-      </div>
+    <!-- HUB OVERVIEW LINK (sidebar) -->
+    <section class="sl-s" id="hub-overview-link">
+      <h4>🏁 Hubs Overview</h4>
+      <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-football"></i> NFL Hub</a>
+      <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-baseball-ball"></i> MLB Hub</a>
+      <a href="soccer-hub.html" class="sl-lk"><i class="fa-solid fa-futbol"></i> Soccer Hub</a>
+      <a href="nhl-hub.html" class="sl-lk"><i class="fa-solid fa-hockey-puck"></i> NHL Hub</a>
     </section>
+    <!-- HUB OVERVIEW LINK END -->
 
     <!-- CENTER CONTENT -->
     <main id="center">
@@ -157,6 +145,8 @@
         <p class="greet-sub" id="greet-sub">March Madness • NFL Draft • MLB Opening Day</p>
       </header>
 
+      
+      
       <!-- Hero Feature -->
       <section class="sec" id="sec-featured">
         <article class="hero-card" id="hero-card">
@@ -204,9 +194,13 @@
           <button class="sf active" data-f="all">All</button>
           <button class="sf" data-f="live">🔴 Live</button>
           <button class="sf" data-f="upcoming">Upcoming</button>
-          <button class="sf" data-f="myteams">My Teams</button>
+          <button class="sf" data-f="today">Today</button>
         </nav>
-        <div class="sched-list" id="sched-list"></div>
+        <div class="sched-list" id="sched-list">
+          <div class="sched-item">Today 7:00 PM MLB: Yankees vs Rays</div>
+          <div class="sched-item">Today 7:30 PM NBA: Knicks vs Celtics</div>
+          <div class="sched-item">Today 9:00 PM NFL: Cowboys vs Giants</div>
+        </div>
       </section>
 
       <!-- News Feed -->
@@ -228,32 +222,7 @@
 
     </main>
 
-    <!-- HUB DASHBOARD: quick access to NFL/MLB/Soccer/NHL hubs -->
-    <section class="sec" id="hub-dashboard">
-      <div class="sec-bar"><h2><span class="ab"></span> HUB DASHBOARD</h2></div>
-      <div class="sports-grid" style="grid-template-columns: repeat(2, 1fr); gap:14px;">
-        <a class="sport-tile" href="nfl-hub.html">
-          <div class="tile-icon">🏈</div>
-          <div class="tile-title">NFL Hub</div>
-          <div class="tile-desc">Live NFL scores, standings, news</div>
-        </a>
-        <a class="sport-tile" href="mlb-hub.html">
-          <div class="tile-icon">⚾</div>
-          <div class="tile-title">MLB Hub</div>
-          <div class="tile-desc">Live MLB scores and standings</div>
-        </a>
-        <a class="sport-tile" href="soccer-hub.html">
-          <div class="tile-icon">⚽</div>
-          <div class="tile-title">Soccer Hub</div>
-          <div class="tile-desc">Live soccer leagues</div>
-        </a>
-        <a class="sport-tile" href="nhl-hub.html">
-          <div class="tile-icon">🏒</div>
-          <div class="tile-title">NHL Hub</div>
-          <div class="tile-desc">Live NHL scores and news</div>
-        </a>
-      </div>
-    </section>
+    
 
     <!-- RIGHT SIDEBAR -->
     <aside class="side-r" id="side-r">
