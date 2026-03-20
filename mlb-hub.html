@@ -50,6 +50,21 @@
         }
       } catch(e){ console.error(e); }
       const newsList = document.getElementById('mlb-news-list'); if (newsList) newsList.innerHTML = '<div>MLB: Breaking news placeholder.</div>';
+      // Standings (MLB)
+      try {
+        const standings = await API.ESPN.getStandings('mlb');
+        const stand = document.getElementById('mlb-standings');
+        if (stand && Array.isArray(standings)) {
+          stand.innerHTML = standings.map(s => `
+            <div class="standings-row" aria-label="${s.name} standings">
+              <span class="rank">${s.rank}</span>
+              <span class="team-name">${s.name} <span class="team-abbr">${s.abbr || ''}</span></span>
+              <span class="stat">${s.wins}-${s.losses}</span>
+              <span class="stat">${s.gb ?? ''}</span>
+              <span class="stat">${s.pct ?? ''}</span>
+            </div>`).join('');
+        }
+      } catch(_){ }
     })();
   </script>
 </body>
