@@ -25,13 +25,17 @@
         <a href="#" class="logo">⚡ SPORTSYNC</a>
         <nav class="snav" id="snav">
           <a href="#" class="sn active" data-s="all">Home</a>
-          <a href="nba.html" class="sn">🏀 NBA</a>
+        <a href="nba.html" class="sn">🏀 NBA</a>
+        <a href="nfl-hub.html" class="sn">🏈 NFL Hub</a>
+        <a href="mlb-hub.html" class="sn">⚾ MLB Hub</a>
+        <a href="soccer-hub.html" class="sn">⚽ Soccer Hub</a>
+        <a href="nhl-hub.html" class="sn">🏒 NHL Hub</a>
           <a href="march-madness.html" class="sn">🏆 March Madness</a>
           <a href="nba-draft.html" class="sn">📊 NBA Draft</a>
-          <a href="nfl-draft.html" class="sn">🏈 NFL Draft</a>
-          <a href="#" class="sn" data-s="mlb">⚾ MLB</a>
-          <a href="#" class="sn" data-s="nhl">🏒 NHL</a>
-          <a href="#" class="sn" data-s="soccer">⚽ Soccer</a>
+        <a href="nfl-draft.html" class="sn">🏈 NFL Draft</a>
+        <a href="#" class="sn" data-s="mlb">⚾ MLB</a>
+        <a href="#" class="sn" data-s="nhl">🏒 NHL</a>
+        <a href="#" class="sn" data-s="soccer">⚽ Soccer</a>
         </nav>
         <div class="tb-right">
           <div class="search-p">
@@ -121,6 +125,29 @@
       </section>
     </aside>
 
+    <!-- HUB TILES (left sidebar) -->
+    <section class="sl-s" id="hub-tiles">
+      <h4>🏁 Hubs</h4>
+      <div class="sidebar-hubs" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <a class="hb-tile" href="nfl-hub.html" title="NFL Hub">
+          <div class="hb-icon">🏈</div>
+          <div class="hb-title">NFL Hub</div>
+        </a>
+        <a class="hb-tile" href="mlb-hub.html" title="MLB Hub">
+          <div class="hb-icon">⚾</div>
+          <div class="hb-title">MLB Hub</div>
+        </a>
+        <a class="hb-tile" href="soccer-hub.html" title="Soccer Hub">
+          <div class="hb-icon">⚽</div>
+          <div class="hb-title">Soccer Hub</div>
+        </a>
+        <a class="hb-tile" href="nhl-hub.html" title="NHL Hub">
+          <div class="hb-icon">🏒</div>
+          <div class="hb-title">NHL Hub</div>
+        </a>
+      </div>
+    </section>
+
     <!-- CENTER CONTENT -->
     <main id="center">
 
@@ -200,6 +227,33 @@
       <!-- Top Players (moved to NBA dashboard) -->
 
     </main>
+
+    <!-- HUB DASHBOARD: quick access to NFL/MLB/Soccer/NHL hubs -->
+    <section class="sec" id="hub-dashboard">
+      <div class="sec-bar"><h2><span class="ab"></span> HUB DASHBOARD</h2></div>
+      <div class="sports-grid" style="grid-template-columns: repeat(2, 1fr); gap:14px;">
+        <a class="sport-tile" href="nfl-hub.html">
+          <div class="tile-icon">🏈</div>
+          <div class="tile-title">NFL Hub</div>
+          <div class="tile-desc">Live NFL scores, standings, news</div>
+        </a>
+        <a class="sport-tile" href="mlb-hub.html">
+          <div class="tile-icon">⚾</div>
+          <div class="tile-title">MLB Hub</div>
+          <div class="tile-desc">Live MLB scores and standings</div>
+        </a>
+        <a class="sport-tile" href="soccer-hub.html">
+          <div class="tile-icon">⚽</div>
+          <div class="tile-title">Soccer Hub</div>
+          <div class="tile-desc">Live soccer leagues</div>
+        </a>
+        <a class="sport-tile" href="nhl-hub.html">
+          <div class="tile-icon">🏒</div>
+          <div class="tile-title">NHL Hub</div>
+          <div class="tile-desc">Live NHL scores and news</div>
+        </a>
+      </div>
+    </section>
 
     <!-- RIGHT SIDEBAR -->
     <aside class="side-r" id="side-r">

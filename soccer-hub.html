@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soccer Hub | SPORTSYNC</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="espn-api.js" defer></script>
+  <script src="thesportsdb-api.js" defer></script>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+  <main class="nba-page">
+    <section class="sec">
+      <div class="nba-hero" style="padding:20px 24px; text-align:left;">
+        <h1>Soccer Hub</h1>
+        <p>Live scores and leagues from across the globe</p>
+      </div>
+      <div class="nba-grid" style="grid-template-columns: 1fr 1fr; gap:20px;">
+        <div class="nba-card" id="live-scores">
+          <div class="nba-card-header"><h3><i class="fa-solid fa-soccer-ball"></i> Live Soccer Scores</h3><span class="live-indicator"><span class="live-dot"></span> LIVE</span></div>
+          <div class="game-list" id="soccer-live" style="padding:12px;"></div>
+        </div>
+        <div class="nba-card" id="soccer-news">
+          <div class="nba-card-header"><h3><i class="fa-solid fa-newspaper"></i> Soccer News</h3></div>
+          <div id="soccer-news-list" style="padding:12px; font-size:0.9rem; color:var(--t2);"></div>
+        </div>
+      </div>
+    </section>
+    <section class="sec" id="soccer-standings">
+      <div class="sec-bar"><h2><span class="ab"></span> Standings</h2></div>
+      <div class="standings" id="soccer-standings"></div>
+    </section>
+  </main>
+  <script>
+    (async function(){
+      try{
+        const epl = await API.ESPN.getScoreboard('epl');
+        const leagues = await API.ESPN.getScoreboard('mls');
+        const soccerLive = document.getElementById('soccer-live');
+        const items = [];
+        if (epl?.events) items.push(...API.ESPN.parse.scoreboard(epl));
+        if (leagues?.events) items.push(...API.ESPN.parse.scoreboard(leagues));
+        if (soccerLive && items.length){
+          soccerLive.innerHTML = items.slice(0,6).map(g => {
+            const away = g.away?.abbr ?? '';
+            const home = g.home?.abbr ?? '';
+            const hs = g.home?.score ?? '';
+            const as = g.away?.score ?? '';
+            return `<div class="game-item live"><div class="game-teams"><span class="team-name">${away}</span></div><div class="game-score">${hs} - ${as}</div><div class="game-teams" style="justify-content:flex-end"><span class="team-name">${home}</span></div></div>`;
+          }).join('');
+        }
+      } catch(e){ console.error(e); }
+      const newsList = document.getElementById('soccer-news-list'); if (newsList) newsList.innerHTML = '<div>Soccer: Latest headlines coming soon.</div>';
+    })();
+  </script>
+</body>
+</html>

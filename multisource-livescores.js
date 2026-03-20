@@ -34,13 +34,32 @@
     return base;
   }
 
+  // Backoff wrapper
+  async function fetchWithBackoff(sourceName, fn){
+    const t = Date.now();
+    if (nextAttempt[sourceName] && t < nextAttempt[sourceName]) return [];
+    try{
+      const res = await fn();
+      // reset on success
+      nextAttempt[sourceName] = 0;
+      backoff[sourceName] = 0;
+      return res || [];
+    }catch(err){
+      const next = (backoff[sourceName] || 1000) * 2;
+      backoff[sourceName] = Math.min(MAX_BACKOFF, next);
+      nextAttempt[sourceName] = t + backoff[sourceName];
+      logDiscrepancy && logDiscrepancy(`Backoff for ${sourceName}: ${backoff[sourceName]}ms`);
+      return [];
+    }
+  }
+
   async function fetchFromAPISports(){
     if (!APS_KEY) return [];
-    try{
+    return fetchWithBackoff('apisports', async () => {
       const res = await fetch(`${API_SPORTS_BASE}livescores?league=NBA, NFL`, {
         headers: { 'X-Auth-Token': APS_KEY }
       });
-      if(!res.ok) return [];
+      if(!res.ok) throw new Error('APISports bad');
       const data = await res.json();
       const events = data?.response || [];
       return events.map(e => normalizeEvent('API-Sports', {
@@ -52,9 +71,10 @@
         awayScore: e?.scores?.away ?? e?.score?.away,
         date: e?.time?.date || (e?.fixture?.date ? new Date(e.fixture.date).toISOString().slice(0,10) : todayStr()),
         time: e?.time?.extra || e?.time?.time || '',
-        status: e?.status?.short || 'LIVE'
+        status: e?.status?.short || 'LIVE',
+        source: 'API-Sports'
       }));
-    }catch(_){ return []; }
+    });
   }
 
   async function fetchFromESPN(){
@@ -110,6 +130,31 @@
     return Array.from(map.values());
   }
 
+  // Simple exponential backoff scaffolding per source
+  const backoff = { apisports: 0, espn: 0, balldontlie: 0 };
+  const nextAttempt = { apisports: 0, espn: 0, balldontlie: 0 };
+  const MAX_BACKOFF = 5 * 60 * 1000; // 5 minutes
+  function now() { return Date.now(); }
+  function logDiscrepancy(msg){
+    if (typeof require === 'function') {
+      try {
+        const fs = require('fs');
+        fs.appendFileSync('/home/numberc/Desktop/sports sync/inaccurate_events.log', new Date().toISOString() + ' ' + msg + '\n');
+        return;
+      } catch(_){ }
+    }
+    // Fallback for browser environment
+    console.log('[DISCREPANCY]', msg);
+  }
+
+  // Fixture/cache state
+  let fixtureList = [];
+  let lastFixtureRefresh = 0;
+  function updateFixtureCache(all) {
+    fixtureList = all || [];
+    lastFixtureRefresh = Date.now();
+  }
+
   window.SPORTSYNC = window.SPORTSYNC || {};
   window.SPORTSYNC.MultiSourceLive = {
     start: function(){
@@ -119,16 +164,38 @@
           fetchFromESPN(),
           fetchFromBalldontlie()
         ]);
-        const events = reconcile(sources);
+        const all = [].concat(...sources);
+        // Hourly fixture refresh (simulate first-fetch-all fixtures)
+        if (Date.now() - lastFixtureRefresh > 3600000 || fixtureList.length === 0) {
+          updateFixtureCache(all);
+        } else {
+          updateFixtureCache(fixtureList.concat(all));
+        }
+        // Pick live/in-progress games from cached fixtures
+        const liveCandidates = fixtureList.filter(i => {
+          const s = (i?.status || '') .toString().toLowerCase();
+          return s.includes('live') || s.includes('in progress');
+        });
+        const toPoll = liveCandidates.length ? liveCandidates.slice(0, Math.min(10, liveCandidates.length)) : fixtureList.slice(0, 0);
+        fixtures = toPoll;
+        lastUpdated = Date.now();
+        broadcast(fixtures);
+        
+        // Also render simple HTML on ticker (legacy path) if needed
         const wrapper = document.getElementById('ticker-wrapper');
         const dup = document.getElementById('ticker-wrapper-duplicate');
-        if(!wrapper) return;
-        const html = events.map(e => `<span class="ticker-item">${e.home} vs ${e.away}${(e.homeScore!=null||e.awayScore!=null) ? ` ${e.homeScore ?? ''} - ${e.awayScore ?? ''}` : ''}</span>`).join(' ');
-        wrapper.innerHTML = html;
-        if (dup) dup.innerHTML = html;
+        if (wrapper && fixtures.length) {
+          const html = fixtures.map(e => `<span class="ticker-item">${e.home} vs ${e.away}${(e.homeScore!=null||e.awayScore!=null) ? ` ${e.homeScore ?? ''} - ${e.awayScore ?? ''}` : ''}</span>`).join(' ');
+          wrapper.innerHTML = html;
+          if (dup) dup.innerHTML = html;
+        }
       }
       tick();
       setInterval(tick, 60000);
     }
   };
+  // Auto-start on load if DOM is ready
+  if (typeof window !== 'undefined' && window.SPORTSYNC && window.SPORTSYNC.MultiSourceLive && typeof window.SPORTSYNC.MultiSourceLive.start === 'function') {
+    try { window.SPORTSYNC.MultiSourceLive.start(); } catch(e) { console.error(e); }
+  }
 })();
