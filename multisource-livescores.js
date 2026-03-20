@@ -186,7 +186,40 @@
         .catch(() => [])
     );
     const results = await Promise.all(promises);
-    return results.flat();
+    const items = results.flat();
+    // Try to enrich with venue/broadcast if present on the API response
+    return items.map(it => {
+      const venue = it?.venue?.name || it?.strVenue || '';
+      const broadcast = it?.broadcast?.name || it?.strBroadcast || '';
+      return { ...it, venue, broadcast };
+    });
+  }
+
+  // ESPN schedule (as a secondary source) - best effort
+  async function fetchFromESPNSchedule(){
+    try {
+      if (!window?.API?.ESPN?.getScoreboard) return [];
+      const nfl = await API.ESPN.getScoreboard('nfl');
+      const mlb = await API.ESPN.getScoreboard('mlb');
+      const nba = await API.ESPN.getScoreboard('nba');
+      const nhl = await API.ESPN.getScoreboard('nhl');
+      const datasets = [nfl, mlb, nba, nhl];
+      const map = [];
+      for (const ds of datasets) {
+        const events = ds?.events || [];
+        for (const e of events) {
+          const home = e?.home?.abbr || e?.home?.name || '';
+          const away = e?.away?.abbr || e?.away?.name || '';
+          const date = e?.date || '';
+          const time = e?.time?.start || e?.dateTime || '';
+          const venue = e?.venue?.name || '';
+          const status = e?.status?.type?.description || e?.status || 'Scheduled';
+          const broadcast = (e?.broadcast?.network) || (e?.broadcast?.type) || '';
+          map.push({ sport: ds?.sport?.name || 'ESPN', league: ds?.league?.name || '', home, away, date, time, venue, broadcast, status, source: 'ESPN' });
+        }
+      }
+      return map;
+    } catch(_){ return []; }
   }
 
   window.SPORTSYNC = window.SPORTSYNC || {};

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBA Draft Lottery 2026 | SPORTSYNC</title>
+  <meta name="description" content="NBA Draft Lottery Simulator - Spin the slot machine to determine draft order. Powered by Tankathon odds.">
+  <meta name="theme-color" content="#0a0a10">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+  <link rel="stylesheet" href="index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .draft-page { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    
+    .draft-hero {
+      background: linear-gradient(135deg, #1a1a24 0%, #2d1f3d 50%, #1a1a24 100%);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .draft-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 50%, rgba(255,140,0,0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 50%, rgba(0,100,200,0.1) 0%, transparent 50%);
+    }
+    .draft-hero h1 {
+      font-family: var(--h);
+      font-size: 3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .draft-hero h1 span { color: #ff8c00; }
+    .draft-hero p { color: #888; font-size: 1.1rem; margin-bottom: 20px; position: relative; z-index: 1; }
+    
+    .draft-meta {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .draft-meta-item {
+      background: rgba(255,255,255,0.05);
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .draft-meta-item .label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .draft-meta-item .value { font-family: var(--h); font-size: 1.3rem; color: #ff8c00; }
+
+    /* Slot Machine Lottery */
+    .lottery-container {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .lottery-title {
+      font-family: var(--h);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .lottery-subtitle {
+      color: var(--t2);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    
+    .slot-machine {
+      background: linear-gradient(180deg, #1a1a2e 0%, #0a0a14 100%);
+      border-radius: 20px;
+      padding: 30px;
+      border: 3px solid #333;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.1);
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+    .slot-display {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .slot-ball {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff9800, #ff6f00);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--h);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(255,152,0,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .slot-ball img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 6px;
+    }
+    .slot-ball i {
+      font-size: 2rem;
+      opacity: 0.7;
+    }
+    .slot-ball.spinning {
+      animation: ball-spin 0.15s linear infinite;
+    }
+    .slot-ball:nth-child(1) { animation-duration: 0.2s; }
+    .slot-ball:nth-child(2) { animation-duration: 0.18s; }
+    .slot-ball:nth-child(3) { animation-duration: 0.22s; }
+    .slot-ball:nth-child(4) { animation-duration: 0.19s; }
+    
+    @keyframes ball-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .slot-ball.winner {
+      animation: winner-pulse 0.5s ease-out;
+      box-shadow: 0 0 40px rgba(255,152,0,0.8);
+      background: linear-gradient(145deg, #22c55e, #16a34a);
+    }
+    @keyframes winner-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .spin-btn {
+      padding: 16px 48px;
+      font-family: var(--h);
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: linear-gradient(145deg, #ff9800, #ff6f00);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 20px rgba(255,152,0,0.4);
+    }
+    .spin-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(255,152,0,0.6);
+    }
+    .spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .lottery-results {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 1px solid var(--brd);
+    }
+    .lottery-result-title {
+      font-family: var(--h);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .lottery-pick {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: var(--bg3);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+    .lottery-pick:hover { background: var(--card); }
+    .lottery-pick.winner-pick {
+      background: linear-gradient(145deg, rgba(255,152,0,0.2), rgba(255,152,0,0.1));
+      border: 2px solid var(--orange);
+      animation: glow-pulse 2s infinite;
+    }
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(255,152,0,0.3); }
+      50% { box-shadow: 0 0 25px rgba(255,152,0,0.6); }
+    }
+    .pick-number {
+      font-family: var(--h);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--orange);
+      min-width: 40px;
+    }
+    .pick-team {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+    .pick-odds {
+      font-size: 0.8rem;
+      color: var(--t2);
+    }
+    
+    /* Odds Table - Compact Rows */
+    .odds-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .odds-table th {
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--t2);
+      background: var(--bg3);
+      border-bottom: 2px solid var(--brd);
+    }
+    .odds-table td {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--brd);
+      vertical-align: middle;
+    }
+    .odds-table tr:hover td { background: var(--bg3); }
+    .odds-table tr.lotto-team td { background: rgba(0,230,118,0.05); }
+    .odds-table tr.lotto-team:hover td { background: rgba(0,230,118,0.1); }
+    
+    .odds-rank {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--orange);
+      min-width: 24px;
+      text-align: center;
+    }
+    .odds-tank-rank {
+      font-family: var(--h);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--t2);
+      min-width: 20px;
+      text-align: center;
+    }
+    .tank-top { color: var(--red); }
+    .tank-med { color: var(--orange); }
+    .tank-low { color: var(--green); }
+    
+    .odds-team-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-logo-sm {
+      width: 24px;
+      height: 24px;
+      background: var(--bg3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .team-logo-sm img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+    .team-logo-sm.nba-logo {
+      background: linear-gradient(135deg, #FF6B00, #FF8C00);
+    }
+    .team-logo-sm.nba-logo img {
+      padding: 2px;
+    }
+    .team-name { font-weight: 600; }
+    
+    .odds-percent { 
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green);
+      text-align: right;
+    }
+    .odds-label { font-size: 0.65rem; color: var(--t2); }
+    
+    .win-pct { color: var(--t2); font-size: 0.8rem; }
+    .games-behind { color: var(--t2); font-size: 0.8rem; }
+
+    /* Draft Grid */
+    .draft-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+    }
+    @media (max-width: 1024px) { .draft-grid { grid-template-columns: 1fr; } }
+    
+    .draft-picks {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .pick-header {
+      display: grid;
+      grid-template-columns: 50px 1fr 80px 80px;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--brd);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--t2);
+    }
+    .pick-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 80px 80px;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--brd);
+      align-items: center;
+      transition: 0.2s;
+    }
+    .pick-row:hover { background: var(--bg3); }
+    .pick-row:last-child { border-bottom: none; }
+    .pick-num {
+      font-family: var(--h);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--orange);
+    }
+    .pick-player { font-size: 0.95rem; font-weight: 700; }
+    .pick-pos {
+      background: rgba(255,152,0,0.2);
+      color: #ff9800;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .pick-school { font-size: 0.75rem; color: var(--t2); }
+    
+    .draft-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .sidebar-card h3 {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .top-picks-list { display: flex; flex-direction: column; gap: 6px; }
+    .top-pick-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--bg3);
+      border-radius: 6px;
+    }
+    .top-pick-rank {
+      font-family: var(--h);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ff8c00;
+      min-width: 28px;
+    }
+    .top-pick-name { font-size: 0.85rem; font-weight: 700; }
+    .top-pick-pos { font-size: 0.65rem; color: var(--t2); }
+    
+    .bigboard-list { display: flex; flex-direction: column; gap: 6px; }
+    .bigboard-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--bg3);
+      border-radius: 6px;
+    }
+    .bb-rank {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #ff9800, #ff6f00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--h);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .bb-name { font-size: 0.85rem; font-weight: 700; }
+    .bb-detail { font-size: 0.65rem; color: var(--t2); }
+    .bb-grade { font-family: var(--h); font-size: 0.95rem; font-weight: 700; color: var(--green); }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: 8px;
+      color: var(--t2);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: 0.2s;
+    }
+    .back-btn:hover { border-color: var(--green); color: var(--green); }
+    
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: var(--card);
+      border: 1px solid var(--brd);
+      color: var(--t2);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--bh); }
+    .filter-btn.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back to SportSync</a>
+
+  <div class="draft-page">
+    <div class="draft-hero">
+      <h1>🏀 <span>NBA Draft</span> Lottery 2026</h1>
+      <p>Spin the slot machine to determine who gets the top picks</p>
+      <p style="margin-top:8px;font-size:0.9rem;">
+        <a href="index.html" style="color:var(--blue)">Dashboard</a> | 
+        <a href="nba.html" style="color:var(--orange)">NBA Hub</a> | 
+        <a href="march-madness.html" style="color:var(--green)">March Madness</a> |
+        <a href="nfl-draft.html" style="color:var(--blue)">NFL Draft</a>
+      </p>
+      <div class="draft-meta">
+        <div class="draft-meta-item">
+          <div class="label">Draft Date</div>
+          <div class="value">Jun 26</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Lottery Date</div>
+          <div class="value">May 12</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Format</div>
+          <div class="value">60 Picks</div>
+        </div>
+        <div class="draft-meta-item">
+          <div class="label">Rounds</div>
+          <div class="value">2 Rounds</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slot Machine Lottery -->
+    <div class="lottery-container">
+      <div class="lottery-title">🎰 NBA Draft Lottery Simulator</div>
+      <div class="lottery-subtitle">Based on Tankathon odds • Spin to determine lottery picks</div>
+      
+      <div class="slot-machine">
+        <div class="slot-display" id="slot-display">
+          <div class="slot-ball" id="ball-1"><i class="fa-solid fa-basketball"></i></div>
+          <div class="slot-ball" id="ball-2"><i class="fa-solid fa-basketball"></i></div>
+          <div class="slot-ball" id="ball-3"><i class="fa-solid fa-basketball"></i></div>
+          <div class="slot-ball" id="ball-4"><i class="fa-solid fa-basketball"></i></div>
+        </div>
+        <button class="spin-btn" id="spin-btn" onclick="spinLottery()">
+          <i class="fa-solid fa-sync-alt"></i> SPIN LOTTERY
+        </button>
+      </div>
+      
+      <div class="lottery-results" id="lottery-results">
+        <div class="lottery-result-title">🏆 Lottery Results</div>
+        <div id="lottery-picks"></div>
+      </div>
+    </div>
+
+    <!-- Lottery Odds - Compact Table -->
+    <div class="lottery-container">
+      <div class="lottery-title">📊 Lottery Odds (Tankathon)</div>
+      <table class="odds-table">
+        <thead>
+          <tr>
+            <th>Lot</th>
+            <th>Tank</th>
+            <th>Team</th>
+            <th style="text-align:right">Odds</th>
+            <th style="text-align:right">W-L</th>
+            <th style="text-align:right">GB</th>
+          </tr>
+        </thead>
+        <tbody id="odds-table-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="draft-grid">
+      <div class="draft-picks">
+        <div class="pick-header">
+          <span>Pick</span>
+          <span>Player</span>
+          <span>Pos</span>
+          <span>School</span>
+        </div>
+        <div class="filter-bar">
+          <button class="filter-btn active" data-round="1">Round 1</button>
+          <button class="filter-btn" data-round="2">Round 2</button>
+          <button class="filter-btn" data-round="all">All Picks</button>
+        </div>
+        <div id="picks-container"></div>
+      </div>
+
+      <div class="draft-sidebar">
+        <div class="sidebar-card">
+          <h3>⭐ Top Prospects</h3>
+          <div class="top-picks-list" id="top-picks"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>📋 Big Board</h3>
+          <div class="bigboard-list" id="bigboard"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // NBA Team Logos from ESPN CDN
+    const teamLogos = {
+      'WAS': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/wsh.png', color: '#002B5C' },
+      'CHA': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/cha.png', color: '#1E1F20' },
+      'POR': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/por.png', color: '#C8102E' },
+      'SAS': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/sas.png', color: '#C4CED4' },
+      'UTA': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/uth.png', color: '#002B5C' },
+      'PHI': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/phi.png', color: '#006BB6' },
+      'BKN': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/bkn.png', color: '#000000' },
+      'TOR': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/tor.png', color: '#CE1141' },
+      'NOP': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/no.png', color: '#002B5C' },
+      'HOU': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/hou.png', color: '#CE1141' },
+      'ATL': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/atl.png', color: '#E03A3E' },
+      'CHI': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/chi.png', color: '#CE1141' },
+      'SAC': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/sac.png', color: '#5A2D82' },
+      'GSW': { logo: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/gsw.png', color: '#1D428A' }
+    };
+
+    // Tankathon-style lottery odds (after 2019 lottery reform)
+    const lotteryTeams = [
+      { rank: 1, tankRank: 1, team: 'Washington', abbr: 'WAS', odds: 14.0, wins: 12, losses: 52, gb: '-' },
+      { rank: 2, tankRank: 2, team: 'Charlotte', abbr: 'CHA', odds: 14.0, wins: 14, losses: 50, gb: '1.0' },
+      { rank: 3, tankRank: 3, team: 'Portland', abbr: 'POR', odds: 14.0, wins: 15, losses: 49, gb: '2.0' },
+      { rank: 4, tankRank: 4, team: 'San Antonio', abbr: 'SAS', odds: 12.5, wins: 16, losses: 48, gb: '3.0' },
+      { rank: 5, tankRank: 5, team: 'Utah', abbr: 'UTA', odds: 10.5, wins: 18, losses: 46, gb: '4.0' },
+      { rank: 6, tankRank: 6, team: 'Philadelphia', abbr: 'PHI', odds: 9.0, wins: 20, losses: 44, gb: '5.5' },
+      { rank: 7, tankRank: 7, team: 'Brooklyn', abbr: 'BKN', odds: 7.5, wins: 21, losses: 43, gb: '6.0' },
+      { rank: 8, tankRank: 8, team: 'Toronto', abbr: 'TOR', odds: 6.0, wins: 23, losses: 41, gb: '7.0' },
+      { rank: 9, tankRank: 9, team: 'New Orleans', abbr: 'NOP', odds: 4.5, wins: 25, losses: 39, gb: '8.5' },
+      { rank: 10, tankRank: 10, team: 'Houston', abbr: 'HOU', odds: 3.0, wins: 28, losses: 36, gb: '10.0' },
+      { rank: 11, tankRank: 11, team: 'Atlanta', abbr: 'ATL', odds: 2.0, wins: 30, losses: 34, gb: '12.0' },
+      { rank: 12, tankRank: 12, team: 'Chicago', abbr: 'CHI', odds: 1.5, wins: 32, losses: 32, gb: '14.0' },
+      { rank: 13, tankRank: 13, team: 'Sacramento', abbr: 'SAC', odds: 1.0, wins: 35, losses: 29, gb: '17.0' },
+      { rank: 14, tankRank: 14, team: 'Golden State', abbr: 'GSW', odds: 0.5, wins: 38, losses: 26, gb: '20.0' }
+    ];
+
+    // Fetch NBA team logos from ESPN API
+    async function fetchNBATeamLogos() {
+      try {
+        const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams');
+        const data = await response.json();
+        
+        if (data.sports && data.sports[0].leagues[0].teams) {
+          data.sports[0].leagues[0].teams.forEach(t => {
+            const abbr = t.team.abbreviation;
+            if (teamLogos[abbr]) {
+              teamLogos[abbr].logo = t.team.logo;
+              teamLogos[abbr].color = t.team.color;
+            }
+          });
+        }
+      } catch (e) {
+        console.log('Using fallback team logos');
+      }
+    }
+
+    function getTeamLogo(abbr) {
+      return teamLogos[abbr]?.logo || `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/${abbr.toLowerCase()}.png`;
+    }
+
+    const draftData = {
+      1: [
+        { pick: 1, player: 'Cooper Flagg', pos: 'SF', school: 'Duke' },
+        { pick: 2, player: 'Dylan Harper', pos: 'SF', school: 'Rutgers' },
+        { pick: 3, player: 'Ace Bailey', pos: 'SG', school: 'Rutgers' },
+        { pick: 4, player: 'VJ Edgecombe', pos: 'SG', school: 'Baylor' },
+        { pick: 5, player: 'Boogie Fland', pos: 'PG', school: 'Alabama' },
+        { pick: 6, player: 'EG Gordon', pos: 'PG', school: 'Iowa State' },
+        { pick: 7, player: 'Jabari Smith Jr', pos: 'SF', school: 'Auburn' },
+        { pick: 8, player: 'Derik Queen', pos: 'PF', school: 'Maryland' },
+        { pick: 9, player: 'Jerome阳明', pos: 'PG', school: 'Kentucky' },
+        { pick: 10, player: 'Kylan Boswell', pos: 'PG', school: 'Arizona' },
+        { pick: 11, player: 'Tre Johnson', pos: 'SG', school: 'Texas' },
+        { pick: 12, player: 'Jayden Quinerly', pos: 'PG', school: 'Alabama' },
+        { pick: 13, player: 'Malcolm Bolo', pos: 'C', school: 'St. John\'s' },
+        { pick: 14, player: 'James Brown', pos: 'PF', school: 'Duke' }
+      ],
+      2: [
+        { pick: 31, player: 'Coby Davis', pos: 'PG', school: 'Duke' },
+        { pick: 32, player: 'Rashaan Terner', pos: 'C', school: 'Stanford' },
+        { pick: 33, player: 'Dylan U暂时的', pos: 'SF', school: 'Texas A&M' },
+        { pick: 34, player: 'Zacharyrist', pos: 'SG', school: 'Kansas' },
+        { pick: 35, player: 'Marcus Adams', pos: 'SG', school: 'Kansas State' },
+        { pick: 36, pick: 36, player: 'Lambert Mc', pos: 'PF', school: 'Michigan' },
+        { pick: 37, player: 'Jordan Smith', pos: 'SF', school: 'UConn' },
+        { pick: 38, player: 'Josh Coval', pos: 'SF', school: 'Illinois' }
+      ]
+    };
+
+    const topProspects = [
+      { rank: 1, name: 'Cooper Flagg', pos: 'SF', school: 'Duke' },
+      { rank: 2, name: 'Dylan Harper', pos: 'SF', school: 'Rutgers' },
+      { rank: 3, name: 'Ace Bailey', pos: 'SG', school: 'Rutgers' },
+      { rank: 4, name: 'VJ Edgecombe', pos: 'SG', school: 'Baylor' },
+      { rank: 5, name: 'Boogie Fland', pos: 'PG', school: 'Alabama' }
+    ];
+
+    const bigBoard = [
+      { rank: 1, name: 'Cooper Flagg', pos: 'SF/PF', school: 'Duke', grade: 98 },
+      { rank: 2, name: 'Dylan Harper', pos: 'SF/SG', school: 'Rutgers', grade: 97 },
+      { rank: 3, name: 'Ace Bailey', pos: 'SG/SF', school: 'Rutgers', grade: 96 },
+      { rank: 4, name: 'VJ Edgecombe', pos: 'PG/SG', school: 'Baylor', grade: 95 },
+      { rank: 5, name: 'Boogie Fland', pos: 'PG', school: 'Alabama', grade: 94 }
+    ];
+
+    let lotteryResults = [];
+    let isSpinning = false;
+
+    // Weighted random selection based on odds
+    function weightedRandom(teams) {
+      const totalOdds = teams.reduce((sum, t) => sum + t.odds, 0);
+      let random = Math.random() * totalOdds;
+      
+      for (const team of teams) {
+        random -= team.odds;
+        if (random <= 0) return team;
+      }
+      return teams[teams.length - 1];
+    }
+
+    // Spin the lottery
+    function spinLottery() {
+      if (isSpinning) return;
+      isSpinning = true;
+      
+      const spinBtn = document.getElementById('spin-btn');
+      spinBtn.disabled = true;
+      spinBtn.innerHTML = '<i class="fa-solid fa-sync-alt fa-spin"></i> SPINNING...';
+      
+      const balls = [
+        document.getElementById('ball-1'),
+        document.getElementById('ball-2'),
+        document.getElementById('ball-3'),
+        document.getElementById('ball-4')
+      ];
+      
+      // Start spinning animation
+      balls.forEach(ball => ball.classList.add('spinning'));
+      
+      // Determine lottery winners (top 4 picks)
+      lotteryResults = [];
+      const remainingTeams = [...lotteryTeams];
+      
+      for (let i = 0; i < 4; i++) {
+        const winner = weightedRandom(remainingTeams);
+        lotteryResults.push({ pick: i + 1, ...winner });
+        remainingTeams.splice(remainingTeams.findIndex(t => t.rank === winner.rank), 1);
+      }
+      
+      // Animation sequence
+      let spinCount = 0;
+      const maxSpins = 25;
+      const interval = setInterval(() => {
+        spinCount++;
+        
+        balls.forEach((ball, idx) => {
+          const fakeTeam = lotteryTeams[Math.floor(Math.random() * lotteryTeams.length)];
+          ball.innerHTML = `<img src="${getTeamLogo(fakeTeam.abbr)}" alt="${fakeTeam.abbr}">`;
+        });
+        
+        if (spinCount >= maxSpins) {
+          clearInterval(interval);
+          
+          // Reveal winners one by one
+          let revealIndex = 0;
+          const revealInterval = setInterval(() => {
+            balls[revealIndex].classList.remove('spinning');
+            balls[revealIndex].classList.add('winner');
+            balls[revealIndex].innerHTML = `<img src="${getTeamLogo(lotteryResults[revealIndex].abbr)}" alt="${lotteryResults[revealIndex].team}">`;
+            
+            revealIndex++;
+            
+            if (revealIndex >= 4) {
+              clearInterval(revealInterval);
+              renderLotteryResults();
+              spinBtn.disabled = false;
+              spinBtn.innerHTML = '<i class="fa-solid fa-sync-alt"></i> SPIN AGAIN';
+              isSpinning = false;
+            }
+          }, 600);
+        }
+      }, 80);
+    }
+
+    function renderLotteryResults() {
+      const container = document.getElementById('lottery-picks');
+      container.innerHTML = lotteryResults.map((result, idx) => `
+        <div class="lottery-pick winner-pick">
+          <span class="pick-number">#${result.pick}</span>
+          <div class="odds-team-cell">
+            <span class="team-logo-sm">
+              <img src="${getTeamLogo(result.abbr)}" alt="${result.team}" onerror="this.style.display='none'">
+            </span>
+            <div>
+              <strong>${result.team}</strong>
+              <span class="pick-odds">Tank #${result.tankRank} • ${result.odds}% odds</span>
+            </div>
+          </div>
+          <span class="pick-pos">${result.abbr}</span>
+        </div>
+      `).join('');
+    }
+
+    function getTankClass(rank) {
+      if (rank <= 5) return 'tank-top';
+      if (rank <= 10) return 'tank-med';
+      return 'tank-low';
+    }
+
+    function renderOdds() {
+      const container = document.getElementById('odds-table-body');
+      container.innerHTML = lotteryTeams.map(t => `
+        <tr class="${t.rank <= 3 ? 'lotto-team' : ''}">
+          <td><span class="odds-rank">${t.rank}</span></td>
+          <td><span class="odds-tank-rank ${getTankClass(t.tankRank)}">${t.tankRank}</span></td>
+          <td>
+            <div class="odds-team-cell">
+              <span class="team-logo-sm">
+                <img src="${getTeamLogo(t.abbr)}" alt="${t.team}" onerror="this.parentElement.style.background='${teamLogos[t.abbr]?.color || '#333'}';this.remove();">
+              </span>
+              <span class="team-name">${t.team}</span>
+            </div>
+          </td>
+          <td><span class="odds-percent">${t.odds}%</span></td>
+          <td><span class="win-pct">${t.wins}-${t.losses}</span></td>
+          <td><span class="games-behind">${t.gb}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderPicks(round) {
+      const container = document.getElementById('picks-container');
+      let picks = [];
+      if (round === 'all') {
+        picks = [...draftData[1], ...draftData[2]];
+      } else {
+        picks = draftData[round] || draftData[1];
+      }
+      
+      container.innerHTML = picks.map(p => `
+        <div class="pick-row">
+          <span class="pick-num">${p.pick}</span>
+          <span class="pick-player">${p.player}</span>
+          <span class="pick-pos">${p.pos}</span>
+          <span class="pick-school">${p.school}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderTopPicks() {
+      const container = document.getElementById('top-picks');
+      container.innerHTML = topProspects.map(p => `
+        <div class="top-pick-item">
+          <span class="top-pick-rank">${p.rank}</span>
+          <div>
+            <div class="top-pick-name">${p.name}</div>
+            <div class="top-pick-pos">${p.school} • ${p.pos}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderBigBoard() {
+      const container = document.getElementById('bigboard');
+      container.innerHTML = bigBoard.map(b => `
+        <div class="bigboard-item">
+          <span class="bb-rank">${b.rank}</span>
+          <div>
+            <div class="bb-name">${b.name}</div>
+            <div class="bb-detail">${b.school} • ${b.pos}</div>
+          </div>
+          <span class="bb-grade">${b.grade}</span>
+        </div>
+      `).join('');
+    }
+
+    // Initialize
+    async function init() {
+      await fetchNBATeamLogos();
+      renderOdds();
+      renderPicks(1);
+      renderTopPicks();
+      renderBigBoard();
+    }
+    init();
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderPicks(btn.dataset.round);
+      });
+    });
+  </script>
+</body>
+</html>
