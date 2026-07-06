@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="index.css"/>
 <script src="espn-api.js" defer></script>
 
-<script src="players-data.js"></script>
+<script src="players-data.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Condensed:wght@400;600;700;800&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet"/>
@@ -34,6 +34,9 @@
 [data-theme="dark"] .playoff-badge.e{background:var(--nb-border);color:var(--nb-muted)}
 [data-theme="dark"] .player-avatar,.news-img{background:linear-gradient(135deg,var(--nb-card2),var(--nb-border))}
 [data-theme="dark"] .sc-select{background:var(--nb-card2);color:var(--nb-text);border-color:var(--nb-border)}
+[data-theme="dark"] .standings-decade-btn{background:var(--nb-card2);color:var(--nb-muted);border-color:var(--nb-border)}
+[data-theme="dark"] .standings-decade-btn:hover{color:var(--nb-text);border-color:var(--nb-red)}
+[data-theme="dark"] .standings-decade-btn.active{color:#fff;background:var(--nb-red);border-color:var(--nb-red)}
 [data-theme="dark"] .leftnav-item:hover{background:rgba(200,16,46,0.1)}
 [data-theme="dark"] .leftnav-item.active{background:rgba(200,16,46,0.15)}
 body{background:var(--nb-bg);color:var(--nb-text);font-family:"Roboto",-apple-system,sans-serif;font-size:13px;line-height:1.4;min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -292,34 +295,53 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .seed-num{color:var(--nb-muted);margin-right:4px;font-size:9px}
 
 /* DRAFT */
-.draft-round-label{font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:#fff;padding:8px 14px;background:linear-gradient(135deg,var(--nb-red),#ff4500);border-bottom:1px solid var(--nb-border);letter-spacing:.4px}
-.draft-pick-row{display:grid;grid-template-columns:36px 160px 1fr 48px 44px 70px 48px 48px 48px;align-items:center;gap:5px;padding:7px 12px;border-bottom:1px solid var(--nb-border2);transition:background .1s;font-size:11px;cursor:pointer}
-@media(max-width:1000px){.draft-pick-row{grid-template-columns:32px 120px 1fr 44px 40px 60px}.draft-stat-col{display:none}}
-@media(max-width:600px){.draft-pick-row{grid-template-columns:26px 1fr;gap:3px;padding:6px 8px;font-size:10px}.draft-meta-col{display:none}}
+.draft-header-row{display:grid;grid-template-columns:32px 100px 1fr 55px 45px 55px 35px repeat(5,38px);align-items:center;gap:4px;padding:5px 10px;font-size:8px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--nb-muted);border-bottom:1px solid var(--nb-border2)}
+.draft-header-row .draft-stat-hdr{cursor:pointer;text-align:center;transition:color .15s;position:relative}
+.draft-header-row .draft-stat-hdr:hover{color:var(--nb-text)}
+.draft-header-row .draft-stat-hdr.active{color:var(--nb-red)}
+.draft-header-row .draft-stat-hdr .draft-hdr-arrow{font-size:6px;display:none;margin-left:2px}
+.draft-header-row .draft-stat-hdr.active .draft-hdr-arrow{display:inline}
+.draft-round-label{grid-column:1/-1;padding:8px 10px 4px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--nb-muted);border-bottom:1px solid var(--nb-border2);background:#f8f9fb}
+.draft-pick-row{display:grid;grid-template-columns:32px 100px 1fr 55px 45px 55px 35px repeat(5,38px);align-items:center;gap:4px;padding:6px 10px;border-bottom:1px solid var(--nb-border2);transition:background .1s;font-size:11px}
+@media(max-width:1200px){.draft-pick-row,.draft-header-row{grid-template-columns:32px 80px 1fr 55px 45px 55px 35px}}
+@media(max-width:1100px){.draft-pick-row,.draft-header-row{grid-template-columns:32px 60px 1fr 55px 45px 55px 35px}.draft-stat-col,.draft-header-row .draft-stat-hdr{display:none}}
+@media(max-width:800px){.draft-pick-row,.draft-header-row{grid-template-columns:28px 40px 1fr 42px 35px}.draft-team-col,.draft-cls-col,.draft-header-row .draft-team-hdr,.draft-header-row .draft-cls-hdr,.draft-age-col,.draft-header-row .draft-age-hdr{display:none}}
+@media(max-width:500px){.draft-pick-row,.draft-header-row{grid-template-columns:26px 1fr}.draft-team-col,.draft-ht-col,.draft-wt-col,.draft-header-row .draft-team-hdr,.draft-header-row .draft-ht-hdr,.draft-header-row .draft-wt-hdr{display:none}}
 .draft-pick-row:hover{background:rgba(200,16,46,0.03)}
-.draft-pick-row:last-child{border-bottom:none}
-.draft-pick-num{font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:var(--nb-muted);text-align:center}
+.draft-pick-num{font-family:"Roboto Condensed",sans-serif;font-size:12px;font-weight:700;color:var(--nb-muted);text-align:center;min-width:24px}
 .draft-pick-num.top5{color:var(--nb-gold)}
 .draft-pick-num.lottery{color:var(--nb-orange)}
-.draft-team-cell{display:flex;align-items:center;gap:6px;min-width:0}
-.draft-team-cell img{width:20px;height:20px;object-fit:contain;border-radius:50%;flex-shrink:0}
-.draft-team-name{font-weight:600;font-size:10px;color:var(--nb-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.draft-player-cell{min-width:0}
-.draft-player-name{font-weight:600;color:var(--nb-text);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.draft-player-college{font-size:9px;color:var(--nb-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.draft-pos{font-size:10px;font-weight:600;color:var(--nb-orange);text-align:center}
-.draft-stat-col{font-size:10px;color:var(--nb-muted);text-align:center}
-.draft-stat-col strong{color:var(--nb-text);font-weight:600}
-.draft-stat-label{font-size:7px;color:var(--nb-muted);text-transform:uppercase;letter-spacing:.4px;display:block;font-weight:700}
-.draft-player-cell{display:flex;align-items:center;gap:6px;min-width:0}
-.draft-player-cell .draft-player-info{min-width:0;flex:1}
-.draft-player-headshot{width:28px;height:28px;object-fit:cover;border-radius:50%;flex-shrink:0;background:#f0f2f5}
-@media(max-width:1000px){.draft-player-headshot{width:24px;height:24px}}
-@media(max-width:600px){.draft-player-headshot{width:20px;height:20px}}
-.draft-comp{font-size:9px;color:var(--nb-orange);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.draft-expand-weakness{display:none;grid-column:1/-1;padding:6px 12px 8px 48px;font-size:10px;color:var(--nb-muted);background:rgba(200,16,46,0.03);border-bottom:1px solid var(--nb-border2);line-height:1.4}
-.draft-expand-weakness.visible{display:block}
-.draft-expand-weakness strong{color:var(--nb-red);font-weight:600}
+.draft-team-col{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden}
+.draft-team-col img{width:18px;height:18px;object-fit:contain;flex-shrink:0;border-radius:3px}
+.draft-team-col .draft-team-name{font-size:9px;font-weight:600;color:var(--nb-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.draft-player-cell{min-width:0;overflow:hidden;cursor:pointer}
+.draft-player-name{font-weight:600;color:var(--nb-text);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;transition:color .15s}
+.draft-player-cell:hover .draft-player-name{color:var(--nb-red)}
+.draft-player-meta{font-size:9px;color:var(--nb-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.draft-player-meta em{font-style:normal;color:var(--nb-orange);font-weight:600}
+.draft-stat-col{font-size:10px;color:var(--nb-text);text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+.draft-stat-col .draft-stat-sub{font-size:7px;color:var(--nb-muted);font-weight:400;display:block;text-transform:uppercase;letter-spacing:.3px}
+.draft-stat-col.dim{color:var(--nb-muted)}
+.draft-stat-col.q-good{color:#00a86b}
+.draft-stat-col.q-great{color:#008050}
+.draft-stat-col.q-bad{color:#e74c3c}
+.draft-stat-col.q-terrible{color:#c0392b}
+.draft-toggle{display:flex;gap:2px;background:var(--nb-border2);border-radius:4px;padding:2px;margin-left:auto}
+.draft-toggle button{background:none;border:none;padding:3px 8px;font-size:9px;font-weight:600;color:var(--nb-muted);border-radius:3px;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1}
+.draft-toggle button.active{background:var(--nb-card);color:var(--nb-text);box-shadow:0 1px 2px rgba(0,0,0,0.08)}
+.draft-toggle button:hover:not(.active){color:var(--nb-text)}
+#draftTooltip{position:fixed;z-index:9999;background:#1a1a2e;color:#e8e8e8;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.5;box-shadow:0 8px 32px rgba(0,0,0,0.35);pointer-events:none;opacity:0;transition:opacity .12s;max-width:280px;font-family:system-ui,-apple-system,sans-serif}
+#draftTooltip.visible{opacity:1}
+#draftTooltip .tip-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:1px}
+#draftTooltip .tip-team{font-size:10px;color:#c0c0c0;margin-bottom:6px}
+#draftTooltip .tip-stats{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px}
+#draftTooltip .tip-stat{display:flex;justify-content:space-between;gap:8px}
+#draftTooltip .tip-stat .tip-label{color:#888}
+#draftTooltip .tip-stat .tip-value{font-weight:600;color:#e8e8e8}
+#draftTooltip .tip-stat .tip-value.q-good{color:#00e676}
+#draftTooltip .tip-stat .tip-value.q-great{color:#00c853}
+#draftTooltip .tip-stat .tip-value.q-bad{color:#ff5252}
+#draftTooltip .tip-stat .tip-value.q-terrible{color:#d32f2f}
 
 /* CONTRACTS */
 .cap-banner{background:linear-gradient(135deg,var(--nb-card),#f8f9fb);border:1px solid var(--nb-border);border-radius:8px;overflow:hidden;display:flex;flex-wrap:wrap;box-shadow:var(--nb-shadow)}
@@ -350,6 +372,9 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .sc-filter-tab.active{background:var(--nb-red);border-color:var(--nb-red);color:#fff;box-shadow:0 1px 6px rgba(200,16,46,0.2)}
 .sc-select{background:#f0f2f5;border:1px solid var(--nb-border);border-radius:5px;padding:5px 8px;font-size:10px;font-weight:600;color:var(--nb-text);font-family:inherit;outline:none;cursor:pointer}
 .sc-select:focus{border-color:var(--nb-red)}
+.standings-decade-btn{flex-shrink:0;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;color:var(--nb-muted);border:1px solid var(--nb-border);cursor:pointer;transition:all .12s;white-space:nowrap;background:var(--nb-card)}
+.standings-decade-btn:hover{color:var(--nb-text);border-color:var(--nb-red)}
+.standings-decade-btn.active{color:#fff;background:var(--nb-red);border-color:var(--nb-red)}
 .sc-select option{background:#fff;color:#111;font-weight:500}
 .sc-select optgroup{background:#e8e8ee;color:#222;font-weight:700}
 .sc-select optgroup option{background:#fff;color:#111;font-weight:500;padding:3px 6px}
@@ -471,10 +496,10 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
         <p>Real-time scores, standings, stats &amp; more — <a href="#" id="refreshLink">Refresh</a></p>
       </div>
       <div class="hero-cap-row">
-        <div class="hero-cap-stat"><div class="hero-cap-label">Salary Cap</div><div class="hero-cap-value gold" id="heroCap">$140.6M</div></div>
-        <div class="hero-cap-stat"><div class="hero-cap-label">Luxury Tax</div><div class="hero-cap-value orange" id="heroTax">$170.8M</div></div>
-        <div class="hero-cap-stat"><div class="hero-cap-label">1st Apron</div><div class="hero-cap-value green" id="heroApron">$178.1M</div></div>
-        <div class="hero-cap-stat"><div class="hero-cap-label">2nd Apron</div><div class="hero-cap-value" id="heroApron2">$189.5M</div></div>
+        <div class="hero-cap-stat"><div class="hero-cap-label">Salary Cap</div><div class="hero-cap-value gold" id="heroCap">$154.6M</div></div>
+        <div class="hero-cap-stat"><div class="hero-cap-label">Luxury Tax</div><div class="hero-cap-value orange" id="heroTax">$187.9M</div></div>
+        <div class="hero-cap-stat"><div class="hero-cap-label">1st Apron</div><div class="hero-cap-value green" id="heroApron">$195.9M</div></div>
+        <div class="hero-cap-stat"><div class="hero-cap-label">2nd Apron</div><div class="hero-cap-value" id="heroApron2">$207.8M</div></div>
       </div>
     </div>
   </div>
@@ -566,6 +591,8 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
             <select id="standingsYear" class="sc-select"></select>
           </div>
         </div>
+        <div class="standings-decade-bar" id="standingsDecadeBar" style="display:flex;gap:3px;padding:6px 14px;border-bottom:1px solid var(--nb-border2);overflow-x:auto"></div>
+        <div id="seasonHighlightsBar" style="margin:0 0 10px;display:flex;gap:20px;flex-wrap:wrap;padding:0 14px"></div>
         <div class="standings-conference-grid">
           <div class="standings-conference">
             <div class="standings-conf-header"><i class="fas fa-star"></i> Eastern Conference</div>
@@ -638,8 +665,19 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
         <div class="sc-card-header">
           <span class="sc-card-title"><i class="fas fa-user-graduate"></i> NBA Draft</span>
           <div style="display:flex;gap:8px;align-items:center">
+            <div class="draft-toggle" id="draftStatToggle">
+              <button data-view="perGame" class="active">Per Game</button>
+              <button data-view="per36">Per 36</button>
+              <button data-view="advanced">Advanced</button>
+            </div>
             <select id="draftYear" class="sc-select"></select>
           </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:5px 10px;font-size:8px;letter-spacing:.4px;text-transform:uppercase;color:var(--nb-muted)">
+          <span style="color:#00a86b;font-weight:600">&#9608; Good</span>
+          <span style="color:#008050;font-weight:600">&#9608; Great</span>
+          <span style="color:#e74c3c;font-weight:600">&#9608; Bad</span>
+          <span style="color:#c0392b;font-weight:600">&#9608; Terrible</span>
         </div>
         <div id="draftTableContainer"><div class="scoreboard-empty"><i class="fas fa-user-graduate"></i> Select a year</div></div>
       </div>
@@ -17231,8 +17269,13 @@ function renderDateStrip(selected){
 }
 
 /* ===== TEAM LOGO HELPER ===== */
-function teamLogoHTML(abbr,size){
+function teamLogoHTML(abbr,size,year){
   if(!size)size=36;
+  const eraKey=teamEraLogo(abbr,year);
+  const src=eraKey&&YEAR_SPECIFIC_LOGOS[eraKey]?YEAR_SPECIFIC_LOGOS[eraKey]:HISTORICAL_LOGOS[abbr];
+  if(src)return '<img src="'+src+'" alt="'+abbr+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain">';
+  const espnAbbr=ESPN_CDN_ABBR[abbr]||ESPN_CDN_ABBR[FRANCHISE_MAP[abbr]];
+  if(espnAbbr)return '<img src="'+ESPN_CDN+espnAbbr+'.png" alt="'+abbr+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain">';
   const logos=window.TeamLogos;
   if(logos&&logos.nba&&logos.nba[abbr]&&logos.nba[abbr].logo){
     return '<img src="'+logos.nba[abbr].logo+'" alt="'+abbr+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain">';
@@ -17356,29 +17399,189 @@ function initFilterBar(){
 
 /* ===== STANDINGS ===== */
 /* ===== TEAM NAME TO ABBREVIATION ===== */
+const SEASON_HIGHLIGHTS={
+  "1947":{champion:"Philadelphia Warriors"},
+  "1948":{champion:"Baltimore Bullets"},
+  "1949":{champion:"Minneapolis Lakers"},
+  "1950":{champion:"Minneapolis Lakers"},
+  "1951":{champion:"Rochester Royals"},
+  "1952":{champion:"Minneapolis Lakers"},
+  "1953":{champion:"Minneapolis Lakers"},
+  "1954":{champion:"Minneapolis Lakers"},
+  "1955":{champion:"Syracuse Nationals"},
+  "1956":{champion:"Philadelphia Warriors",mvp:"Bob Pettit"},
+  "1957":{champion:"Boston Celtics",mvp:"Bob Cousy"},
+  "1958":{champion:"St. Louis Hawks",mvp:"Bill Russell"},
+  "1959":{champion:"Boston Celtics",mvp:"Bob Pettit"},
+  "1960":{champion:"Boston Celtics",mvp:"Wilt Chamberlain"},
+  "1961":{champion:"Boston Celtics",mvp:"Bill Russell"},
+  "1962":{champion:"Boston Celtics",mvp:"Bill Russell"},
+  "1963":{champion:"Boston Celtics",mvp:"Bill Russell"},
+  "1964":{champion:"Boston Celtics",mvp:"Oscar Robertson"},
+  "1965":{champion:"Boston Celtics",mvp:"Bill Russell"},
+  "1966":{champion:"Boston Celtics",mvp:"Wilt Chamberlain"},
+  "1967":{champion:"Philadelphia 76ers",mvp:"Wilt Chamberlain"},
+  "1968":{champion:"Boston Celtics",mvp:"Wilt Chamberlain"},
+  "1969":{champion:"Boston Celtics",mvp:"Wes Unseld",fmvp:"Jerry West"},
+  "1970":{champion:"New York Knicks",mvp:"Willis Reed",fmvp:"Willis Reed"},
+  "1971":{champion:"Milwaukee Bucks",mvp:"Kareem Abdul-Jabbar",fmvp:"Kareem Abdul-Jabbar"},
+  "1972":{champion:"Los Angeles Lakers",mvp:"Kareem Abdul-Jabbar",fmvp:"Wilt Chamberlain"},
+  "1973":{champion:"New York Knicks",mvp:"Dave Cowens",fmvp:"Willis Reed"},
+  "1974":{champion:"Boston Celtics",mvp:"Kareem Abdul-Jabbar",fmvp:"John Havlicek"},
+  "1975":{champion:"Golden State Warriors",mvp:"Bob McAdoo",fmvp:"Rick Barry"},
+  "1976":{champion:"Boston Celtics",mvp:"Kareem Abdul-Jabbar",fmvp:"Jo Jo White"},
+  "1977":{champion:"Portland Trail Blazers",mvp:"Kareem Abdul-Jabbar",fmvp:"Bill Walton"},
+  "1978":{champion:"Washington Bullets",mvp:"Bill Walton",fmvp:"Wes Unseld"},
+  "1979":{champion:"Seattle SuperSonics",mvp:"Moses Malone",fmvp:"Dennis Johnson"},
+  "1980":{champion:"Los Angeles Lakers",mvp:"Kareem Abdul-Jabbar",fmvp:"Magic Johnson"},
+  "1981":{champion:"Boston Celtics",mvp:"Julius Erving",fmvp:"Cedric Maxwell"},
+  "1982":{champion:"Los Angeles Lakers",mvp:"Moses Malone",fmvp:"Magic Johnson"},
+  "1983":{champion:"Philadelphia 76ers",mvp:"Moses Malone",fmvp:"Moses Malone"},
+  "1984":{champion:"Boston Celtics",mvp:"Larry Bird",fmvp:"Larry Bird"},
+  "1985":{champion:"Los Angeles Lakers",mvp:"Larry Bird",fmvp:"Kareem Abdul-Jabbar"},
+  "1986":{champion:"Boston Celtics",mvp:"Larry Bird",fmvp:"Larry Bird"},
+  "1987":{champion:"Los Angeles Lakers",mvp:"Magic Johnson",fmvp:"Magic Johnson"},
+  "1988":{champion:"Los Angeles Lakers",mvp:"Michael Jordan",fmvp:"James Worthy"},
+  "1989":{champion:"Detroit Pistons",mvp:"Magic Johnson",fmvp:"Joe Dumars"},
+  "1990":{champion:"Detroit Pistons",mvp:"Magic Johnson",fmvp:"Isiah Thomas"},
+  "1991":{champion:"Chicago Bulls",mvp:"Michael Jordan",fmvp:"Michael Jordan"},
+  "1992":{champion:"Chicago Bulls",mvp:"Michael Jordan",fmvp:"Michael Jordan"},
+  "1993":{champion:"Chicago Bulls",mvp:"Charles Barkley",fmvp:"Michael Jordan"},
+  "1994":{champion:"Houston Rockets",mvp:"Hakeem Olajuwon",fmvp:"Hakeem Olajuwon"},
+  "1995":{champion:"Houston Rockets",mvp:"David Robinson",fmvp:"Hakeem Olajuwon"},
+  "1996":{champion:"Chicago Bulls",mvp:"Michael Jordan",fmvp:"Michael Jordan"},
+  "1997":{champion:"Chicago Bulls",mvp:"Karl Malone",fmvp:"Michael Jordan"},
+  "1998":{champion:"Chicago Bulls",mvp:"Michael Jordan",fmvp:"Michael Jordan"},
+  "1999":{champion:"San Antonio Spurs",mvp:"Karl Malone",fmvp:"Tim Duncan"},
+  "2000":{champion:"Los Angeles Lakers",mvp:"Shaquille O'Neal",fmvp:"Shaquille O'Neal"},
+  "2001":{champion:"Los Angeles Lakers",mvp:"Allen Iverson",fmvp:"Shaquille O'Neal"},
+  "2002":{champion:"Los Angeles Lakers",mvp:"Tim Duncan",fmvp:"Shaquille O'Neal"},
+  "2003":{champion:"San Antonio Spurs",mvp:"Tim Duncan",fmvp:"Tim Duncan"},
+  "2004":{champion:"Detroit Pistons",mvp:"Kevin Garnett",fmvp:"Chauncey Billups"},
+  "2005":{champion:"San Antonio Spurs",mvp:"Steve Nash",fmvp:"Tim Duncan"},
+  "2006":{champion:"Miami Heat",mvp:"Steve Nash",fmvp:"Dwyane Wade"},
+  "2007":{champion:"San Antonio Spurs",mvp:"Dirk Nowitzki",fmvp:"Tony Parker"},
+  "2008":{champion:"Boston Celtics",mvp:"Kobe Bryant",fmvp:"Paul Pierce"},
+  "2009":{champion:"Los Angeles Lakers",mvp:"LeBron James",fmvp:"Kobe Bryant"},
+  "2010":{champion:"Los Angeles Lakers",mvp:"LeBron James",fmvp:"Kobe Bryant"},
+  "2011":{champion:"Dallas Mavericks",mvp:"Derrick Rose",fmvp:"Dirk Nowitzki"},
+  "2012":{champion:"Miami Heat",mvp:"LeBron James",fmvp:"LeBron James"},
+  "2013":{champion:"Miami Heat",mvp:"LeBron James",fmvp:"LeBron James"},
+  "2014":{champion:"San Antonio Spurs",mvp:"Kevin Durant",fmvp:"Kawhi Leonard"},
+  "2015":{champion:"Golden State Warriors",mvp:"Stephen Curry",fmvp:"Andre Iguodala"},
+  "2016":{champion:"Cleveland Cavaliers",mvp:"Stephen Curry",fmvp:"LeBron James"},
+  "2017":{champion:"Golden State Warriors",mvp:"Russell Westbrook",fmvp:"Kevin Durant"},
+  "2018":{champion:"Golden State Warriors",mvp:"James Harden",fmvp:"Kevin Durant"},
+  "2019":{champion:"Toronto Raptors",mvp:"Giannis Antetokounmpo",fmvp:"Kawhi Leonard"},
+  "2020":{champion:"Los Angeles Lakers",mvp:"Giannis Antetokounmpo",fmvp:"LeBron James"},
+  "2021":{champion:"Milwaukee Bucks",mvp:"Nikola Jokić",fmvp:"Giannis Antetokounmpo"},
+  "2022":{champion:"Golden State Warriors",mvp:"Nikola Jokić",fmvp:"Stephen Curry"},
+  "2023":{champion:"Denver Nuggets",mvp:"Joel Embiid",fmvp:"Nikola Jokić"},
+  "2024":{champion:"Boston Celtics",mvp:"Nikola Jokić",fmvp:"Jaylen Brown"},
+  "2025":{champion:"Oklahoma City Thunder",mvp:"Shai Gilgeous-Alexander",fmvp:"Shai Gilgeous-Alexander"},
+  "2026":{champion:"New York Knicks",mvp:"Shai Gilgeous-Alexander",fmvp:"Jalen Brunson"}
+};
 const TEAM_ABBR = {
-  "Atlanta Hawks":"ATL","Boston Celtics":"BOS","Brooklyn Nets":"BKN","Charlotte Hornets":"CHA",
+  "Atlanta Hawks":"ATL","Boston Celtics":"BOS","Brooklyn Nets":"BKN","Charlotte Bobcats":"CHA","Charlotte Hornets":"CHA",
   "Chicago Bulls":"CHI","Cleveland Cavaliers":"CLE","Dallas Mavericks":"DAL","Denver Nuggets":"DEN",
   "Detroit Pistons":"DET","Golden State Warriors":"GSW","Houston Rockets":"HOU","Indiana Pacers":"IND",
   "LA Clippers":"LAC","Los Angeles Lakers":"LAL","Memphis Grizzlies":"MEM","Miami Heat":"MIA",
-  "Milwaukee Bucks":"MIL","Minnesota Timberwolves":"MIN","New Orleans Pelicans":"NOP",
-  "New York Knicks":"NYK","Oklahoma City Thunder":"OKC","Orlando Magic":"ORL","Philadelphia 76ers":"PHI",
+  "Milwaukee Bucks":"MIL","Minnesota Timberwolves":"MIN","New Orleans Jazz":"NOJ","New Orleans Pelicans":"NOP",
+  "New York Knicks":"NYK","New York Knickerbockers":"NYK","Oklahoma City Thunder":"OKC","Orlando Magic":"ORL","Philadelphia 76ers":"PHI",
   "Phoenix Suns":"PHX","Portland Trail Blazers":"POR","Sacramento Kings":"SAC","San Antonio Spurs":"SAS",
   "Toronto Raptors":"TOR","Utah Jazz":"UTA","Washington Wizards":"WAS",
   "Los Angeles Clippers":"LAC","New Orleans Hornets":"NOP","New Orleans/Oklahoma City Hornets":"NOP",
   "Vancouver Grizzlies":"VAN","Seattle SuperSonics":"SEA","Washington Bullets":"WAS",
-  "New Jersey Nets":"NJN","New York Nets":"NYN","Kansas City Kings":"KCK","Cincinnati Royals":"CIN",
-  "Rochester Royals":"ROC","San Diego Clippers":"SDC","Buffalo Braves":"BUF","St. Louis Hawks":"STL",
+  "New Jersey Nets":"NJN","New York Nets":"NYN","Kansas City Kings":"KCK","Kansas City-Omaha Kings":"KCK","Cincinnati Royals":"CIN",
+  "Rochester Royals":"ROC","San Diego Clippers":"SDC","San Diego Rockets":"SDR","Buffalo Braves":"BUF","St. Louis Hawks":"STL",
   "Minneapolis Lakers":"MINL","San Francisco Warriors":"SFW","Philadelphia Warriors":"PHW",
   "Syracuse Nationals":"SYR","Tri-Cities Blackhawks":"TCB","Milwaukee Hawks":"MILH",
-  "Fort Wayne Pistons":"FWP","Anderson Packers":"AND","Sheboygan Red Skins":"SRS",
+  "Fort Wayne Pistons":"FWP","Anderson Packers":"AND","Sheboygan Red Skins":"SRS","Capital Bullets":"WAS",
   "Waterloo Hawks":"WAT","Denver Nuggets (orig)":"DENO","Indianapolis Olympians":"INO",
-  "Baltimore Bullets":"BALB","Providence Steamrollers":"PRO","Toronto Huskies":"TORH",
+  "Baltimore Bullets":"BALB","Providence Steam Rollers":"PRO","Providence Steamrollers":"PRO","Toronto Huskies":"TORH",
   "Washington Capitols":"WSC","Pittsburgh Ironmen":"PIT","Cleveland Rebels":"CLR",
   "Detroit Falcons":"DTF","St. Louis Bombers":"STB","Chicago Stags":"CHS","Indianapolis Jets":"INJ",
   "Chicago Packers":"CHP","Chicago Zephyrs":"CHZ","Philadelphia 76ers":"PHI"
 };
 
+const ESPN_CDN='https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/';
+const ESPN_CDN_ABBR={
+  ATL:'atl',BKN:'bkn',BOS:'bos',CHA:'cha',CHI:'chi',CLE:'cle',DAL:'dal',
+  DEN:'den',DET:'det',GSW:'gs',HOU:'hou',IND:'ind',LAC:'lac',LAL:'lal',
+  MEM:'mem',MIA:'mia',MIL:'mil',MIN:'min',NOP:'no',NYK:'ny',OKC:'okc',
+  ORL:'orl',PHI:'phi',PHX:'phx',POR:'por',SAC:'sac',SAS:'sa',TOR:'tor',
+  UTA:'utah',WAS:'wsh'
+};
+const FRANCHISE_MAP={
+  NYN:'BKN',MINL:'LAL',PHW:'GSW',SFW:'GSW',SYR:'PHI',
+  TCB:'ATL',MILH:'ATL',FWP:'DET',CHP:'WAS',CHZ:'WAS',SDR:'HOU'
+};
+const HISTORICAL_LOGOS={
+  "SEA":"https://upload.wikimedia.org/wikipedia/en/a/a4/Seattle_SuperSonics_logo.svg",
+  "VAN":"https://upload.wikimedia.org/wikipedia/en/1/1e/Vancouver_Grizzlies_logo.svg",
+  "NJN":"https://upload.wikimedia.org/wikipedia/commons/8/8f/Nets97-12Wordmark.gif",
+  "CIN":"https://upload.wikimedia.org/wikipedia/en/a/ab/Cincinnati_Royals_logo.svg",
+  "PRO":"https://upload.wikimedia.org/wikipedia/en/4/42/Providence_Steamrollers_logo.svg",
+  "WSC":"https://upload.wikimedia.org/wikipedia/en/0/06/Washington_Capitols_logo.svg",
+  "CHS":"https://upload.wikimedia.org/wikipedia/en/4/4d/Chicago_Stags_logo.png",
+  "TORH":"https://upload.wikimedia.org/wikipedia/en/4/4c/Torontohuskies.png",
+  "BUF":"https://upload.wikimedia.org/wikipedia/commons/d/dd/Buffalo_Braves_%28black_and_orange_varient%29_logo.svg",
+  "ROC":"https://upload.wikimedia.org/wikipedia/commons/1/16/Rochester_Royals_logo.svg",
+  "INO":"https://upload.wikimedia.org/wikipedia/commons/4/44/Indianapolis_Olympians_logo.svg",
+  "SDC":"https://upload.wikimedia.org/wikipedia/commons/0/0e/Logo_san_diego_clippers_1982_bis_1984.png",
+  "NOJ":"https://upload.wikimedia.org/wikipedia/commons/2/29/New_Orleans_Jazz_Logo%2C_1975-1979.png",
+  "KCK":"https://upload.wikimedia.org/wikipedia/commons/c/c2/Kansas_City_Omaha_Kings_logo.png",
+  "STL":"https://upload.wikimedia.org/wikipedia/commons/3/3f/St.Louis_Hawks_57-68.gif",
+  "CLR":"https://upload.wikimedia.org/wikipedia/commons/0/03/Cleveland_Rebels_logo.png",
+  "AND":"https://upload.wikimedia.org/wikipedia/commons/9/92/Anderson_Packers_logo.PNG",
+  "BALB":"https://upload.wikimedia.org/wikipedia/en/9/9a/The_logo_of_the_original_Baltimore_Bullets_from_the_postwar_era.gif",
+  "DTF":"https://upload.wikimedia.org/wikipedia/commons/4/4f/Logo_Detroit_Falcons_1930.gif",
+  "STB":"https://upload.wikimedia.org/wikipedia/en/9/9e/The_logo_of_the_St._Louis_Bombers_NBA_team.png",
+  "WAT":"https://upload.wikimedia.org/wikipedia/commons/4/4e/Waterloo_hawks_logo.png",
+  "DENO":"https://upload.wikimedia.org/wikipedia/en/b/bd/The_logo_of_the_original_Denver_Nuggets.gif"
+};
+const YEAR_SPECIFIC_LOGOS={
+  "1998_WAS":"https://upload.wikimedia.org/wikipedia/en/0/06/Washington_Wizards_logo.svg",
+  "2003_NOP":"https://upload.wikimedia.org/wikipedia/en/5/52/New_Orleans_Hornets_logo.svg",
+  "2014_NOP":"https://upload.wikimedia.org/wikipedia/en/f/fc/New_Orleans_Pelicans_logo.svg",
+  "1989_CHA":"https://upload.wikimedia.org/wikipedia/en/9/95/Charlotte_Hornets_%281997%29.svg",
+  "2015_CHA":"https://upload.wikimedia.org/wikipedia/en/c/c4/Charlotte_Hornets_%282014%29.svg",
+  "1997_DET":"https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_of_the_Detroit_Pistons_%281978%E2%80%931996%29.png",
+  "2005_DET":"https://upload.wikimedia.org/wikipedia/commons/4/4e/Logo_of_the_Detroit_Pistons_%282005%E2%80%932017%29.png",
+  "1996_UTA":"https://upload.wikimedia.org/wikipedia/commons/5/53/Utah_Jazz_Logo%2C_1980-1996.png",
+  "2016_UTA":"https://upload.wikimedia.org/wikipedia/commons/7/7e/Utah_Jazz_Logo%2C_2016-2022.png",
+  "1977_POR":"https://upload.wikimedia.org/wikipedia/commons/3/35/Portland-Trail-Blazers-Logo-1970_01.png",
+  "1992_POR":"https://upload.wikimedia.org/wikipedia/commons/c/c0/Portland-Trail-Blazers-Logo-1990.png",
+  "2004_POR":"https://upload.wikimedia.org/wikipedia/commons/6/65/Portland-Trail-Blazers-Logo-2003.png"
+};
+function teamEraLogo(abbr,year){
+  if(!year)return null;
+  const y=parseInt(year);
+  if(abbr==='WAS')return y<=1997?null:'1998_WAS';
+  if(abbr==='NOP')return y<=2013?'2003_NOP':'2014_NOP';
+  if(abbr==='CHA')return y<=2002?'1989_CHA':y<=2014?null:'2015_CHA';
+  if(abbr==='DEN')return y<=2004?'1976_DEN':y<=2017?'2005_DEN':'2018_DEN';
+  if(abbr==='DET')return y<=1995?null:y<=2004?'1997_DET':'2005_DET';
+  if(abbr==='GSW'){
+    if(y<=1990)return'1971_GSW';
+    if(y<=2009)return'1991_GSW';
+    return'2010_GSW';
+  }
+  if(abbr==='ATL')return y<=2003?'2004_ATL':y<=2014?'2007_ATL':'2015_ATL';
+  if(abbr==='SAS')return y<=2016?null:'2017_SAS';
+  if(abbr==='SAC')return y<=1993?null:y<=2002?'1994_SAC':y<=2015?'2003_SAC':'2016_SAC';
+  if(abbr==='MIL')return y<=1988?null:y<=2005?'1989_MIL':y<=2014?'2006_MIL':'2015_MIL';
+  if(abbr==='PHX')return y<=1992?null:y<=2000?'1993_PHX':'2001_PHX';
+  if(abbr==='TOR')return y<=2003?null:y<=2007?'2004_TOR':y<=2014?'2008_TOR':'2015_TOR';
+  if(abbr==='UTA')return y<=1995?null:y<=2004?'1996_UTA':y<=2015?'2005_UTA':'2016_UTA';
+  if(abbr==='ORL')return y<=2000?'1989_ORL':y<=2009?'2001_ORL':'2010_ORL';
+  if(abbr==='MIA')return y<=1999?'1988_MIA':y<=2011?'2000_MIA':'2012_MIA';
+  if(abbr==='IND')return y<=1993?null:y<=2004?'1994_IND':'2005_IND';
+  if(abbr==='CLE')return y<=1982?null:y<=1993?'1983_CLE':y<=2002?'1994_CLE':y<=2016?'2003_CLE':'2017_CLE';
+  if(abbr==='POR')return y<=1991?'1977_POR':y<=2003?'1992_POR':'2004_POR';
+  if(abbr==='LAL')return y<=1998?null:'1999_LAL';
+  return null;
+}
 function teamAbbr(name){
   return TEAM_ABBR[name]||name.replace(/[^A-Z]/g,'').slice(0,3).toUpperCase();
 }
@@ -17410,11 +17613,16 @@ function streakLabel(t,i,teams){
   return diff>0?'W2':diff<0?'L2':'—';
 }
 
-async function renderStandingsSidebar(){
+async function renderStandingsSidebar(year){
   const confs=['east','west'];
-  const today=new Date();
-  const defaultYear=today.getFullYear()+(today.getMonth()<8?0:1);
-  const year=String(defaultYear);
+  if(!year){
+    const yearSelect=document.getElementById('standingsYear');
+    year=yearSelect?yearSelect.value:null;
+  }
+  if(!year){
+    const today=new Date();
+    year=String(today.getFullYear()+(today.getMonth()<8?0:1));
+  }
   const allData=getStandingsData(year);
   confs.forEach(conf=>{
     const container=document.getElementById(conf==='east'?'standingsSidebar':'standingsSidebarWest');
@@ -17427,7 +17635,7 @@ async function renderStandingsSidebar(){
     teams.forEach((t,i)=>{
       const rankCls=i<3?' top3':i<6?' p6':'';
       const abbr=t.abbr||teamAbbr(t.team);
-      const logo=teamLogoHTML(abbr,22);
+      const logo=teamLogoHTML(abbr,22,year);
       const strk=streakLabel(t,i,teams);
       const strkCls=strk.startsWith('W')?'strk-w':strk.startsWith('L')?'strk-l':'';
       html+='<div class="standings-row"><span class="rank'+rankCls+'">'+(i+1)+'</span><span class="team-cell"><span class="team-logo-sm">'+logo+'</span><strong>'+t.team+'</strong></span><span class="stat-cell w">'+t.wins+'</span><span class="stat-cell">'+t.losses+'</span><span class="stat-cell">'+(t.gb==='—'?'—':t.gb)+'</span><span class="stat-cell '+strkCls+'">'+strk+'</span></div>';
@@ -17446,7 +17654,7 @@ function playoffBadge(rank,total){
   return'<span class="playoff-badge e">e</span>';
 }
 
-function renderOneConference(teams,containerId){
+function renderOneConference(teams,containerId,year){
   const container=document.getElementById(containerId);
   if(!container)return;
   if(!teams||!teams.length){container.innerHTML='<div class="standings-loading">No data</div>';return}
@@ -17455,7 +17663,7 @@ function renderOneConference(teams,containerId){
   teams.forEach((t,i)=>{
     const rank=i+1;
     const abbr=t.abbr||teamAbbr(t.team);
-    const logo=teamLogoHTML(abbr,20);
+    const logo=teamLogoHTML(abbr,20,year);
     const pct=parseFloat(t.pct);
     const pctSty=!isNaN(pct)&&pct>=.500?'pct-pos':'pct-neg';
     const diff=parseFloat(t.diff);
@@ -17490,9 +17698,28 @@ async function renderStandingsFull(){
     ['standingsEastContainer','standingsWestContainer'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="standings-loading">No data for '+cyear+'</div>'});
     return;
   }
-  renderOneConference(data.e||[],'standingsEastContainer');
-  renderOneConference(data.w||[],'standingsWestContainer');
-  renderStandingsSidebar();
+  renderOneConference(data.e||[],'standingsEastContainer',cyear);
+  renderOneConference(data.w||[],'standingsWestContainer',cyear);
+  renderStandingsSidebar(cyear);
+  const bar=document.getElementById('seasonHighlightsBar');
+  if(bar){
+    const hl=SEASON_HIGHLIGHTS[cyear];
+    if(hl){
+      let parts=[];
+      const champAbbr=teamAbbr(hl.champion);
+      const champLogo=teamLogoHTML(champAbbr,24,cyear);
+      parts.push('<div style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--nb-card2),var(--nb-card));border:1px solid var(--nb-border);border-radius:6px;padding:6px 12px;font-size:11px"><i class="fas fa-trophy" style="color:#ffd700"></i> <strong>Champion:</strong> '+champLogo+' '+hl.champion+'</div>');
+      if(hl.mvp){
+        parts.push('<div style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--nb-card2),var(--nb-card));border:1px solid var(--nb-border);border-radius:6px;padding:6px 12px;font-size:11px"><i class="fas fa-star" style="color:#ff6b00"></i> <strong>MVP:</strong> '+hl.mvp+'</div>');
+      }
+      if(hl.fmvp){
+        parts.push('<div style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--nb-card2),var(--nb-card));border:1px solid var(--nb-border);border-radius:6px;padding:6px 12px;font-size:11px"><i class="fas fa-medal" style="color:#ffd700"></i> <strong>Finals MVP:</strong> '+hl.fmvp+'</div>');
+      }
+      bar.innerHTML=parts.join('');
+    }else{
+      bar.innerHTML='';
+    }
+  }
 }
 
 function initStandings(){
@@ -17502,9 +17729,43 @@ function initStandings(){
   if(!bbref)return;
   const years=Object.keys(bbref).map(Number).sort((a,b)=>b-a);
   yearSelect.innerHTML=years.map(y=>'<option value="'+y+'">'+(y-1)+'-'+String(y).slice(2)+'</option>').join('');
+  const decadeBar=document.getElementById('standingsDecadeBar');
+  if(decadeBar){
+    const decades=[];
+    years.forEach(y=>{
+      const d=Math.floor(y/10)*10;
+      if(!decades.includes(d))decades.push(d);
+    });
+    decades.sort((a,b)=>b-a);
+    const today=new Date();
+    const currentDecade=Math.floor((today.getFullYear()+(today.getMonth()<8?0:1))/10)*10;
+    decadeBar.innerHTML=decades.map(d=>'<span class="standings-decade-btn'+(d===currentDecade?' active':'')+'" data-decade="'+d+'">'+d+'s</span>').join('');
+    decadeBar.querySelectorAll('.standings-decade-btn').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        decadeBar.querySelectorAll('.standings-decade-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        const dec=parseInt(this.dataset.decade);
+        const opts=yearSelect.options;
+        for(let i=0;i<opts.length;i++){
+          const y=parseInt(opts[i].value);
+          if(y>=dec&&y<dec+10){
+            yearSelect.value=opts[i].value;
+            renderStandingsFull();
+            return;
+          }
+        }
+      });
+    });
+  }
   yearSelect.addEventListener('change',()=>{
+    const y=parseInt(yearSelect.value);
+    const d=Math.floor(y/10)*10;
+    if(decadeBar){
+      decadeBar.querySelectorAll('.standings-decade-btn').forEach(b=>{
+        b.classList.toggle('active',parseInt(b.dataset.decade)===d);
+      });
+    }
     renderStandingsFull();
-    renderStandingsSidebar();
   });
   renderStandingsFull();
 }
@@ -17590,10 +17851,12 @@ function renderNewsItem(a){
 
 /* ===== CONTRACTS DATA ===== */
 const NBA_CONTRACTS_DATA = {
-  salaryCap: 140588000,
-  luxuryTax: 170814000,
-  apron1: 178132000,
-  apron2: 189512000,
+  salaryCap: 154647000,  // 2025-26 actuals from NBA.com
+  // TODO: 30 per-team cap/lt/apron rows below all carry the SAME league-wide values;
+  //       replace with actual 2025-26 team payrolls (committed $, space $, etc.) per team.
+  luxuryTax: 187895000,
+  apron1: 195945000,
+  apron2: 207824000,
   salaries: [
     {name:"Stephen Curry",team:"GSW",pos:"PG",salary:55761200,years:3,opt:"PO",type:"Supermax",exp:2027},
     {name:"Kevin Durant",team:"PHX",pos:"SF",salary:51179020,years:2,opt:"PO",type:"Max",exp:2026},
@@ -17649,36 +17912,36 @@ const NBA_CONTRACTS_DATA = {
     {name:"James Harden",team:"LAC",pos:"PG",salary:33670000,years:2,opt:"PO",type:"Max",exp:2026}
   ],
   teams: [
-    {name:"Boston Celtics",abbr:"BOS",conf:"East",payroll:193500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"New York Knicks",abbr:"NYK",conf:"East",payroll:186200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Phoenix Suns",abbr:"PHX",conf:"West",payroll:183400000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Milwaukee Bucks",abbr:"MIL",conf:"East",payroll:181100000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"LA Lakers",abbr:"LAL",conf:"West",payroll:178900000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Denver Nuggets",abbr:"DEN",conf:"West",payroll:177200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Golden State Warriors",abbr:"GSW",conf:"West",payroll:176600000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"LA Clippers",abbr:"LAC",conf:"West",payroll:174300000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Philadelphia 76ers",abbr:"PHI",conf:"East",payroll:172500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Miami Heat",abbr:"MIA",conf:"East",payroll:168200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Minnesota Timberwolves",abbr:"MIN",conf:"West",payroll:167800000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Cleveland Cavaliers",abbr:"CLE",conf:"East",payroll:165100000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Dallas Mavericks",abbr:"DAL",conf:"West",payroll:162400000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"New Orleans Pelicans",abbr:"NOP",conf:"West",payroll:158700000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Atlanta Hawks",abbr:"ATL",conf:"East",payroll:156200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Chicago Bulls",abbr:"CHI",conf:"East",payroll:153800000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Toronto Raptors",abbr:"TOR",conf:"East",payroll:149500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Houston Rockets",abbr:"HOU",conf:"West",payroll:147200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Indiana Pacers",abbr:"IND",conf:"East",payroll:145800000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Sacramento Kings",abbr:"SAC",conf:"West",payroll:143600000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Orlando Magic",abbr:"ORL",conf:"East",payroll:141200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Oklahoma City Thunder",abbr:"OKC",conf:"West",payroll:138500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Memphis Grizzlies",abbr:"MEM",conf:"West",payroll:136100000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"San Antonio Spurs",abbr:"SAS",conf:"West",payroll:132800000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Brooklyn Nets",abbr:"BKN",conf:"East",payroll:131400000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Washington Wizards",abbr:"WAS",conf:"East",payroll:128500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Charlotte Hornets",abbr:"CHA",conf:"East",payroll:125200000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Detroit Pistons",abbr:"DET",conf:"East",payroll:122800000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Utah Jazz",abbr:"UTA",conf:"West",payroll:119500000,cap:140588000,lt:170814000,apron:189512000},
-    {name:"Portland Trail Blazers",abbr:"POR",conf:"West",payroll:116200000,cap:140588000,lt:170814000,apron:189512000}
+    {name:"Boston Celtics",abbr:"BOS",conf:"East",payroll:193500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"New York Knicks",abbr:"NYK",conf:"East",payroll:186200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Phoenix Suns",abbr:"PHX",conf:"West",payroll:183400000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Milwaukee Bucks",abbr:"MIL",conf:"East",payroll:181100000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"LA Lakers",abbr:"LAL",conf:"West",payroll:178900000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Denver Nuggets",abbr:"DEN",conf:"West",payroll:177200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Golden State Warriors",abbr:"GSW",conf:"West",payroll:176600000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"LA Clippers",abbr:"LAC",conf:"West",payroll:174300000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Philadelphia 76ers",abbr:"PHI",conf:"East",payroll:172500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Miami Heat",abbr:"MIA",conf:"East",payroll:168200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Minnesota Timberwolves",abbr:"MIN",conf:"West",payroll:167800000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Cleveland Cavaliers",abbr:"CLE",conf:"East",payroll:165100000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Dallas Mavericks",abbr:"DAL",conf:"West",payroll:162400000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"New Orleans Pelicans",abbr:"NOP",conf:"West",payroll:158700000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Atlanta Hawks",abbr:"ATL",conf:"East",payroll:156200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Chicago Bulls",abbr:"CHI",conf:"East",payroll:153800000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Toronto Raptors",abbr:"TOR",conf:"East",payroll:149500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Houston Rockets",abbr:"HOU",conf:"West",payroll:147200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Indiana Pacers",abbr:"IND",conf:"East",payroll:145800000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Sacramento Kings",abbr:"SAC",conf:"West",payroll:143600000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Orlando Magic",abbr:"ORL",conf:"East",payroll:141200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Oklahoma City Thunder",abbr:"OKC",conf:"West",payroll:138500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Memphis Grizzlies",abbr:"MEM",conf:"West",payroll:136100000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"San Antonio Spurs",abbr:"SAS",conf:"West",payroll:132800000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Brooklyn Nets",abbr:"BKN",conf:"East",payroll:131400000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Washington Wizards",abbr:"WAS",conf:"East",payroll:128500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Charlotte Hornets",abbr:"CHA",conf:"East",payroll:125200000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Detroit Pistons",abbr:"DET",conf:"East",payroll:122800000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Utah Jazz",abbr:"UTA",conf:"West",payroll:119500000,cap:154647000,lt:187895000,apron:207824000},
+    {name:"Portland Trail Blazers",abbr:"POR",conf:"West",payroll:116200000,cap:154647000,lt:187895000,apron:207824000}
   ],
   freeAgents: [
     {name:"LeBron James",pos:"SF",age:40,team:"LAL",type:"Player Option",val:"$51.4M",exp:2025},
@@ -17942,74 +18205,216 @@ function renderBracket(){
 
 /* ===== DRAFT DATA ===== */
 const NBA_DRAFT_DATA = {
-  "2025": [
-    {pick:1,team:"Utah Jazz (via CLE)",player:"Cooper Flagg",pos:"PF",college:"Duke",age:18,ht:"6-9",wt:205,comp:"Kevin Garnett"},
-    {pick:2,team:"Washington Wizards",player:"Dylan Harper",pos:"PG",college:"Rutgers",age:18,ht:"6-6",wt:215,comp:"James Harden"},
-    {pick:3,team:"Charlotte Hornets",player:"Ace Bailey",pos:"SF",college:"Rutgers",age:18,ht:"6-9",wt:200,comp:"Brandon Ingram"},
-    {pick:4,team:"Portland Trail Blazers",player:"Vasilije Micic",pos:"SG",college:"Serbia",age:21,ht:"6-7",wt:195,comp:"Bogdan Bogdanovic"},
-    {pick:5,team:"San Antonio Spurs",player:"Khaman Maluach",pos:"C",college:"Duke/FI",age:19,ht:"7-2",wt:250,comp:"Rudy Gobert"},
-    {pick:6,team:"Brooklyn Nets",player:"Tre Johnson",pos:"SG",college:"Texas",age:18,ht:"6-6",wt:190,comp:"Jordan Poole"},
-    {pick:7,team:"Chicago Bulls",player:"Kasparas Jakucionis",pos:"PG",college:"Illinois",age:18,ht:"6-6",wt:205,comp:"Domas Sabonis-lite"},
-    {pick:8,team:"Toronto Raptors",player:"VJ Edgecombe",pos:"SG",college:"Baylor",age:18,ht:"6-5",wt:185,comp:"Russell Westbrook-lite"},
-    {pick:9,team:"Detroit Pistons",player:"Collin Murray-Boyles",pos:"PF",college:"South Carolina",age:19,ht:"6-7",wt:235,comp:"Draymond Green-lite"},
-    {pick:10,team:"Atlanta Hawks",player:"Egor Demin",pos:"PG",college:"BYU",age:18,ht:"6-8",wt:190,comp:"Shai Gilgeous-Alexander (type)"},
-    {pick:11,team:"Minnesota Timberwolves",player:"Nolan Traore",pos:"PG",college:"France",age:18,ht:"6-5",wt:195,comp:"De'Aaron Fox"},
-    {pick:12,team:"New Orleans Pelicans",player:"Will Riley",pos:"SF",college:"Illinois",age:18,ht:"6-8",wt:190,comp:"Brandon Miller"},
-    {pick:13,team:"Miami Heat",player:"Asa Newell",pos:"PF",college:"Georgia",age:18,ht:"6-9",wt:210,comp:"Jaren Jackson Jr."},
-    {pick:14,team:"Houston Rockets",player:"Jeremiah Fears",pos:"PG",college:"Illinois",age:18,ht:"6-4",wt:185,comp:"Jalen Brunson"},
-    {pick:15,team:"Indiana Pacers",player:"Boogie Fland",pos:"PG",college:"Arkansas",age:18,ht:"6-3",wt:175,comp:"Jaden Hardy"},
-    {pick:16,team:"Phoenix Suns",player:"Thomas Sorber",pos:"C",college:"Georgetown",age:19,ht:"6-10",wt:255,comp:"Alperen Sengun"},
-    {pick:17,team:"Philadelphia 76ers",player:"Riley Kugel",pos:"SG",college:"Florida",age:19,ht:"6-5",wt:195,comp:"Malik Monk"},
-    {pick:18,team:"New York Knicks",player:"Maxime Raynaud",pos:"C",college:"Stanford",age:20,ht:"7-1",wt:250,comp:"Boban Marjanovic-lite"},
-    {pick:19,team:"Los Angeles Lakers",player:"Johni Broome",pos:"PF",college:"Auburn",age:22,ht:"6-10",wt:235,comp:"Boris Diaw"},
-    {pick:20,team:"Orlando Magic",player:"Rasheer Fleming",pos:"PF",college:"St. Joseph's",age:19,ht:"6-9",wt:230,comp:"Robert Covington"},
-    {pick:21,team:"Sacramento Kings",player:"Dink Pate",pos:"SF",college:"G League Ignite",age:18,ht:"6-8",wt:210,comp:"Brandon Ingram-lite"},
-    {pick:22,team:"Denver Nuggets",player:"Miles Byrd",pos:"SG",college:"San Diego State",age:19,ht:"6-7",wt:190,comp:"Terrence Ross"},
-    {pick:23,team:"Oklahoma City Thunder",player:"Carter Bryant",pos:"SF",college:"Arizona",age:19,ht:"6-8",wt:215,comp:"Andre Iguodala-lite"},
-    {pick:24,team:"Milwaukee Bucks",player:"Tahaad Pettiford",pos:"PG",college:"Auburn",age:19,ht:"6-1",wt:175,comp:"Jalen Brunson-lite"},
-    {pick:25,team:"Boston Celtics",player:"Alex Karaban",pos:"PF",college:"UConn",age:22,ht:"6-8",wt:225,comp:"Grant Williams"},
-    {pick:26,team:"Memphis Grizzlies",player:"Jaxson Robinson",pos:"SF",college:"Kentucky",age:22,ht:"6-7",wt:195,comp:"Joe Ingles"},
-    {pick:27,team:"Cleveland Cavaliers",player:"Dedan Thomas Jr.",pos:"PG",college:"UNLV",age:19,ht:"6-2",wt:185,comp:"Jalen Brunson-lite"},
-    {pick:28,team:"Dallas Mavericks",player:"Zvonimir Ivisic",pos:"C",college:"Kentucky",age:21,ht:"7-2",wt:245,comp:"Kristaps Porzingis"},
-    {pick:29,team:"LA Clippers",player:"Otega Oweh",pos:"SG",college:"Kentucky",age:20,ht:"6-5",wt:210,comp:"Josh Hart"},
-    {pick:30,team:"Golden State Warriors",player:"Javon Small",pos:"PG",college:"West Virginia",age:21,ht:"6-3",wt:195,comp:"Jalen Brunson"}
+  "2026": [
+    {pick:1,team:"Washington Wizards",abbr:"was",player:"AJ Dybantsa",pos:"SF",college:"BYU",ht:"6'9.75\"",wt:217,cls:"Freshman",age:19.4,pts:25.5,reb:6.8,ast:3.7,blk:0.3,stl:1.1,pts36:26.4,reb36:7.1,ast36:3.8,blk36:0.4,stl36:1.1,ts:0.6,usg:33.9,obpm:9.5,dbpm:2.2,bpm:11.7},
+    {pick:2,team:"Utah Jazz",abbr:"uta",player:"Darryn Peterson",pos:"SG/PG",college:"Kansas",ht:"6'5.75\"",wt:199,cls:"Freshman",age:19.4,pts:20.2,reb:4.2,ast:1.6,blk:0.6,stl:1.4,pts36:25.0,reb36:5.2,ast36:2.0,blk36:0.8,stl36:1.8,ts:0.578,usg:33.5,obpm:9.3,dbpm:4.8,bpm:14.1},
+    {pick:3,team:"Memphis Grizzlies",abbr:"mem",player:"Cameron Boozer",pos:"PF",college:"Duke",ht:"6'9.5\"",wt:253,cls:"Freshman",age:18.9,pts:22.5,reb:10.2,ast:4.1,blk:0.6,stl:1.4,pts36:24.2,reb36:11.0,ast36:4.4,blk36:0.7,stl36:1.5,ts:0.653,usg:29.9,obpm:12.7,dbpm:6.0,bpm:18.7},
+    {pick:4,team:"Chicago Bulls",abbr:"chi",player:"Caleb Wilson",pos:"SF/PF",college:"North Carolina",ht:"6'10.5\"",wt:211,cls:"Freshman",age:19.9,pts:19.8,reb:9.4,ast:2.7,blk:1.4,stl:1.5,pts36:22.8,reb36:10.8,ast36:3.1,blk36:1.6,stl36:1.7,ts:0.626,usg:28.7,obpm:8.7,dbpm:5.3,bpm:14.0},
+    {pick:5,team:"Los Angeles Clippers",abbr:"lac",player:"Keaton Wagler",pos:"SG/PG",college:"Illinois",ht:"6'6.25\"",wt:188,cls:"Freshman",age:19.4,pts:17.9,reb:5.1,ast:4.2,blk:0.4,stl:0.9,pts36:19.0,reb36:5.4,ast36:4.5,blk36:0.4,stl36:1.0,ts:0.596,usg:25.2,obpm:8.8,dbpm:3.5,bpm:12.3},
+    {pick:6,team:"Brooklyn Nets",abbr:"bkn",player:"Mikel Brown Jr.",pos:"PG",college:"Louisville",ht:"6'4.75\"",wt:190,cls:"Freshman",age:20.2,pts:18.2,reb:3.3,ast:4.7,blk:0.1,stl:1.2,pts36:22.4,reb36:4.1,ast36:5.8,blk36:0.2,stl36:1.5,ts:0.577,usg:31.4,obpm:4.9,dbpm:1.7,bpm:6.6},
+    {pick:7,team:"Sacramento Kings",abbr:"sac",player:"Darius Acuff Jr.",pos:"PG",college:"Arkansas",ht:"6'3.25\"",wt:186,cls:"Freshman",age:19.6,pts:23.5,reb:3.1,ast:6.4,blk:0.3,stl:0.8,pts36:24.1,reb36:3.2,ast36:6.6,blk36:0.3,stl36:0.9,ts:0.604,usg:29.5,obpm:9.4,dbpm:0.7,bpm:10.1},
+    {pick:8,team:"Atlanta Hawks",abbr:"atl",player:"Kingston Flemings",pos:"PG",college:"Houston",ht:"6'3.75\"",wt:183,cls:"Freshman",age:19.5,pts:16.1,reb:4.1,ast:5.2,blk:0.3,stl:1.5,pts36:18.2,reb36:4.6,ast36:5.9,blk36:0.4,stl36:1.7,ts:0.563,usg:26.0,obpm:6.6,dbpm:6.0,bpm:12.6},
+    {pick:9,team:"Dallas Mavericks",abbr:"dal",player:"Morez Johnson Jr.",pos:"PF/C",college:"Michigan",ht:"6'10.25\"",wt:251,cls:"Sophomore",age:20.4,pts:13.1,reb:7.3,ast:1.2,blk:1.1,stl:0.7,pts36:18.8,reb36:10.5,ast36:1.7,blk36:1.6,stl36:1.0,ts:0.677,usg:21.3,obpm:6.4,dbpm:5.4,bpm:11.8},
+    {pick:10,team:"Milwaukee Bucks",abbr:"mil",player:"Brayden Burries",pos:"SG/PG",college:"Arizona",ht:"6'5\"",wt:215,cls:"Freshman",age:20.8,pts:16.1,reb:4.9,ast:2.4,blk:0.2,stl:1.5,pts36:19.4,reb36:5.9,ast36:2.9,blk36:0.2,stl36:1.8,ts:0.616,usg:23.2,obpm:6.0,dbpm:5.7,bpm:11.7},
+    {pick:11,team:"Golden State Warriors",abbr:"gs",player:"Yaxel Lendeborg",pos:"PF",college:"Michigan",ht:"6'10\"",wt:241,cls:"Senior",age:23.7,pts:15.1,reb:6.8,ast:3.2,blk:1.2,stl:1.1,pts36:18.0,reb36:8.1,ast36:3.9,blk36:1.5,stl36:1.3,ts:0.646,usg:20.4,obpm:9.8,dbpm:6.9,bpm:16.7},
+    {pick:12,team:"Oklahoma City Thunder",abbr:"okc",player:"Aday Mara",pos:"C",college:"Michigan",ht:"7'4.25\"",wt:260,cls:"Junior",age:21.2,pts:12.1,reb:6.8,ast:2.4,blk:2.6,stl:0.4,pts36:18.6,reb36:10.4,ast36:3.7,blk36:4.0,stl36:0.5,ts:0.659,usg:23.1,obpm:5.8,dbpm:8.4,bpm:14.3},
+    {pick:13,team:"Miami Heat",abbr:"mia",player:"Nate Ament",pos:"SF",college:"Tennessee",ht:"6'10.75\"",wt:211,cls:"Freshman",age:19.5,pts:16.7,reb:6.3,ast:2.3,blk:0.6,stl:1.0,pts36:20.2,reb36:7.7,ast36:2.8,blk36:0.8,stl36:1.2,ts:0.534,usg:29.0,obpm:5.1,dbpm:3.3,bpm:8.4},
+    {pick:14,team:"Charlotte Hornets",abbr:"cha",player:"Hannes Steinbach",pos:"PF",college:"Washington",ht:"6'11.5\"",wt:248,cls:"Freshman",age:20.1,pts:18.5,reb:11.8,ast:1.6,blk:1.2,stl:1.1,pts36:19.3,reb36:12.2,ast36:1.6,blk36:1.3,stl36:1.1,ts:0.636,usg:23.9,obpm:7.7,dbpm:2.4,bpm:10.1},
+    {pick:15,team:"Chicago Bulls",abbr:"chi",player:"Dailyn Swain",pos:"SG/SF",college:"Texas",ht:"6'7.75\"",wt:211,cls:"Junior",age:20.9,pts:17.3,reb:7.5,ast:3.6,blk:0.3,stl:1.6,pts36:19.0,reb36:8.3,ast36:3.9,blk36:0.3,stl36:1.8,ts:0.636,usg:24.6,obpm:6.9,dbpm:3.6,bpm:10.5},
+    {pick:16,team:"Memphis Grizzlies",abbr:"mem",player:"Bennett Stirtz",pos:"PG",college:"Iowa",ht:"6'3.75\"",wt:186,cls:"Senior",age:22.7,pts:19.8,reb:2.6,ast:4.4,blk:0.2,stl:1.4,pts36:18.9,reb36:2.5,ast36:4.2,blk36:0.2,stl36:1.3,ts:0.607,usg:26.9,obpm:7.7,dbpm:2.5,bpm:10.2},
+    {pick:17,team:"Oklahoma City Thunder",abbr:"okc",player:"Ebuka Okorie",pos:"PG",college:"Stanford",ht:"6'2.5\"",wt:186,cls:"Freshman",age:19.2,pts:23.2,reb:3.6,ast:3.6,blk:0.3,stl:1.6,pts36:23.8,reb36:3.7,ast36:3.7,blk36:0.3,stl36:1.6,ts:0.589,usg:31.0,obpm:8.4,dbpm:2.2,bpm:10.6},
+    {pick:18,team:"Charlotte Hornets",abbr:"cha",player:"Christian Anderson Jr.",pos:"PG",college:"Texas Tech",ht:"6'2.25\"",wt:180,cls:"Sophomore",age:20.2,pts:18.5,reb:3.6,ast:7.4,blk:0.2,stl:1.5,pts36:17.4,reb36:3.4,ast36:6.9,blk36:0.2,stl36:1.4,ts:0.626,usg:23.8,obpm:7.1,dbpm:2.3,bpm:9.4},
+    {pick:19,team:"Toronto Raptors",abbr:"tor",player:"Allen Graves",pos:"PF",college:"Santa Clara",ht:"6'9\"",wt:226,cls:"Freshman",age:19.9,pts:11.8,reb:6.5,ast:1.8,blk:0.9,stl:1.9,pts36:18.8,reb36:10.4,ast36:2.9,blk36:1.5,stl36:3.0,ts:0.613,usg:21.9,obpm:8.7,dbpm:4.7,bpm:13.4},
+    {pick:20,team:"San Antonio Spurs",abbr:"sas",player:"Jayden Quaintance",pos:"PF/C",college:"Kentucky",ht:"6'10.25\"",wt:253,cls:"Sophomore",age:18.9,pts:5.0,reb:5.0,ast:0.5,blk:0.8,stl:0.5,pts36:10.7,reb36:10.7,ast36:1.1,blk36:1.6,stl36:1.1,ts:0.496,usg:19.2,obpm:0.0,dbpm:1.8,bpm:1.9},
+    {pick:21,team:"Detroit Pistons",abbr:"det",player:"Karim López",pos:"SF",college:"New Zealand",ht:"6'9.5\"",wt:222,cls:"International",age:19.2,pts:11.9,reb:6.1,ast:1.9,blk:1.0,stl:1.2,pts36:16.8,reb36:8.5,ast36:2.7,blk36:1.5,stl36:1.6,ts:0.58,usg:19.5,obpm:null,dbpm:null,bpm:null},
+    {pick:22,team:"Philadelphia 76ers",abbr:"phi",player:"Labaron Philon Jr.",pos:"PG",college:"Alabama",ht:"6'3.75\"",wt:176,cls:"Sophomore",age:20.6,pts:22.0,reb:3.5,ast:5.0,blk:0.2,stl:1.2,pts36:25.6,reb36:4.1,ast36:5.8,blk36:0.2,stl36:1.3,ts:0.626,usg:30.0,obpm:9.2,dbpm:2.1,bpm:11.3},
+    {pick:23,team:"Atlanta Hawks",abbr:"atl",player:"Zuby Ejiofor",pos:"PF",college:"St. John's",ht:"6'8.75\"",wt:245,cls:"Senior",age:22.2,pts:16.3,reb:7.3,ast:3.5,blk:2.1,stl:1.2,pts36:19.6,reb36:8.8,ast36:4.3,blk36:2.6,stl36:1.4,ts:0.609,usg:24.8,obpm:8.5,dbpm:6.0,bpm:14.5},
+    {pick:24,team:"New York Knicks",abbr:"ny",player:"Cameron Carr",pos:"SG",college:"Baylor",ht:"6'5.75\"",wt:184,cls:"Sophomore",age:21.6,pts:18.9,reb:5.8,ast:2.6,blk:1.3,stl:0.9,pts36:20.2,reb36:6.2,ast36:2.8,blk36:1.4,stl36:0.9,ts:0.622,usg:25.3,obpm:6.9,dbpm:2.3,bpm:9.2},
+    {pick:25,team:"Los Angeles Lakers",abbr:"lal",player:"Sergio de Larrea",pos:"PG/SG",college:"Valencia",ht:"6'7.25\"",wt:204,cls:"International",age:20.5,pts:7.1,reb:2.2,ast:2.7,blk:0.3,stl:0.5,pts36:17.4,reb36:5.4,ast36:6.6,blk36:0.6,stl36:1.2,ts:0.587,usg:22.2,obpm:null,dbpm:null,bpm:null},
+    {pick:26,team:"Denver Nuggets",abbr:"den",player:"Tarris Reed Jr.",pos:"C",college:"UConn",ht:"6'11\"",wt:264,cls:"Senior",age:22.9,pts:14.7,reb:9.0,ast:2.3,blk:2.0,stl:0.9,pts36:19.4,reb36:11.8,ast36:3.0,blk36:2.6,stl36:1.2,ts:0.614,usg:26.1,obpm:6.7,dbpm:6.1,bpm:12.9},
+    {pick:27,team:"Boston Celtics",abbr:"bos",player:"Chris Cenac Jr.",pos:"PF/C",college:"Houston",ht:"6'11.5\"",wt:240,cls:"Freshman",age:19.4,pts:9.5,reb:7.9,ast:0.7,blk:0.5,stl:0.8,pts36:13.8,reb36:11.4,ast36:1.1,blk36:0.7,stl36:1.1,ts:0.546,usg:19.9,obpm:3.7,dbpm:3.8,bpm:7.5},
+    {pick:28,team:"Minnesota Timberwolves",abbr:"min",player:"Joshua Jefferson",pos:"PF/SF",college:"Iowa State",ht:"6'9\"",wt:246,cls:"Senior",age:22.6,pts:16.4,reb:7.4,ast:4.8,blk:0.8,stl:1.6,pts36:19.1,reb36:8.6,ast36:5.6,blk36:1.0,stl36:1.9,ts:0.56,usg:27.6,obpm:7.0,dbpm:6.1,bpm:13.0},
+    {pick:29,team:"Cleveland Cavaliers",abbr:"cle",player:"Alex Karaban",pos:"SF/PF",college:"UConn",ht:"6'8\"",wt:225,cls:"Senior",age:23.6,pts:13.2,reb:5.3,ast:2.4,blk:0.8,stl:0.8,pts36:13.8,reb36:5.5,ast36:2.5,blk36:0.9,stl36:0.9,ts:0.59,usg:18.4,obpm:5.4,dbpm:3.6,bpm:9.0},
+    {pick:30,team:"Dallas Mavericks",abbr:"dal",player:"Koa Peat",pos:"PF",college:"Arizona",ht:"6'8.25\"",wt:245,cls:"Freshman",age:19.4,pts:14.1,reb:5.6,ast:2.6,blk:0.7,stl:0.6,pts36:18.3,reb36:7.3,ast36:3.3,blk36:0.9,stl36:0.8,ts:0.557,usg:24.5,obpm:4.8,dbpm:3.9,bpm:8.8},
+    {pick:31,team:"Houston Rockets",abbr:"hou",player:"Bruce Thornton",pos:"PG",college:"Ohio State",ht:"6'1.25\"",wt:223,cls:"Senior",age:22.8,pts:19.9,reb:5.1,ast:3.9,blk:0.2,stl:1.1,pts36:19.6,reb36:5.0,ast36:3.9,blk36:0.2,stl36:1.1,ts:0.665,usg:23.6,obpm:9.5,dbpm:3.2,bpm:12.7},
+    {pick:32,team:"Memphis Grizzlies",abbr:"mem",player:"Richie Saunders",pos:"SG",college:"BYU",ht:"6'6.25\"",wt:205,cls:"Senior",age:24.8,pts:18.0,reb:5.8,ast:2.1,blk:0.3,stl:1.7,pts36:20.7,reb36:6.6,ast36:2.4,blk36:0.3,stl36:2.0,ts:0.632,usg:24.5,obpm:7.8,dbpm:2.9,bpm:10.7},
+    {pick:33,team:"Minnesota Timberwolves",abbr:"min",player:"Isaiah Evans",pos:"SF",college:"Duke",ht:"6'6.75\"",wt:186,cls:"Sophomore",age:20.5,pts:15.0,reb:3.2,ast:1.3,blk:0.7,stl:0.7,pts36:19.2,reb36:4.1,ast36:1.6,blk36:0.8,stl36:0.9,ts:0.590,usg:24.9,obpm:6.5,dbpm:3.3,bpm:9.8},
+    {pick:34,team:"Cleveland Cavaliers",abbr:"cle",player:"Meleek Thomas",pos:"SG/PG",college:"Arkansas",ht:"6'4.25\"",wt:190,cls:"Freshman",age:19.9,pts:15.6,reb:3.8,ast:2.5,blk:0.2,stl:1.5,pts36:18.5,reb36:4.5,ast36:2.9,blk36:0.2,stl36:1.8,ts:0.559,usg:23.6,obpm:4.8,dbpm:2.3,bpm:7.0},
+    {pick:35,team:"Denver Nuggets",abbr:"den",player:"Trevon Brazile",pos:"PF",college:"Arkansas",ht:"6'10.75\"",wt:226,cls:"Senior",age:23.4,pts:13.0,reb:7.3,ast:1.6,blk:1.6,stl:1.5,pts36:14.9,reb36:8.4,ast36:1.8,blk36:1.8,stl36:1.7,ts:0.619,usg:17.6,obpm:5.4,dbpm:3.9,bpm:9.3},
+    {pick:36,team:"LA Clippers",abbr:"lac",player:"Baba Miller",pos:"SF",college:"Cincinnati",ht:"6'11.75\"",wt:208,cls:"Senior",age:22.4,pts:13.0,reb:10.3,ast:3.7,blk:1.2,stl:0.7,pts36:14.7,reb36:11.7,ast36:4.2,blk36:1.3,stl36:0.8,ts:0.576,usg:21.1,obpm:3.7,dbpm:5.8,bpm:9.4},
+    {pick:37,team:"Miami Heat",abbr:"mia",player:"Ryan Conwell",pos:"SG",college:"Louisville",ht:"6'3.25\"",wt:215,cls:"Senior",age:22.0,pts:18.8,reb:4.8,ast:2.7,blk:0.2,stl:1.1,pts36:21.9,reb36:5.6,ast36:3.1,blk36:0.2,stl36:1.3,ts:0.566,usg:29.5,obpm:5.1,dbpm:2.2,bpm:7.3},
+    {pick:38,team:"Indiana Pacers",abbr:"ind",player:"Braden Smith",pos:"PG",college:"Purdue",ht:"5'11.5\"",wt:167,cls:"Senior",age:22.9,pts:14.3,reb:3.5,ast:8.8,blk:0.2,stl:1.7,pts36:14.9,reb36:3.7,ast36:9.2,blk36:0.2,stl36:1.8,ts:0.551,usg:24.0,obpm:6.8,dbpm:3.0,bpm:9.8},
+    {pick:39,team:"New York Knicks",abbr:"ny",player:"Jack Kayil",pos:"PG",college:"Alba Berlin",ht:"6'4.75\"",wt:189,cls:"International",age:20.4,pts:12.2,reb:3.0,ast:3.6,blk:0.2,stl:1.0,pts36:20.5,reb36:5.1,ast36:6.0,blk36:0.3,stl36:1.7,ts:0.529,usg:29.1,obpm:null,dbpm:null,bpm:null},
+    {pick:40,team:"Boston Celtics",abbr:"bos",player:"Dillon Mitchell",pos:"SF",college:"St. John's",ht:"6'8\"",wt:202,cls:"Senior",age:22.7,pts:8.3,reb:7.0,ast:3.0,blk:0.7,stl:1.3,pts36:10.7,reb36:9.0,ast36:3.8,blk36:0.9,stl36:1.6,ts:0.555,usg:14.5,obpm:3.9,dbpm:5.3,bpm:9.3},
+    {pick:41,team:"Oklahoma City Thunder",abbr:"okc",player:"Otega Oweh",pos:"SG",college:"Kentucky",ht:"6'5.5\"",wt:216,cls:"Senior",age:23.0,pts:18.6,reb:4.8,ast:2.7,blk:0.3,stl:1.8,pts36:20.5,reb36:5.3,ast36:2.9,blk36:0.3,stl36:2.0,ts:0.554,usg:28.4,obpm:4.0,dbpm:3.4,bpm:7.4},
+    {pick:42,team:"San Antonio Spurs",abbr:"sas",player:"Ja'Kobi Gillespie",pos:"PG",college:"Tennessee",ht:"6'1\"",wt:182,cls:"Senior",age:22.3,pts:18.4,reb:2.8,ast:5.4,blk:0.2,stl:2.1,pts36:19.1,reb36:2.9,ast36:5.6,blk36:0.2,stl36:2.2,ts:0.538,usg:26.9,obpm:6.4,dbpm:4.5,bpm:10.9},
+    {pick:43,team:"Brooklyn Nets",abbr:"bkn",player:"Tyler Bilodeau",pos:"PF",college:"UCLA",ht:"6'8.5\"",wt:228,cls:"Senior",age:22.2,pts:17.6,reb:5.6,ast:1.1,blk:0.4,stl:0.5,pts36:21.1,reb36:6.7,ast36:1.3,blk36:0.4,stl36:0.6,ts:0.656,usg:25.8,obpm:7.5,dbpm:1.4,bpm:8.9},
+    {pick:44,team:"San Antonio Spurs",abbr:"sas",player:"Maliq Brown",pos:"PF",college:"Duke",ht:"6'9.25\"",wt:217,cls:"Senior",age:22.6,pts:4.9,reb:5.2,ast:1.6,blk:0.6,stl:1.8,pts36:8.8,reb36:9.2,ast36:2.9,blk36:1.1,stl36:3.2,ts:0.634,usg:12.7,obpm:2.6,dbpm:8.9,bpm:11.6},
+    {pick:45,team:"Sacramento Kings",abbr:"sac",player:"Emanuel Sharp",pos:"SG",college:"Houston",ht:"6'4\"",wt:208,cls:"Senior",age:22.3,pts:15.5,reb:3.0,ast:1.7,blk:0.1,stl:1.2,pts36:18.9,reb36:3.6,ast36:2.1,blk36:0.1,stl36:1.5,ts:0.582,usg:25.0,obpm:5.9,dbpm:4.8,bpm:10.7},
+    {pick:46,team:"Washington Wizards",abbr:"was",player:"Felix Okpara",pos:"C",college:"Tennessee",ht:"6'11.25\"",wt:237,cls:"Senior",age:22.2,pts:8.0,reb:6.3,ast:0.5,blk:1.5,stl:0.4,pts36:10.7,reb36:8.5,ast36:0.7,blk36:2.0,stl36:0.6,ts:0.617,usg:13.4,obpm:1.8,dbpm:3.6,bpm:5.5},
+    {pick:47,team:"New York Knicks",abbr:"ny",player:"Tyler Nickel",pos:"SG",college:"Vanderbilt",ht:"6'7.25\"",wt:217,cls:"Senior",age:22.8,pts:13.5,reb:3.3,ast:1.2,blk:0.5,stl:0.8,pts36:15.9,reb36:3.8,ast36:1.4,blk36:0.6,stl36:0.9,ts:0.617,usg:18.9,obpm:6.0,dbpm:1.4,bpm:7.5},
+    {pick:48,team:"Dallas Mavericks",abbr:"dal",player:"Tobi Lawal",pos:"PF",college:"Virginia Tech",ht:"6'8.5\"",wt:214,cls:"Senior",age:23.1,pts:12.3,reb:8.5,ast:0.6,blk:1.1,stl:0.3,pts36:15.2,reb36:10.5,ast36:0.8,blk36:1.4,stl36:0.4,ts:0.635,usg:20.0,obpm:2.3,dbpm:1.6,bpm:3.9},
+    {pick:49,team:"Denver Nuggets",abbr:"den",player:"Bryce Hopkins",pos:"SF",college:"St. John's",ht:"6'7.25\"",wt:219,cls:"Senior",age:23.8,pts:13.6,reb:6.2,ast:1.9,blk:0.3,stl:1.1,pts36:17.0,reb36:7.8,ast36:2.4,blk36:0.3,stl36:1.4,ts:0.558,usg:22.4,obpm:5.0,dbpm:3.5,bpm:8.5},
+    {pick:50,team:"Toronto Raptors",abbr:"tor",player:"Jaden Bradley",pos:"PG",college:"Arizona",ht:"6'3.75\"",wt:205,cls:"Senior",age:22.8,pts:13.3,reb:3.4,ast:4.4,blk:0.1,stl:1.4,pts36:15.6,reb36:4.0,ast36:5.1,blk36:0.1,stl36:1.7,ts:0.568,usg:20.9,obpm:3.7,dbpm:5.3,bpm:9.0},
+    {pick:51,team:"Orlando Magic",abbr:"orl",player:"Izaiyah Nelson",pos:"PF/C",college:"South Florida",ht:"6'9.5\"",wt:219,cls:"Senior",age:22.7,pts:15.9,reb:9.6,ast:1.2,blk:1.4,stl:1.6,pts36:20.9,reb36:12.6,ast36:1.6,blk36:1.9,stl36:2.2,ts:0.612,usg:23.7,obpm:5.9,dbpm:3.3,bpm:9.2},
+    {pick:52,team:"Atlanta Hawks",abbr:"atl",player:"Henri Veesaar",pos:"C",college:"North Carolina",ht:"7'0.5\"",wt:227,cls:"Junior",age:22.2,pts:17.0,reb:8.7,ast:2.1,blk:1.2,stl:0.6,pts36:19.5,reb36:10.0,ast36:2.4,blk36:1.4,stl36:0.7,ts:0.664,usg:23.3,obpm:7.0,dbpm:3.8,bpm:10.7},
+    {pick:53,team:"Detroit Pistons",abbr:"det",player:"Ugonna Onyenso",pos:"C",college:"Virginia",ht:"7'0.25\"",wt:237,cls:"Senior",age:21.7,pts:6.5,reb:4.9,ast:0.6,blk:2.9,stl:0.6,pts36:12.6,reb36:9.5,ast36:1.1,blk36:5.7,stl36:1.2,ts:0.616,usg:15.5,obpm:4.7,dbpm:7.6,bpm:12.2},
+    {pick:54,team:"Golden State Warriors",abbr:"gs",player:"Lajae Jones",pos:"SG/SF",college:"Florida State",ht:"6'7\"",wt:220,cls:"Senior",age:22.1,pts:12.7,reb:5.7,ast:1.1,blk:1.0,stl:1.2,pts36:15.5,reb36:7.0,ast36:1.4,blk36:1.2,stl36:1.5,ts:0.556,usg:20.3,obpm:2.9,dbpm:2.2,bpm:5.1},
+    {pick:55,team:"LA Clippers",abbr:"lac",player:"Nick Martinelli",pos:"SF",college:"Northwestern",ht:"6'7.75\"",wt:224,cls:"Senior",age:22.2,pts:23.0,reb:6.2,ast:2.0,blk:0.4,stl:0.8,pts36:23.3,reb36:6.3,ast36:2.0,blk36:0.4,stl36:0.8,ts:0.602,usg:31.1,obpm:8.0,dbpm:0.6,bpm:8.6},
+    {pick:56,team:"Dallas Mavericks",abbr:"dal",player:"Vsevolod Ishchenko",pos:"SF",college:"Lokomotiv Kuban",ht:"6'8\"",wt:218,cls:"International",age:21.4,pts:8.7,reb:4.6,ast:2.0,blk:0.7,stl:1.3,pts36:13.2,reb36:7.0,ast36:3.1,blk36:1.0,stl36:2.0,ts:0.632,usg:16.2,obpm:null,dbpm:null,bpm:null},
+    {pick:57,team:"LA Clippers",abbr:"lac",player:"Narcisse Ngoy",pos:"C",college:"Poitiers",ht:"7'0\"",wt:235,cls:"International",age:21.9,pts:9.7,reb:11.5,ast:1.2,blk:2.4,stl:0.5,pts36:14.3,reb36:16.8,ast36:1.8,blk36:3.6,stl36:0.8,ts:0.656,usg:16.8,obpm:null,dbpm:null,bpm:null},
+    {pick:58,team:"New Orleans Pelicans",abbr:"no",player:"Jaron Pierre Jr.",pos:"SG",college:"SMU",ht:"6'5\"",wt:210,cls:"Senior",age:23.9,pts:17.6,reb:4.9,ast:2.1,blk:0.4,stl:1.0,pts36:19.1,reb36:5.3,ast36:2.3,blk36:0.5,stl36:1.1,ts:0.567,usg:25.4,obpm:4.1,dbpm:0.9,bpm:5.0}
   ]
 };
+
+let draftStatView='perGame';
+let draftSort={col:null,asc:true};
+const STAT_VIEWS={
+  perGame:{labels:['PTS','REB','AST','BLK','STL'],keys:['pts','reb','ast','blk','stl']},
+  per36:{labels:['PTS','REB','AST','BLK','STL'],keys:['pts36','reb36','ast36','blk36','stl36']},
+  advanced:{labels:['TS%','USG','OBPM','DBPM','BPM'],keys:['ts','usg','obpm','dbpm','bpm']}
+};
+const STAT_QUAL={pts:[15,20,25],reb:[3,6,10],ast:[2,4,7],blk:[0.3,0.8,1.5],stl:[0.5,1,1.8],pts36:[15,20,25],reb36:[3,6,10],ast36:[2,4,7],blk36:[0.3,0.8,1.5],stl36:[0.5,1,1.8],ts:[0.5,0.55,0.62],usg:[15,22,30],obpm:[0,3,7],dbpm:[0,2,5],bpm:[0,5,12]};
+const DRAFT_YEARS=['2026','2025','2024','2023','2022','2021','2020','2019','2018','2017','2016','2015','2014','2013','2012','2011','2010','2009','2008','2007','2006','2005','2004'];
+
+function fmtStat(key,val){
+  if(val==null)return '-';
+  if(key==='ts')return val.toFixed(3);
+  if(typeof val==='number')return val%1===0?val.toString():val.toFixed(1);
+  return val;
+}
+
+function statQuality(key,val){
+  if(val==null)return 'dim';
+  const t=STAT_QUAL[key];
+  if(!t)return '';
+  if(val>=t[2])return 'q-great';
+  if(val>=t[1])return 'q-good';
+  if(val<=t[0])return 'q-terrible';
+  return '';
+}
 
 function renderDraft(){
   const container=document.getElementById('draftTableContainer');
   if(!container)return;
-  const yearSelect=document.getElementById('draftYear');
-  const year=yearSelect?yearSelect.value:'2025';
+  const yearEl=document.getElementById('draftYear');
+  const year=yearEl?yearEl.value:'2026';
   const data=NBA_DRAFT_DATA[year];
   if(!data||!data.length){
     container.innerHTML='<div class="scoreboard-empty"><i class="fas fa-user-graduate"></i> No draft data for '+year+'</div>';
     return;
   }
-  let html='<div class="draft-round-label"><i class="fas fa-star"></i> Round 1 — '+year+' NBA Draft</div>';
-  data.forEach((p,i)=>{
-    const numCls=i<5?' top5':i<14?' lottery':'';
-    const compHtml=p.comp?'<div class="draft-comp"><i class="fas fa-user-friends"></i> '+p.comp+'</div>':'';
-    html+='<div class="draft-pick-row" onclick="this.querySelector(\'.draft-expand-weakness\').classList.toggle(\'visible\')">'+
-      '<div class="draft-pick-num'+numCls+'">'+(i+1)+'</div>'+
-      '<div class="draft-team-cell">'+teamLogoHTML(p.team.split(' ')[0],22)+'<span class="draft-team-name">'+p.team+'</span></div>'+
-      '<div class="draft-player-cell"><img class="draft-player-headshot" src="" alt="" onerror="this.style.display=\'none\'"><div class="draft-player-info"><div class="draft-player-name">'+p.player+'</div><div class="draft-player-college">'+p.college+'</div></div></div>'+
-      '<div class="draft-pos">'+p.pos+'</div>'+
-      '<div class="draft-stat-col"><strong>'+p.age+'</strong><span class="draft-stat-label">Age</span></div>'+
-      '<div class="draft-stat-col"><strong>'+p.ht+'</strong><span class="draft-stat-label">Ht</span></div>'+
-      '<div class="draft-stat-col"><strong>'+p.wt+'</strong><span class="draft-stat-label">Wt</span></div>'+
-      '<div class="draft-stat-col">'+compHtml+'</div>'+
-      '</div>';
+  const view=draftStatView;
+  const {labels,keys}=STAT_VIEWS[view];
+  let sorted=[...data];
+  if(draftSort.col){
+    sorted.sort((a,b)=>{
+      const av=a[draftSort.col]!=null?a[draftSort.col]:-9999;
+      const bv=b[draftSort.col]!=null?b[draftSort.col]:-9999;
+      return draftSort.asc?av-bv:bv-av;
+    });
+  }
+  let html='<div class="draft-header-row"><div></div><div class="draft-team-hdr" style="text-align:left;font-size:7px">Team</div><div>Player</div><div class="draft-ht-hdr" style="text-align:center">Ht</div><div class="draft-wt-hdr" style="text-align:center">Wt</div><div class="draft-cls-hdr" style="text-align:center">Class</div><div class="draft-age-hdr" style="text-align:center">Age</div>';
+  labels.forEach((l,i)=>{
+    const k=keys[i];
+    const active=draftSort.col===k?' active':'';
+    const arrow=draftSort.col===k?(draftSort.asc?'▲':'▼'):'';
+    html+='<div class="draft-stat-hdr'+active+'" data-stat="'+k+'" onclick="sortDraft(\''+k+'\')">'+l+'<span class="draft-hdr-arrow"> '+arrow+'</span></div>';
+  });
+  html+='</div>';
+  [1,2].forEach(r=>{
+    const rPicks=sorted.filter(p=>(p.pick<=30?1:2)===r);
+    if(!rPicks.length)return;
+    html+='<div class="draft-round-label">Round '+r+'</div>';
+    rPicks.forEach(p=>{
+      const numCls=p.pick<=5?' top5':p.pick<=14?' lottery':'';
+    const meta=p.pos+(p.college?' <em>|</em> '+p.college:'');
+    const logoUrl='http://d2uki2uvp6v3wr.cloudfront.net/nba/'+p.abbr+'.svg';
+    html+='<div class="draft-pick-row">'+
+      '<div class="draft-pick-num'+numCls+'">'+p.pick+'</div>'+
+      '<div class="draft-team-col"><img src="'+logoUrl+'" alt="" onerror="this.style.display=\'none\'"><span class="draft-team-name" title="'+p.team+'">'+p.team.split(' ').pop()+'</span></div>'+
+      '<div class="draft-player-cell" data-player="'+p.player.replace(/'/g,'&#39;')+'" data-team="'+p.team.replace(/'/g,'&#39;')+'" data-pick="'+p.pick+'" onmouseenter="showDraftTip(this)" onmouseleave="hideDraftTip()"><div class="draft-player-name">'+p.player+'</div><div class="draft-player-meta">'+meta+'</div></div>'+
+      '<div class="draft-stat-col draft-ht-col">'+p.ht+'</div>'+
+      '<div class="draft-stat-col draft-wt-col">'+p.wt+'</div>'+
+      '<div class="draft-stat-col draft-cls-col"><span class="draft-stat-sub">'+p.cls+'</span></div>'+
+      '<div class="draft-stat-col draft-age-col">'+(typeof p.age==='number'?p.age.toFixed(1):p.age)+'</div>';
+    keys.forEach(k=>{
+      const q=statQuality(k,p[k]);
+      html+='<div class="draft-stat-col '+q+'">'+fmtStat(k,p[k])+'</div>';
+    });
+    html+='</div>';
+    });
   });
   container.innerHTML=html;
 }
 
+function showDraftTip(el){
+  const tip=document.getElementById('draftTooltip');
+  if(!tip)return;
+  const player=el.dataset.player;
+  const team=el.dataset.team;
+  const pick=el.dataset.pick;
+  const yearEl=document.getElementById('draftYear');
+  const year=yearEl?yearEl.value:'2026';
+  const data=NBA_DRAFT_DATA[year];
+  if(!data)return;
+  const p=data.find(d=>d.pick==pick);
+  if(!p)return;
+  const view=draftStatView;
+  const {labels,keys}=STAT_VIEWS[view];
+  let statsHtml='';
+  keys.forEach((k,i)=>{
+    const v=p[k];
+    const q=statQuality(k,v);
+    statsHtml+='<div class="tip-stat"><span class="tip-label">'+labels[i]+'</span><span class="tip-value '+q+'">'+(v==null?'-':fmtStat(k,v))+'</span></div>';
+  });
+  tip.innerHTML='<div class="tip-name">'+player+'</div><div class="tip-team">'+team+' \u2022 Pick #'+pick+'</div><div class="tip-stats">'+statsHtml+'</div>';
+  const rect=el.getBoundingClientRect();
+  const tRect=tip.getBoundingClientRect();
+  let left=rect.left+rect.width/2-tRect.width/2;
+  let top=rect.top-tRect.height-10;
+  if(left<4)left=4;
+  if(left+tRect.width>window.innerWidth-4)left=window.innerWidth-tRect.width-4;
+  if(top<4){top=rect.bottom+10;}
+  tip.style.left=left+'px';
+  tip.style.top=top+'px';
+  tip.classList.add('visible');
+}
+
+function hideDraftTip(){
+  const tip=document.getElementById('draftTooltip');
+  if(tip)tip.classList.remove('visible');
+}
+
 function initDraft(){
-  const yearSelect=document.getElementById('draftYear');
-  if(!yearSelect)return;
-  const years=Object.keys(NBA_DRAFT_DATA).sort((a,b)=>parseInt(b)-parseInt(a));
-  yearSelect.innerHTML=years.map(y=>'<option value="'+y+'">'+y+'</option>').join('');
-  yearSelect.addEventListener('change',renderDraft);
+  const yearEl=document.getElementById('draftYear');
+  if(!yearEl)return;
+  const curYear='2026';
+  yearEl.innerHTML=DRAFT_YEARS.map(y=>'<option value="'+y+'"'+(y===curYear?' selected':'')+'>'+y+'</option>').join('');
+  yearEl.addEventListener('change',function(){renderDraft();});
+  const tog=document.getElementById('draftStatToggle');
+  if(tog){
+    tog.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        tog.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        draftStatView=this.dataset.view;
+        draftSort={col:null,asc:true};
+        renderDraft();
+      });
+    });
+  }
+  if(!document.getElementById('draftTooltip')){
+    const tip=document.createElement('div');
+    tip.id='draftTooltip';
+    document.body.appendChild(tip);
+  }
+  renderDraft();
+}
+
+function sortDraft(col){
+  if(draftSort.col===col)draftSort.asc=!draftSort.asc;
+  else{draftSort.col=col;draftSort.asc=false;}
   renderDraft();
 }
 
