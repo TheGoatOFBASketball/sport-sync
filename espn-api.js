@@ -9,7 +9,7 @@ const ESPN_WEB = 'https://site.web.api.espn.com/apis';
 const ESPN_CORE = 'https://sports.core.api.espn.com/v3';
 
 // ═══ TEAM LOGOS CACHE ═══
-const TeamLogos = {
+window.TeamLogos = {
   nba: {},
   nfl: {},
   mlb: {},
@@ -31,9 +31,10 @@ const TeamLogos = {
 
   async loadSport(sport) {
     try {
-      const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
-      const response = await fetch(`${ESPN_BASE}/sports/${config.sport}/${config.league}/teams`);
-      const data = await response.json();
+      // Use the shared API surface (which goes through the local proxy
+      // when available) instead of a raw direct fetch, so the CORS fix
+      // applies here too.
+      const data = await getESPN_Teams(sport);
       
       if (data?.sports?.[0]?.leagues?.[0]?.teams) {
         data.sports[0].leagues[0].teams.forEach(t => {
@@ -132,7 +133,7 @@ const ESPN_SPORTS = {
 };
 
 // ═══ TheSportsDB API (Free - themoviedb.org) ═══
-const THESPORTSDB_KEY = '1'; // Public free key
+const THESPORTSDB_KEY = '3'; // Upgraded from deprecated key '1'
 const THESPORTSDB_BASE = 'https://www.thesportsdb.com/api/v1/json';
 
 const THE_SPORTS_DB = {
@@ -145,9 +146,13 @@ const THE_SPORTS_DB = {
   lookupTable: (id) => `${THESPORTSDB_BASE}/lookuptable.php?id=${id}`
 };
 
-// ═══ BallDonLie API (Free - balldontlie.io) ═══
-const BALLDONLIE_BASE = 'https://api.balldontlie.io/v1';
-const BALLDONLIE_KEY = 'demo'; // Free tier
+// ═══ BallDontLie API (balldontlie.io) ═══
+// NOTE: As of 2025 the public API at api.balldontlie.io returned 404.
+// The service moved to balldontlie.io/v1 with API-key-only access.
+// Keeping this as a dead-man's-switch — returns null without a real key.
+// Set localStorage key 'BALLDONLIE_KEY' to a valid key to re-enable.
+const BALLDONLIE_BASE = 'https://balldontlie.io/api/v1';
+const BALLDONLIE_KEY = 'demo'; // Deprecated — requires real API key
 
 // ═══ Generic Fetch Helper ═══
 async function fetchJSON(url, options = {}) {
@@ -180,17 +185,61 @@ async function getESPN_News(sport = 'nba', limit = 20) {
 
 async function getESPN_Teams(sport = 'nba') {
   const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
+  // Try local katana_server proxy first (no CORS, single-origin hop). Fall
+  // back to direct ESPN if the local server isn't running.
+  try {
+    const local = await fetchJSON(`http://localhost:8000/katana/espn/teams?sport=${config.sport}&league=${config.league}`);
+    if (local && !local.error) return local;
+  } catch (_) { /* fall through to direct */ }
   return await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/teams`);
 }
 
 async function getESPN_TeamSchedule(teamId, sport = 'nba') {
   const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
+  // Try local katana_server proxy first (no CORS). Fall back to direct ESPN.
+  try {
+    const local = await fetchJSON(`http://localhost:8000/katana/espn/teams/${teamId}/schedule?sport=${config.sport}&league=${config.league}`);
+    if (local && !local.error) return local;
+  } catch (_) { /* fall through to direct */ }
   return await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/teams/${teamId}/schedule`);
 }
 
 async function getESPN_Standings(sport = 'nba') {
   const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
-  return await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/standings`);
+  // ESPN changed the standings endpoint to return minimal redirects, fall back
+  try {
+    const data = await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/standings`);
+    if (data?.children?.length > 0) return parseESPN_Standings(data);
+  } catch (_) {}
+  // Return standings via TheSportsDB if available
+  try {
+    const leagueIdMapping = { nba: '4387', nfl: '4391', mlb: '4424', nhl: '4380', epl: '4328' };
+    const lid = leagueIdMapping[sport];
+    if (lid) {
+      const tsdb = await getSportsDB_Standings(lid);
+      if (tsdb?.length > 0) return tsdb;
+    }
+  } catch (_) {}
+  return [];
+}
+
+async function getSportsDB_Standings(leagueId) {
+  const data = await fetchJSON(`${THESPORTSDB_BASE}/3/lookuptable.php?id=${leagueId}`);
+  if (!data?.table) return [];
+  return data.table.map((t, idx) => ({
+    rank: idx + 1,
+    name: t.name,
+    abbr: t.teambadge ? '' : '',
+    wins: t.Played ? t.W : '',
+    losses: t.L,
+    pct: '',
+    gb: '',
+    played: t.Played,
+    goalsfor: t.goalsfor,
+    goalsagainst: t.goalsagainst,
+    goaldifference: t.GoalDifference,
+    points: t.Total
+  }));
 }
 
 async function getESPN_Rankings(sport = 'ncaaf') {
@@ -245,6 +294,128 @@ async function getESPN_AllNews() {
     } catch (e) {}
   }
   return results;
+}
+
+// ═══ HOOPS RUMORS (NBA trade / rumor news via RSS) ═══
+// Source: https://www.hoopsrumors.com/feed (WordPress RSS 2.0).
+// CORS hoopsrumors.com does not send Access-Control-Allow-Origin for
+// browser fetches, so we proxy through rss2json to obtain a JSON
+// envelope with status / feed / items[] that the browser can read.
+const HOOPS_RUMORS_RSS = 'https://www.hoopsrumors.com/feed';
+const HOOPS_RUMORS_PROXY = 'https://api.rss2json.com/v1/api.json';
+
+// 5-minute localStorage TTL cache so rss2json isn't hammered on every nav
+const HOOPS_RUMORS_CACHE_KEY = 'sportsync:hoopsrumors:news:v1';
+const HOOPS_RUMORS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+// Fallback proxy: the project's own katana_server (FastAPI on :8000),
+// which fetches the RSS server-side and returns a rss2json-shape envelope.
+// Used when rss2json 4xx/5xx's (free-tier throttling) so the user still
+// sees Hoops Rumors content.
+const HOOPS_RUMORS_FALLBACK_PROXY = 'http://localhost:8000/katana/hoopsrumors/feed';
+
+function readHoopsRumorsCache(limit) {
+  try {
+    const raw = localStorage.getItem(HOOPS_RUMORS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.limit !== limit) return null;
+    if (Date.now() - (parsed.cachedAt || 0) > HOOPS_RUMORS_CACHE_TTL_MS) return null;
+    return parsed.data;
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeHoopsRumorsCache(limit, data) {
+  try {
+    localStorage.setItem(HOOPS_RUMORS_CACHE_KEY, JSON.stringify({
+      cachedAt: Date.now(),
+      limit,
+      data
+    }));
+  } catch (_) { /* quota / private mode — ignore */ }
+}
+
+async function getHoopsRumorsNews(limit = 15) {
+  const cached = readHoopsRumorsCache(limit);
+  if (cached) {
+    if (typeof console !== 'undefined' && console.debug) console.debug('[hoopsrumors] cache hit');
+    return cached;
+  }
+  // Primary: katana_server (local, no throttling, <1s). Try this first
+  // because rss2json's free tier hangs the connection on throttle instead
+  // of returning a fast 4xx, which would otherwise block the UI on the
+  // "Loading news..." placeholder indefinitely.
+  try {
+    const url = `${HOOPS_RUMORS_FALLBACK_PROXY}?limit=${limit}`;
+    const data = await fetchJSON(url);
+    if (data && data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
+      writeHoopsRumorsCache(limit, data);
+      return data;
+    }
+    throw new Error('katana_server non-ok or empty items');
+  } catch (primaryErr) {
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('[hoopsrumors] local katana_server failed, trying rss2json',
+        primaryErr?.message || primaryErr);
+    }
+  }
+  // Fallback: rss2json (clean JSON envelope). Used when the local server
+  // isn't running so the user still gets Hoops Rumors content from the cloud.
+  try {
+    const url = `${HOOPS_RUMORS_PROXY}?rss_url=${encodeURIComponent(HOOPS_RUMORS_RSS)}&count=${limit}`;
+    const data = await fetchJSON(url);
+    if (data && data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
+      writeHoopsRumorsCache(limit, data);
+      return data;
+    }
+    throw new Error('rss2json non-ok or empty items');
+  } catch (fallbackErr) {
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('[hoopsrumors] both proxies failed', fallbackErr?.message || fallbackErr);
+    }
+    throw fallbackErr;
+  }
+}
+
+function parseHoopsRumorsNews(data, limit = 15) {
+  if (!data || data.status !== 'ok' || !Array.isArray(data.items)) return [];
+  // Drop premium-tier / subscriber-chat items (e.g. "Hoops Rumors Front
+  // Office Subscriber Chat"). Public readers shouldn't see them.
+  return data.items
+    .filter(item => !/subscriber chat|front office subscriber/i.test(item.title || ''))
+    .slice(0, limit).map((item, idx) => {
+    // Image priority: thumbnail → enclosure.link → first <img> in content
+    let image = '';
+    if (typeof item.thumbnail === 'string' && item.thumbnail) {
+      image = item.thumbnail;
+    } else if (item.enclosure && item.enclosure.link) {
+      image = item.enclosure.link;
+    } else {
+      const html = item.content || item.description || '';
+      const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (m) image = m[1];
+    }
+    const textDesc = (item.description || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220);
+    return {
+      id: item.guid || item.link || `hoops-${idx}`,
+      headline: item.title || 'Untitled',
+      description: textDesc,
+      author: item.author || 'Hoops Rumors',
+      image,
+      thumbnail: image,
+      link: item.link,
+      published: item.pubDate || '',
+      related: [],
+      tags: ['NBA', 'Hoops Rumors'],
+      type: 'hoopsrumors',
+    };
+  });
 }
 
 // ═══ BALLDONLIE FUNCTIONS ═══
@@ -449,15 +620,16 @@ function parseESPN_GameSummary(data) {
   };
 }
 
-// ═══ BLEACHER REPORT HELPER ═══
+// ═══ BLEACHER REPORT ═══
+// Note: B/R does not have a public API. Use ESPN API for sports data instead.
 const BLEACHER_REPORT = {
   baseUrl: 'https://bleacherreport.com',
-  apiUrl: 'http://bleacherreport.com/api',
   
-  async getTrending(sport = 'nba') {
-    // Note: B/R doesn't have a public API, these are RSS/embed alternatives
+  getTrending(sport = 'nba') {
+    // Returns curated links to B/R sections since no API is available
     return [
-      { title: 'Latest from Bleacher Report', url: `${this.baseUrl}/${sport}` }
+      { title: 'Latest from Bleacher Report', url: `${this.baseUrl}/${sport}` },
+      { title: 'Latest from ESPN', url: `https://www.espn.com/${sport}/` }
     ];
   }
 };
@@ -487,6 +659,15 @@ window.SPORTSYNC_API = {
       standings: parseESPN_Standings,
       rankings: parseESPN_Rankings,
       summary: parseESPN_GameSummary
+    }
+  },
+  
+  // Hoops Rumors — NBA news (RSS via rss2json CORS proxy)
+  HOOPS_RUMORS: {
+    BASE: HOOPS_RUMORS_RSS,
+    getNews: getHoopsRumorsNews,
+    parse: {
+      news: parseHoopsRumorsNews
     }
   },
   

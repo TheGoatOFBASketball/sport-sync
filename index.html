@@ -1,300 +1,636 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPORTSYNC | Live Scores, News & Your Teams</title>
-  <meta name="description" content="SportSync: The ultimate personalized sports dashboard. Get real-time scores, breaking news, power rankings, and tailored updates for your favorite teams.">
-  <meta name="theme-color" content="#0a0a0e">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
-  <link rel="stylesheet" href="index.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#0a0a0e" />
+        <title>SportSync | Live Sports Dashboard</title>
+        <meta
+            name="description"
+            content="Your personalized sports command center. Real-time NBA, NFL, MLB, NHL scores, breaking news, and live sync for your teams."
+        />
 
-  <a href="#center" class="skip-link">Skip to main content</a>
+        <meta property="og:title" content="SportSync | Live Sports Dashboard" />
+        <meta
+            property="og:description"
+            content="Real-time scores, news, and live sync for all your favorite teams."
+        />
 
-  <!-- TOP NAV -->
-  <header id="topbar">
-    <div class="tb-main">
-      <div class="tb-inner">
-        <button class="ham" id="ham" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
-        <a href="#" class="logo">⚡ SPORTSYNC</a>
-        <nav class="snav" id="snav">
-          <a href="#" class="sn active" data-s="all">Home</a>
-        <a href="nba.html" class="sn">🏀 NBA</a>
-          <a href="march-madness.html" class="sn">🏆 March Madness</a>
-          <a href="nba-draft.html" class="sn">📊 NBA Draft</a>
-        <a href="nfl-draft.html" class="sn">🏈 NFL Draft</a>
-        <a href="#" class="sn" data-s="mlb">⚾ MLB</a>
-        <a href="#" class="sn" data-s="nhl">🏒 NHL</a>
-        <a href="#" class="sn" data-s="soccer">⚽ Soccer</a>
-        </nav>
-        <div class="tb-right">
-          <div class="search-p">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="search" id="site-search" placeholder="Search teams, players..." aria-label="Search">
-          </div>
-          <button class="tbi" id="theme-toggle" aria-label="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
-          <button class="tbi" aria-label="Notifications"><i class="fa-solid fa-bell"></i><span class="ndot"></span></button>
-          <div class="uchip" role="button" tabindex="0" aria-label="User profile">
-            <img src="https://i.pravatar.cc/150?img=33" alt="User avatar">
-            <span id="username">KD3Point</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ESPN-Style Scoreboard Ticker -->
-    <div class="scoreboard" id="scoreboard" aria-label="Live scores ticker">
-      <div class="ticker-wrapper" id="ticker-wrapper"></div>
-      <div class="ticker-wrapper" id="ticker-wrapper-duplicate"></div>
-    </div>
-  </header>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            media="print"
+            onload="this.media = 'all'"
+        />
+        <noscript
+            ><link
+                rel="stylesheet"
+                href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        /></noscript>
 
-  <script>window.SPORTSYNC_SSE_URL = '/live-updates';</script>
-  <!-- MAIN LAYOUT -->
-  <div class="shell">
+        <link rel="stylesheet" href="index.css" />
+    </head>
+    <body>
+        <a href="#main" class="skip-link">Skip to main content</a>
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="side-l" id="side-l">
-      <div class="sl-s">
-        <h4>⭐ My Teams</h4>
-        <div class="sidebar-teams" id="sidebar-teams">
-          <div class="st-item"><span class="st-color" style="background:#f58426"></span><span>NY Knicks</span></div>
-          <div class="st-item"><span class="st-color" style="background:#003087"></span><span>NY Yankees</span></div>
-          <div class="st-item"><span class="st-color" style="background:#0b2265"></span><span>NY Giants</span></div>
-          <div class="st-item"><span class="st-color" style="background:#003da5"></span><span>Duke BBall</span></div>
-        </div>
-      </div>
-      <div class="sl-s">
-        <h4>📢 Alerts</h4>
-        <div class="alert"><i class="fa-solid fa-bell" style="color:var(--orange)"></i> Knicks vs Celtics — Thu 7:30 PM</div>
-        <div class="alert"><i class="fa-solid fa-calendar" style="color:var(--green)"></i> March Madness starts Thu</div>
-      </div>
-      <section class="sl-s">
-        <h4>🏀 Basketball</h4>
-        <a href="nba.html" class="sl-lk"><i class="fa-solid fa-fire"></i> 🏀 NBA Hub</a>
-        <a href="march-madness.html" class="sl-lk"><i class="fa-solid fa-trophy"></i> 🏆 March Madness</a>
-        <a href="nba-draft.html" class="sl-lk"><i class="fa-solid fa-fire"></i> 📊 NBA Draft</a>
-        <a href="https://espn.com/nba" target="_blank" class="sl-lk"><i class="fa-solid fa-basketball"></i> NBA on ESPN</a>
-        <a href="https://espn.com/womens-college-basketball" target="_blank" class="sl-lk"><i class="fa-solid fa-basketball"></i> WNBA</a>
-        <a href="https://espn.com/mens-college-basketball" target="_blank" class="sl-lk"><i class="fa-solid fa-basketball"></i> NCAA Men's</a>
-        <a href="https://espn.com/womens-college-basketball" target="_blank" class="sl-lk"><i class="fa-solid fa-basketball"></i> NCAA Women's</a>
-      </section>
-      <section class="sl-s">
-        <h4>🏈 Football</h4>
-        <a href="nfl-draft.html" class="sl-lk"><i class="fa-solid fa-fire"></i> 🏈 NFL Draft</a>
-        <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-fire"></i> NFL Hub</a>
-        <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-fire"></i> NFL Hub</a>
-        <a href="https://espn.com/nfl" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> NFL</a>
-        <a href="https://espn.com/college-football" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> NCAA Football</a>
-        <a href="https://espn.com/xfl" target="_blank" class="sl-lk"><i class="fa-solid fa-football"></i> XFL</a>
-      </section>
-      <section class="sl-s">
-        <h4>⚾ Baseball</h4>
-        <a href="https://espn.com/mlb" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> MLB</a>
-        <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-trophy"></i> MLB Hub</a>
-        <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-trophy"></i> MLB Hub</a>
-        <a href="https://espn.com/wbc" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> WBC</a>
-        <a href="https://espn.com/college-baseball" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> NCAA Baseball</a>
-      </section>
-      <section class="sl-s">
-        <h4>⚽ Soccer</h4>
-        <a href="https://espn.com/soccer" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> All Soccer</a>
-        <a href="https://espn.com/soccer/teams/england" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> Premier League</a>
-        <a href="https://espn.com/soccer/teams/spain" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> La Liga</a>
-        <a href="https://espn.com/soccer/usa.1" target="_blank" class="sl-lk"><i class="fa-solid fa-soccer"></i> MLS</a>
-        <a href="soccer-hub.html" class="sl-lk"><i class="fa-solid fa-soccer"></i> Soccer Hub</a>
-      </section>
-      <section class="sl-s">
-        <h4>📺 Watch</h4>
-        <a href="https://espn.com/watch" target="_blank" class="sl-lk"><i class="fa-solid fa-tv"></i> ESPN Live</a>
-        <a href="https://espn.com/plus" target="_blank" class="sl-lk"><i class="fa-solid fa-star"></i> ESPN+</a>
-        <a href="https://www.nba.com/watch" target="_blank" class="sl-lk"><i class="fa-solid fa-basketball"></i> NBA Pass</a>
-        <a href="https://www.mlb.com/tv" target="_blank" class="sl-lk"><i class="fa-solid fa-baseball"></i> MLB.tv</a>
-      </section>
-      <section class="sl-s">
-        <h4>📰 Sports Sites</h4>
-        <a href="https://espn.com" target="_blank" class="sl-lk"><i class="fa-solid fa-globe"></i> ESPN</a>
-        <a href="https://bleacherreport.com" target="_blank" class="sl-lk"><i class="fa-solid fa-fire"></i> Bleacher Report</a>
-        <a href="https://www.cbssports.com" target="_blank" class="sl-lk"><i class="fa-solid fa-globe"></i> CBS Sports</a>
-        <a href="https://www.yahoo.com/sports" target="_blank" class="sl-lk"><i class="fa-solid fa-globe"></i> Yahoo Sports</a>
-        <a href="https://theathletic.com" target="_blank" class="sl-lk"><i class="fa-solid fa-globe"></i> The Athletic</a>
-      </section>
-    </aside>
+        <!-- ═══ ONBOARDING / TEAM SELECTION ═══ -->
+        <div class="onboarding-overlay" id="onboardingOverlay">
+            <div class="onboarding-container">
+                <div class="onboarding-header">
+                    <div class="onboarding-logo">
+                        <span class="logo-icon">⚡</span>
+                        <span class="logo-text">SPORTSYNC</span>
+                    </div>
+                    <h1>Pick Your Teams</h1>
+                    <p>
+                        Select your favorite teams to personalize your sports
+                        dashboard
+                    </p>
+                </div>
 
-    <!-- HUB OVERVIEW LINK (sidebar) -->
-    <section class="sl-s" id="hub-overview-link">
-      <h4>🏁 Hubs Overview</h4>
-      <a href="nfl-hub.html" class="sl-lk"><i class="fa-solid fa-football"></i> NFL Hub</a>
-      <a href="mlb-hub.html" class="sl-lk"><i class="fa-solid fa-baseball-ball"></i> MLB Hub</a>
-      <a href="soccer-hub.html" class="sl-lk"><i class="fa-solid fa-futbol"></i> Soccer Hub</a>
-      <a href="nhl-hub.html" class="sl-lk"><i class="fa-solid fa-hockey-puck"></i> NHL Hub</a>
-    </section>
-    <!-- HUB OVERVIEW LINK END -->
+                <div class="onboarding-search">
+                    <i class="fa-solid fa-search"></i>
+                    <input
+                        type="text"
+                        id="onboardingSearch"
+                        placeholder="Search teams..."
+                    />
+                </div>
 
-    <!-- CENTER CONTENT -->
-    <main id="center">
+                <div class="onboarding-league-tabs">
+                    <button class="onboarding-tab active" data-league="all">
+                        <i class="fa-solid fa-globe"></i> All
+                    </button>
+                    <button class="onboarding-tab" data-league="nba">
+                        <i class="fa-solid fa-basketball"></i> NBA
+                    </button>
+                    <button class="onboarding-tab" data-league="nfl">
+                        <i class="fa-solid fa-football"></i> NFL
+                    </button>
+                    <button class="onboarding-tab" data-league="mlb">
+                        <i class="fa-solid fa-baseball"></i> MLB
+                    </button>
+                    <button class="onboarding-tab" data-league="nhl">
+                        <i class="fa-solid fa-hockey-puck"></i> NHL
+                    </button>
+                    <button class="onboarding-tab" data-league="wnba">
+                        <i class="fa-solid fa-star"></i> WNBA
+                    </button>
+                    <button class="onboarding-tab" data-league="ncaa">
+                        <i class="fa-solid fa-graduation-cap"></i> NCAA
+                    </button>
+                </div>
 
-      <!-- Greeting -->
-      <header class="sec" id="sec-hero">
-        <h1 class="greet" id="greet">GOOD EVENING, KD3POINT</h1>
-        <p class="greet-sub" id="greet-sub">March Madness • NFL Draft • MLB Opening Day</p>
-      </header>
+                <div class="onboarding-teams-grid" id="onboardingTeamsGrid">
+                    <!-- Teams loaded dynamically -->
+                </div>
 
-      
-      
-      <!-- Hero Feature -->
-      <section class="sec" id="sec-featured">
-        <article class="hero-card" id="hero-card">
-          <div class="hc-overlay"></div>
-          <div class="hc-body">
-            <div class="hc-fire"><i class="fa-solid fa-fire"></i> TRENDING</div>
-            <div class="hc-title">2026 NFL Mock Draft: Complete Round 1 Projections</div>
-            <div class="hc-sub">Field Yates releases first round predictions after free agency frenzy. Chiefs, Eagles make bold moves.</div>
-            <div class="hc-meta">
-              <span class="hc-time">ESPN</span>
-              <a href="https://espn.com/nfl/draft" class="hc-watch" target="_blank"><i class="fa-solid fa-external-link"></i> Read More</a>
+                <div class="onboarding-footer">
+                    <div class="selected-count">
+                        <span id="selectedCount">0</span> teams selected
+                    </div>
+                    <button class="continue-btn" id="continueBtn" disabled>
+                        Continue to Dashboard
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
             </div>
-          </div>
-        </article>
-      </section>
-
-      <!-- My Teams -->
-      <section class="sec" id="sec-myteams">
-        <div class="sec-bar"><h2><span class="ab"></span> MY TEAMS</h2></div>
-        <div class="mt-row" id="mt-row"></div>
-      </section>
-
-      <!-- Quick Stats -->
-      <section class="sec">
-        <div class="quick-stats">
-          <div class="qs-card"><span class="qs-num">7</span><span class="qs-label">Games Live</span></div>
-          <div class="qs-card"><span class="qs-num">24</span><span class="qs-label">Headlines</span></div>
-          <div class="qs-card"><span class="qs-num">5</span><span class="qs-label">Your Teams</span></div>
-          <div class="qs-card"><span class="qs-num">12</span><span class="qs-label">Tracked</span></div>
         </div>
-      </section>
 
-      <!-- All Scores Grid -->
-      <section class="sec" id="sec-all-scores">
-        <div class="sec-bar"><h2><span class="ab"></span> LIVE SCORES</h2><span class="espn-badge">ESPN</span></div>
-        <div class="sports-grid" id="all-scores">
-          <!-- Populated by JS -->
+        <!-- ═══ HEADER ═══ -->
+        <header class="header" id="header">
+            <div class="header-top">
+                <div class="header-inner">
+                    <button
+                        class="menu-btn"
+                        id="menuBtn"
+                        aria-label="Open menu"
+                        aria-expanded="false"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <a
+                        href="index.html"
+                        class="brand"
+                        aria-label="SportSync home"
+                    >
+                        <span class="brand-icon" aria-label="SportSync logo">
+                            <img
+                                src="assets/logo_espn.svg"
+                                alt="SportSync ESPN-style logo"
+                                class="brand-logo"
+                                id="brandLogo"
+                                style="height: 36px"
+                            />
+                        </span>
+                        <span
+                            class="brand-text"
+                            id="brandText"
+                            style="display: none"
+                            >SPORTSYNC</span
+                        >
+                        <span
+                            class="brand-mode-label"
+                            aria-label="Logo style selector"
+                            style="
+                                margin-left: 8px;
+                                font-size: 12px;
+                                opacity: 0.8;
+                            "
+                            >Logo</span
+                        >
+                        <select
+                            id="logoMode"
+                            aria-label="Logo style"
+                            title="Logo style"
+                            style="
+                                height: 28px;
+                                vertical-align: middle;
+                                margin-left: 6px;
+                                border-radius: 6px;
+                                border: 1px solid #444;
+                                background: #111;
+                                color: #fff;
+                                outline: none;
+                                padding: 0 6px;
+                            "
+                        >
+                            <option value="angle_speed">Angle Speed</option>
+                            <option value="badge">Badge</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="espn" selected>ESPN Style</option>
+                        </select>
+                    </a>
+
+                    <nav class="main-nav" id="mainNav">
+                        <a href="index.html" class="nav-link active">Home</a>
+                        <a href="nba.html" class="nav-link">NBA</a>
+                        <a href="nfl-hub.html" class="nav-link">NFL</a>
+                        <a href="mlb-hub.html" class="nav-link">MLB</a>
+                        <a href="nhl-hub.html" class="nav-link">NHL</a>
+                        <a href="soccer-hub.html" class="nav-link">Soccer</a>
+                        <a
+                            href="https://www.espn.com/mens-college-basketball/scoreboard"
+                            target="_blank"
+                            class="nav-link external-link"
+                            >NCAA BB</a
+                        >
+                    </nav>
+
+                    <div class="header-actions">
+                        <button
+                            class="action-btn"
+                            id="themeToggle"
+                            aria-label="Toggle theme"
+                        >
+                            <i class="fa-solid fa-circle-half-stroke"></i>
+                        </button>
+                        <button
+                            class="action-btn"
+                            id="heroThemeToggle"
+                            aria-label="Toggle hero theme"
+                            title="Toggle hero theme"
+                        >
+                            <i class="fa-solid fa-paint-brush"></i>
+                        </button>
+                        <label
+                            class="action-btn"
+                            style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 6px;
+                                padding: 6px 8px;
+                            "
+                        >
+                            <input
+                                id="externalDataToggle"
+                                type="checkbox"
+                                aria-label="Enable external data"
+                            />
+                            <span
+                                style="
+                                    font-size: 12px;
+                                    color: #fff;
+                                    opacity: 0.9;
+                                "
+                                >Katana</span
+                            >
+                        </label>
+                        <button
+                            class="action-btn notif-btn"
+                            aria-label="Notifications"
+                        >
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="notif-badge"></span>
+                        </button>
+                        <button class="user-btn" aria-label="User profile">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                                style="
+                                    width: 24px;
+                                    height: 24px;
+                                    color: var(--accent);
+                                "
+                            >
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Score Ticker -->
+            <div class="score-ticker" id="scoreTicker" aria-label="Live scores">
+                <div class="ticker-track" id="tickerTrack"></div>
+            </div>
+        </header>
+
+        <!-- ═══ MAIN LAYOUT ═══ -->
+        <div class="layout" id="layout">
+            <!-- Left Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-header-row">
+                        <h3 class="sidebar-title">My Teams</h3>
+                        <button
+                            class="add-team-btn"
+                            id="editTeamsBtn"
+                            title="Edit Teams"
+                        >
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                    <div class="team-list" id="teamList"></div>
+                    <button class="repick-btn" id="repickTeamsBtn">
+                        <i class="fa-solid fa-sync-alt"></i> Pick Different
+                        Teams
+                    </button>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Quick Links</h3>
+                    <nav class="sidebar-nav">
+                        <a href="nba.html" class="sidebar-link"
+                            ><i class="fa-solid fa-fire"></i> NBA Hub</a
+                        >
+                        <a href="march-madness.html" class="sidebar-link"
+                            ><i class="fa-solid fa-trophy"></i> March Madness</a
+                        >
+                        <a href="nfl-hub.html" class="sidebar-link"
+                            ><i class="fa-solid fa-chart-simple"></i> NFL Hub</a
+                        >
+                        <a href="mlb-hub.html" class="sidebar-link"
+                            ><i class="fa-solid fa-baseball-ball"></i> MLB
+                            Hub</a
+                        >
+                        <a href="wnba-hub.html" class="sidebar-link"
+                            ><i class="fa-solid fa-basketball"></i> WNBA Hub</a
+                        >
+                        <a href="nhl-hub.html" class="sidebar-link"
+                            ><i class="fa-solid fa-hockey-puck"></i> NHL Hub</a
+                        >
+                        <a href="soccer-hub.html" class="sidebar-link"
+                            ><i class="fa-solid fa-futbol"></i> Soccer Hub</a
+                        >
+                    </nav>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Watch</h3>
+                    <nav class="sidebar-nav">
+                        <a
+                            href="https://www.espn.com/watch/"
+                            target="_blank"
+                            class="sidebar-link"
+                            ><i class="fa-solid fa-play"></i> ESPN+ Watch</a
+                        >
+                        <a
+                            href="https://plus.espn.com"
+                            target="_blank"
+                            class="sidebar-link"
+                            ><i class="fa-solid fa-star"></i> ESPN+</a
+                        >
+                        <a
+                            href="https://www.nba.com/league-pass"
+                            target="_blank"
+                            class="sidebar-link"
+                            ><i class="fa-solid fa-basketball"></i> NBA League
+                            Pass</a
+                        >
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Add Team Modal -->
+            <div class="modal-overlay" id="teamModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fa-solid fa-star"></i> Add Team</h2>
+                        <button class="modal-close" id="closeTeamModal">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input
+                            type="text"
+                            class="team-search-input"
+                            id="teamSearchInput"
+                            placeholder="Search teams..."
+                        />
+                        <div class="league-filter-tabs">
+                            <button class="filter-tab active" data-league="nba">
+                                NBA
+                            </button>
+                            <button class="filter-tab" data-league="nfl">
+                                NFL
+                            </button>
+                            <button class="filter-tab" data-league="mlb">
+                                MLB
+                            </button>
+                            <button class="filter-tab" data-league="nhl">
+                                NHL
+                            </button>
+                            <button class="filter-tab" data-league="wnba">
+                                WNBA
+                            </button>
+                            <button class="filter-tab" data-league="ncaa">
+                                NCAA
+                            </button>
+                        </div>
+                        <div
+                            class="team-results-list"
+                            id="teamResultsList"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="main" id="main">
+                <!-- ═══ HERO SECTION ═══ -->
+                <section class="hero" id="hero">
+                    <div class="hero-bg"></div>
+                    <div class="hero-overlay"></div>
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <span class="badge-icon"
+                                ><i class="fa-solid fa-fire"></i
+                            ></span>
+                            <span id="heroBadgeText">Loading...</span>
+                        </div>
+                        <h1 class="hero-title" id="heroTitle">
+                            SportSync Live
+                        </h1>
+                        <p class="hero-subtitle" id="heroSubtitle">
+                            Real-time scores, news, and standings across all
+                            your favorite leagues.
+                        </p>
+                        <!-- Hero live strip: mini live scores + bracket teaser -->
+                        <div class="hero-live-strip" id="heroLiveStrip">
+                            <div
+                                class="mini-scores"
+                                aria-label="Live scores on hero"
+                            >
+                                <span class="mini-team">Loading</span>
+                                <span class="mini-score">...</span>
+                                <span class="mini-time">Live</span>
+                            </div>
+                            <div class="bracket-teaser" aria-label="Live games">
+                                <span class="bracket-title">Today's Games</span>
+                                <span class="bracket-match"
+                                    >Loading scores...</span
+                                >
+                            </div>
+                        </div>
+                        <div class="hero-actions">
+                            <a
+                                href="https://www.espn.com/mens-college-basketball/"
+                                target="_blank"
+                                class="btn btn-primary"
+                            >
+                                Full Coverage
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                            <a
+                                href="https://www.espn.com/watch/"
+                                target="_blank"
+                                class="btn btn-secondary"
+                            >
+                                <i class="fa-solid fa-play"></i> Watch Live
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══ LIVE SCORES ═══ -->
+                <section class="section" id="scores">
+                    <div class="section-header">
+                        <div class="section-title-group">
+                            <h2 class="section-title">
+                                <span class="title-bar"></span>
+                                LIVE SCORES
+                            </h2>
+                            <span class="live-badge"
+                                ><span class="pulse"></span> 2 LIVE</span
+                            >
+                        </div>
+                    </div>
+                    <div class="scores-grid" id="scoresGrid"></div>
+                </section>
+
+                <!-- ═══ MY TEAMS ═══ -->
+                <section class="section" id="my-teams">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="title-bar"></span>
+                            YOUR TEAMS
+                        </h2>
+                    </div>
+                    <div class="teams-carousel" id="teamsCarousel"></div>
+                </section>
+
+                <!-- ═══ PHOTO GALLERY ═══ -->
+                <section class="section photo-gallery-section">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="title-bar"></span>
+                            TOP HEADLINES
+                        </h2>
+                    </div>
+                    <div class="photo-gallery" id="photoGallery">
+                        <div class="photo-card photo-large">
+                            <div class="photo-overlay">
+                                <span class="photo-tag">NBA</span>
+                                <h4 class="photo-caption">
+                                    Playoff Race: Standings Tighten Across Both
+                                    Conferences
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="photo-card">
+                            <div class="photo-overlay">
+                                <span class="photo-tag">MLB</span>
+                                <h4 class="photo-caption">
+                                    Opening Day Preview: Teams to Watch in 2026
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="photo-card">
+                            <div class="photo-overlay">
+                                <span class="photo-tag">NHL</span>
+                                <h4 class="photo-caption">
+                                    Stanley Cup Playoff Push Intensifies
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══ NEWS ═══ -->
+                <section class="section" id="news">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="title-bar"></span>
+                            LATEST NEWS
+                        </h2>
+                        <div class="news-tabs" id="newsTabs">
+                            <button class="tab-btn active" data-tab="all">
+                                For You
+                            </button>
+                            <button class="tab-btn" data-tab="nba">NBA</button>
+                            <button class="tab-btn" data-tab="nfl">NFL</button>
+                            <button class="tab-btn" data-tab="mlb">MLB</button>
+                        </div>
+                    </div>
+                    <div class="news-grid" id="newsGrid"></div>
+                </section>
+
+                <!-- ═══ SCHEDULE ═══ -->
+                <section class="section" id="schedule">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="title-bar"></span>
+                            UPCOMING
+                        </h2>
+                        <div class="filter-tabs" id="filterTabs">
+                            <button class="tab-btn active" data-filter="all">
+                                All
+                            </button>
+                            <button class="tab-btn" data-filter="today">
+                                Today
+                            </button>
+                            <button class="tab-btn" data-filter="tomorrow">
+                                Tomorrow
+                            </button>
+                        </div>
+                    </div>
+                    <div class="schedule-list" id="scheduleList"></div>
+                </section>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="sidebar-right" id="sidebarRight">
+                <!-- Standings Hub Widget -->
+                <div class="widget standings-widget">
+                    <div class="widget-header">
+                        <h3 class="widget-title">
+                            <i class="fa-solid fa-ranking-star"></i> Standings
+                            Hub
+                        </h3>
+                    </div>
+                    <div class="standings-tabs">
+                        <button class="standings-tab active" data-league="nba">
+                            NBA
+                        </button>
+                        <button class="standings-tab" data-league="nhl">
+                            NHL
+                        </button>
+                        <button class="standings-tab" data-league="mlb">
+                            MLB
+                        </button>
+                        <button class="standings-tab" data-league="nfl">
+                            NFL
+                        </button>
+                        <button class="standings-tab" data-league="wnba">
+                            WNBA
+                        </button>
+                    </div>
+                    <div class="standings-list" id="standingsList"></div>
+                </div>
+
+                <!-- Trending Widget -->
+                <div class="widget">
+                    <h3 class="widget-title">
+                        <i class="fa-solid fa-fire"></i> Trending
+                    </h3>
+                    <div class="trending-list" id="trendingList"></div>
+                </div>
+
+                <!-- Quick Poll Widget -->
+                <div class="widget poll-widget">
+                    <h3 class="widget-title">
+                        <i class="fa-solid fa-chart-pie"></i> Quick Poll
+                    </h3>
+                    <p class="poll-q">Who wins the 2026 NBA Championship?</p>
+                    <div class="poll-options" id="pollOptions">
+                        <button class="poll-btn" data-vote="celtics">
+                            <span>🟢 Celtics</span
+                            ><span class="poll-pct">28%</span>
+                        </button>
+                        <button class="poll-btn" data-vote="nuggets">
+                            <span>🔵 Nuggets</span
+                            ><span class="poll-pct">24%</span>
+                        </button>
+                        <button class="poll-btn" data-vote="thunder">
+                            <span>🟠 Thunder</span
+                            ><span class="poll-pct">22%</span>
+                        </button>
+                        <button class="poll-btn" data-vote="lakers">
+                            <span>💜 Lakers</span
+                            ><span class="poll-pct">26%</span>
+                        </button>
+                    </div>
+                    <p class="poll-meta">24,891 votes</p>
+                </div>
+            </aside>
         </div>
-      </section>
 
-      <!-- Scores & Schedule -->
-      <section class="sec" id="sec-sched">
-        <div class="sec-bar"><h2><span class="ab"></span> SCHEDULE</h2><span class="sec-r">All Times ET</span></div>
-        <nav class="sched-f" id="sched-f">
-          <button class="sf active" data-f="all">All</button>
-          <button class="sf" data-f="live">🔴 Live</button>
-          <button class="sf" data-f="upcoming">Upcoming</button>
-          <button class="sf" data-f="today">Today</button>
+        <!-- Mobile Bottom Nav -->
+        <nav class="mobile-nav" id="mobileNav">
+            <a href="#hero" class="mobile-nav-item active"
+                ><i class="fa-solid fa-house"></i><span>Home</span></a
+            >
+            <a href="#scores" class="mobile-nav-item"
+                ><i class="fa-solid fa-trophy"></i><span>Scores</span></a
+            >
+            <a href="#news" class="mobile-nav-item"
+                ><i class="fa-solid fa-newspaper"></i><span>News</span></a
+            >
+            <a href="#my-teams" class="mobile-nav-item"
+                ><i class="fa-solid fa-star"></i><span>Teams</span></a
+            >
         </nav>
-        <div class="sched-list" id="sched-list">
-          <div class="sched-item">Today 7:00 PM MLB: Yankees vs Rays</div>
-          <div class="sched-item">Today 7:30 PM NBA: Knicks vs Celtics</div>
-          <div class="sched-item">Today 9:00 PM NFL: Cowboys vs Giants</div>
-        </div>
-      </section>
 
-      <!-- News Feed -->
-      <section class="sec" id="sec-feed">
-        <div class="sec-bar"><h2><span class="ab"></span> NEWS & UPDATES</h2></div>
-        <nav class="feed-tabs" id="feed-tabs">
-          <button class="ft active" data-f="foryou">For You</button>
-          <button class="ft" data-f="fire">🔥 Hot</button>
-          <button class="ft" data-f="nba">🏀 NBA</button>
-          <button class="ft" data-f="nfl">🏈 NFL</button>
-          <button class="ft" data-f="mlb">⚾ MLB</button>
-          <button class="ft" data-f="nhl">🏒 NHL</button>
-          <button class="ft" data-f="soccer">⚽ Soccer</button>
-        </nav>
-        <div class="feed-list" id="feed-list"></div>
-      </section>
+        <!-- Mobile Overlay -->
+        <div class="overlay" id="overlay"></div>
 
-      <!-- Top Players (moved to NBA dashboard) -->
-
-    </main>
-
-    
-
-    <!-- RIGHT SIDEBAR -->
-    <aside class="side-r" id="side-r">
-      <div class="sr-s">
-        <h4>📊 STANDINGS</h4>
-        <select id="standings-league" class="stand-sel" aria-label="Select league">
-          <option value="nba">NBA</option>
-          <option value="nfl">NFL</option>
-          <option value="mlb">MLB</option>
-          <option value="nhl">NHL</option>
-        </select>
-        <div class="standings" id="standings"></div>
-      </div>
-      
-      <div class="sr-s">
-        <h4>🔥 TRENDING</h4>
-        <div class="trending" id="trending"></div>
-      </div>
-
-      <div class="sr-s">
-        <h4>📅 UPCOMING</h4>
-        <div class="upcoming-list">
-          <div class="upcoming-item"><span>Thu</span><span>March Madness</span></div>
-          <div class="upcoming-item"><span>Thu</span><span>Knicks vs Celtics</span></div>
-          <div class="upcoming-item"><span>Fri</span><span>Warriors vs Clippers</span></div>
-          <div class="upcoming-item"><span>Mar 27</span><span>Yankees Opening Day</span></div>
-          <div class="upcoming-item"><span>Apr 23</span><span>NFL Draft</span></div>
-        </div>
-      </div>
-    </aside>
-
-  </div>
-
-  <!-- Mobile Bottom Nav -->
-  <nav class="bot-nav" id="bot-nav">
-    <a href="#topbar" class="bn active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="#sec-feed" class="bn"><i class="fa-solid fa-newspaper"></i><span>News</span></a>
-    <a href="#sec-myteams" class="bn"><i class="fa-solid fa-star"></i><span>Teams</span></a>
-    <a href="#sec-sched" class="bn"><i class="fa-solid fa-trophy"></i><span>Scores</span></a>
-  </nav>
-
-  <!-- Footer -->
-  <footer id="footer">
-    <div class="fi">
-      <span class="fb">⚡ SPORTSYNC</span>
-      <p>Your personalized sports dashboard</p>
-      <div class="footer-links">
-        <a href="https://espn.com" target="_blank">ESPN</a>
-        <a href="https://bleacherreport.com" target="_blank">Bleacher Report</a>
-        <a href="https://ppv.to" target="_blank">ppv.to</a>
-      </div>
-      <p class="footer-copy">© 2026 SportSync • Data powered by ESPN API</p>
-    </div>
-  </footer>
-
-  <!-- Mobile Overlay -->
-  <div class="mob-ov" id="mob-ov"></div>
-
-  <!-- Loading Indicator -->
-  <div id="loading-indicator">
-    <i class="fa-solid fa-spinner"></i>
-    <span>Loading ESPN Data...</span>
-  </div>
-
-  <!-- ESPN API -->
-  <script src="espn-api.js" defer></script>
-  <!-- The sports live data stack -->
-  <script src="thesportsdb-api.js" defer></script>
-  <script src="multisource-livescores.js" defer></script>
-  <script src="live-sync-sse.js" defer></script>
-  <!-- TheSportsDB API wrapper (live data) -->
-  <script src="thesportsdb-api.js" defer></script>
-  <script src="main.js" defer></script>
-</body>
+        <script src="espn-api.js" defer></script>
+        <script src="thesportsdb-api.js" defer></script>
+        <script src="main.js" defer></script>
+    </body>
 </html>

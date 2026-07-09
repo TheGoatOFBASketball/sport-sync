@@ -4,7 +4,7 @@
 
 (function(){
   const BASE = 'https://www.thesportsdb.com/api/v1/json/';
-  const DEFAULT_KEY = '1';
+  const DEFAULT_KEY = '3'; // Upgraded from deprecated key '1'
   const cfg = {
     key: (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('TSDB_API_KEY')) || DEFAULT_KEY,
     logoCache: {},

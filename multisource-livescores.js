@@ -7,7 +7,15 @@
   const APS_KEY = (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('APS_API_KEY')) || '';
   const API_SPORTS_BASE = 'https://v3.football.api-sports.io/';
   const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/';
-  const BALLDONLIT_BASE = 'https://www.balldontlie.io/api/v1/';
+  const BALLDONLIE_BASE = 'https://balldontlie.io/api/v1/';
+
+  // Backoff/scheduler state hoisted to the top so fetchWithBackoff() doesn't hit a
+  // TDZ ReferenceError on its first invocation. `lastUpdated` is declared here as
+  // well so assign-and-read in tick() doesn't leak a global.
+  const backoff = { apisports: 0, espn: 0, balldontlie: 0 };
+  const nextAttempt = { apisports: 0, espn: 0, balldontlie: 0 };
+  const MAX_BACKOFF = 5 * 60 * 1000; // 5 minutes
+  let lastUpdated = 0;
 
   function todayStr(){
     const d = new Date();
@@ -100,7 +108,7 @@
   async function fetchFromBalldontlie(){
     try{
       const date = todayStr();
-      const res = await fetch(`${BALLDONLIT_BASE}games?dates[]=${date}`);
+      const res = await fetch(`${BALLDONLIE_BASE}games?dates[]=${date}`);
       if(!res.ok) return [];
       const data = await res.json();
       const games = data?.data || [];
@@ -130,10 +138,9 @@
     return Array.from(map.values());
   }
 
-  // Simple exponential backoff scaffolding per source
-  const backoff = { apisports: 0, espn: 0, balldontlie: 0 };
-  const nextAttempt = { apisports: 0, espn: 0, balldontlie: 0 };
-  const MAX_BACKOFF = 5 * 60 * 1000; // 5 minutes
+  // backoff/nextAttempt/MAX_BACKOFF/lastUpdated were hoisted to the top of this IIFE
+  // so they exist before fetchWithBackoff() and tick() execute. Keeping the helper
+  // functions below since they're hoisted too.
   function now() { return Date.now(); }
   function logDiscrepancy(msg){
     if (typeof require === 'function') {
@@ -168,7 +175,7 @@
     const leagues = Object.values(TSDB_LEAGUE_IDS);
     const names = Object.keys(TSDB_LEAGUE_IDS);
     const promises = leagues.map((id, idx) =>
-      fetch(`https://www.thesportsdb.com/api/v1/json/1/eventsnextleague.php?id=${id}`)
+      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${id}`)
         .then(r => r.json().catch(() => null))
         .then(data => {
           const arr = data?.events || [];
@@ -198,11 +205,14 @@
   // ESPN schedule (as a secondary source) - best effort
   async function fetchFromESPNSchedule(){
     try {
-      if (!window?.API?.ESPN?.getScoreboard) return [];
-      const nfl = await API.ESPN.getScoreboard('nfl');
-      const mlb = await API.ESPN.getScoreboard('mlb');
-      const nba = await API.ESPN.getScoreboard('nba');
-      const nhl = await API.ESPN.getScoreboard('nhl');
+      // Real global exposed by espn-api.js is `window.SPORTSYNC_API`, not `window.API`.
+      // Resolve once and reuse so feature-detection and the actual calls agree.
+      const api = window.SPORTSYNC_API;
+      if (!api?.ESPN?.getScoreboard) return [];
+      const nfl = await api.ESPN.getScoreboard('nfl');
+      const mlb = await api.ESPN.getScoreboard('mlb');
+      const nba = await api.ESPN.getScoreboard('nba');
+      const nhl = await api.ESPN.getScoreboard('nhl');
       const datasets = [nfl, mlb, nba, nhl];
       const map = [];
       for (const ds of datasets) {

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:8000 https://site.api.espn.com https://site.web.api.espn.com https://sports.core.api.espn.com https://www.thesportsdb.com https://api.rss2json.com https://api.allorigins.win https://balldontlie.io https://v3.football.api-sports.io; frame-ancestors 'none'; base-uri 'self'">
   <title>NHL Hub | SPORTSYNC</title>
   <link rel="stylesheet" href="index.css" />
   <script src="espn-api.js" defer></script>
@@ -10,7 +11,14 @@
 </head>
 <body>
   <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
-  <main class="nba-page">
+  <main class="nba-page hub-content">
+    <section class="hub-hero" id="hub-hero-nhl" aria-label="NHL Hub Hero">
+      <div class="hub-hero-inner">
+        <h1 class="hub-hero-title">NHL Hub</h1>
+        <p class="hub-hero-subtitle">Live scores, standings, news, and schedule</p>
+      </div>
+      <div class="hub-hero-live" id="heroLiveStripNHL"></div>
+    </section>
     <section class="sec">
       <div class="nba-hero" style="padding:20px 24px; text-align:left;">
         <h1>NHL Hub</h1>
@@ -33,9 +41,10 @@
     </section>
   </main>
   <script>
-    (async function(){
+    function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+(async function(){
       try{
-        const nhlData = await API.ESPN.getScoreboard('nhl');
+        const nhlData = await SPORTSYNC_API.ESPN.getScoreboard('nhl');
         const games = nhlData?.events || [];
         const container = document.getElementById('nhl-live');
         if (container && games.length){
@@ -44,23 +53,23 @@
             const away = g.away?.abbr ?? g.away?.name ?? '';
             const hs = g.home?.score ?? g.home?.points ?? '';
             const as = g.away?.score ?? g.away?.points ?? '';
-            return `<div class="game-item live"><div class="game-teams"><span class="team-name">${away}</span></div><div class="game-score">${hs} - ${as}</div><div class="game-teams" style="justify-content:flex-end"><span class="team-name">${home}</span></div></div>`;
+            return `<div class="game-item live"><div class="game-teams"><span class="team-name">${esc(away)}</span></div><div class="game-score">${esc(hs)} - ${esc(as)}</div><div class="game-teams" style="justify-content:flex-end"><span class="team-name">${esc(home)}</span></div></div>`;
           }).join('');
         }
       } catch(e){ console.error(e); }
       const newsList = document.getElementById('nhl-news-list'); if (newsList) newsList.innerHTML = '<div>NHL: Headlines placeholder.</div>';
       // Standings (NHL)
       try {
-        const standings = await API.ESPN.getStandings('nhl');
+        const standings = await SPORTSYNC_API.ESPN.getStandings('nhl');
         const stand = document.getElementById('nhl-standings');
         if (stand && Array.isArray(standings)) {
           stand.innerHTML = standings.map(s => `
-            <div class="standings-row" aria-label="${s.name} standings">
-              <span class="rank">${s.rank}</span>
-              <span class="team-name">${s.name} <span class="team-abbr">${s.abbr || ''}</span></span>
-              <span class="stat">${s.wins}-${s.losses}</span>
-              <span class="stat">${s.gb ?? ''}</span>
-              <span class="stat">${s.pct ?? ''}</span>
+            <div class="standings-row" aria-label="${esc(s.name)} standings">
+              <span class="rank">${esc(s.rank)}</span>
+              <span class="team-name">${esc(s.name)} <span class="team-abbr">${esc(s.abbr || '')}</span></span>
+              <span class="stat">${esc(s.wins)}-${esc(s.losses)}</span>
+              <span class="stat">${esc(s.gb ?? '')}</span>
+              <span class="stat">${esc(s.pct ?? '')}</span>
             </div>`).join('');
         }
       } catch(_){ }
