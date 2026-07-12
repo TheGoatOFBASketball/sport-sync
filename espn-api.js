@@ -157,11 +157,14 @@ const BALLDONLIE_KEY = 'demo'; // Deprecated — requires real API key
 // ═══ Generic Fetch Helper ═══
 async function fetchJSON(url, options = {}) {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
     const headers = {
       'Accept': 'application/json',
       ...options.headers
     };
-    const res = await fetch(url, { ...options, headers });
+    const res = await fetch(url, { ...options, headers, signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
   } catch (e) {
@@ -451,10 +454,6 @@ const HOOPS_RUMORS_CACHE_KEY = 'sportsync:hoopsrumors:news:v1';
 const HOOPS_RUMORS_CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Fallback proxy: the project's own katana_server (FastAPI on :8000),
-// which fetches the RSS server-side and returns a rss2json-shape envelope.
-// Used when rss2json 4xx/5xx's (free-tier throttling) so the user still
-// sees Hoops Rumors content.
-const HOOPS_RUMORS_FALLBACK_PROXY = 'http://localhost:8000/katana/hoopsrumors/feed';
 
 function readHoopsRumorsCache(limit) {
   try {
@@ -484,30 +483,55 @@ async function getHoopsRumorsNews(limit = 15) {
   if (cached) {
     if (typeof console !== 'undefined' && console.debug) console.debug('[hoopsrumors] cache hit');
     return cached;
-  }
-  // Primary: katana_server (local, no throttling, <1s). Try this first
-  // because rss2json's free tier hangs the connection on throttle instead
-  // of returning a fast 4xx, which would otherwise block the UI on the
-  // "Loading news..." placeholder indefinitely.
-  try {
-    const url = `${HOOPS_RUMORS_FALLBACK_PROXY}?limit=${limit}`;
-    const data = await fetchJSON(url);
+  }  // Skip the host-pinned localhost:8000 attempt on deployed (non-loopback)
+    // pages — the browser resolves localhost to the visitor's own machine,
+    // the fetchJSON 2s AbortController waits for that connect-refused, and
+    // the "Loading news..." placeholder sits there. rss2json (next block)
+    // is reachable from any host, so just go straight to it. Local dev
+    // stays on the fast primary path.
+    // Skip the host-pinned localhost katana attempt ONLY when both:
+    //   (1) the proxy base URL still points at localhost/127.0.0.1
+    //       (no one overridden it via window.SPORTSYNC_PROXY_BASE / <meta>), AND
+    //   (2) this page is served from a non-loopback hostname (so localhost
+    //       would resolve to the visitor's own machine and the fetchJSON
+    //       2s AbortController would sit on a connect-refused).
+    // When EITHER side flips (local dev OR a user remote proxy override),
+    // the primary path runs so user intent is honored. The rss2json block
+    // below handles any case where the primary fails or is skipped.
+    // The .test() anchors on the host with a trailing boundary ([:/]|$)
+    // so substring matches like https://localhost-mirror.example.com do
+    // NOT trip the local-only branch.
+    const baseUrl = getProxyBaseUrl();
+    const proxyIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)([:/]|$)/i.test(baseUrl);
+    const pageIsRemote = typeof window !== 'undefined' && window.location && window.location.hostname &&
+      !['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+    if (!(proxyIsLocal && pageIsRemote)) {
+    // Primary: katana_server (local, no throttling, <1s). Try this first
+    // because rss2json's free tier hangs the connection on throttle instead
+    // of returning a fast 4xx, which would otherwise block the UI on the
+    // "Loading news..." placeholder indefinitely.
+    try {
+      const url = `${baseUrl}/katana/hoopsrumors/feed?limit=${limit}`;
+      const data = await fetchJSON(url);
     if (data && data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
       writeHoopsRumorsCache(limit, data);
       return data;
     }
     throw new Error('katana_server non-ok or empty items');
   } catch (primaryErr) {
-    if (typeof console !== 'undefined' && console.warn) {
-      console.warn('[hoopsrumors] local katana_server failed, trying rss2json',
+    if (typeof console !== 'undefined' && console.warn) {      console.warn('[hoopsrumors] local katana_server failed, trying rss2json',
         primaryErr?.message || primaryErr);
+    }
     }
   }
   // Fallback: rss2json (clean JSON envelope). Used when the local server
-  // isn't running so the user still gets Hoops Rumors content from the cloud.
-  try {
-    const url = `${HOOPS_RUMORS_PROXY}?rss_url=${encodeURIComponent(HOOPS_RUMORS_RSS)}&count=${limit}`;
-    const data = await fetchJSON(url);
+    // isn't running so the user still gets Hoops Rumors content from the cloud.
+    // NOTE: rss2json's free tier rejects the `count` query param with HTTP 422
+    // ("needs a valid api key"), so we deliberately omit it. Server-side
+    // response is sliced client-side via parseHoopsRumorsNews's `.slice(0, limit)`.
+    try {
+      const url = `${HOOPS_RUMORS_PROXY}?rss_url=${encodeURIComponent(HOOPS_RUMORS_RSS)}`;
+      const data = await fetchJSON(url);
     if (data && data.status === 'ok' && Array.isArray(data.items) && data.items.length) {
       writeHoopsRumorsCache(limit, data);
       return data;
