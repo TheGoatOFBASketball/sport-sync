@@ -19,10 +19,12 @@
             content="Real-time scores, news, and live sync for all your favorite teams."
         />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <!-- Bunny.net serves Bebas Neue + Inter via a single Cloudflare-fronted host,
+             so one preconnect warms both the CSS and the woff2 fetches.
+             (Drop-in replacement for Google Fonts; identical font-family names + weights.) -->
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap"
+            href="https://fonts.bunny.net/css?family=bebas-neue|inter:400,500,600,700,800&display=swap"
             rel="stylesheet"
         />
         <link

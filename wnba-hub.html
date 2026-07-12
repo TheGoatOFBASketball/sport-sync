@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://cdnjs.cloudflare.com; font-src 'self' https://fonts.bunny.net https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:8000 https://site.api.espn.com https://site.web.api.espn.com https://sports.core.api.espn.com https://www.thesportsdb.com https://api.rss2json.com https://api.allorigins.win https://balldontlie.io https://v3.football.api-sports.io; frame-ancestors 'none'; base-uri 'self'">
+  <title>WNBA Hub | SPORTSYNC</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="espn-api.js" defer></script>
+  <script src="thesportsdb-api.js" defer></script>
+</head>
+<body>
+  <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Back</a>
+  <main class="nba-page hub-content">
+    <section class="hub-hero" id="hub-hero-wnba" aria-label="WNBA Hub Hero">
+      <div class="hub-hero-inner">
+        <h1 class="hub-hero-title">WNBA Hub</h1>
+        <p class="hub-hero-subtitle">Live scores, standings, news, and schedule</p>
+      </div>
+      <div class="hub-hero-live" id="heroLiveStripWNBA"></div>
+    </section>
+
+    <section class="sec" id="live-scores">
+      <div class="nba-card-header"><h3><i class="fa-solid fa-basketball"></i> Live WNBA Scores</h3><span class="live-indicator"><span class="live-dot"></span> LIVE</span></div>
+      <div class="game-list" id="wnba-live" style="padding:12px;"></div>
+    </section>
+
+    <section class="sec" id="wnba-standings">
+      <div class="sec-bar"><h2><span class="ab"></span> Standings</h2></div>
+      <div class="standings" id="wnba-standings"></div>
+    </section>
+  </main>
+  <script src="main.js" defer></script>
+  <script>
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// WNBA Hub — init scores & standings
+  (async function(){
+    // Scores
+    try {
+      const data = await SPORTSYNC_API.ESPN.getScoreboard('wnba');
+      const el = document.getElementById('wnba-live');
+      if (el && data && data.events && data.events.length) {
+        el.innerHTML = data.events.map(ev => {
+          const home = ev.competitions[0].competitors.find(c=>c.homeAway==='home');
+          const away = ev.competitions[0].competitors.find(c=>c.homeAway==='away');
+          const st = ev.status.type.shortDetail || ev.status.type.detail || 'Scheduled';
+          return `<div class="game-card"><div class="game-meta"><span>${esc(st)}</span></div>
+            <div class="game-teams"><div class="game-team"><img src="${esc(away.team.logo)}" alt="${esc(away.team.abbreviation)}"><span>${esc(away.team.displayName)}</span><span class="score">${esc(away.score ?? '-')}</span></div>
+            <div class="game-team"><img src="${esc(home.team.logo)}" alt="${esc(home.team.abbreviation)}"><span>${esc(home.team.displayName)}</span><span class="score">${esc(home.score ?? '-')}</span></div></div></div>`;
+        }).join('');
+      } else if (el) { el.innerHTML = '<div class="empty-state">No WNBA games today</div>'; }
+    } catch(_){}
+    // Standings — fall back to TheSportsDB
+    try {
+      const data = await SPORTSYNC_API.ESPN.getStandings('wnba');
+      const el = document.getElementById('wnba-standings');
+      if (el && data && data.length) {
+        el.innerHTML = data.map(s =>
+          `<div class="standings-row"><span class="rank">${esc(s.rank)}</span><span class="team">${esc(s.name)}</span><span class="rec">${esc(s.wins)}-${esc(s.losses)}</span></div>`
+        ).join('');
+      } else if (el) {
+        // TheSportsDB fallback
+        const tsdb = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4392').then(r=>r.json()).catch(()=>null);
+        if (tsdb && tsdb.events && tsdb.events.length) {
+          el.innerHTML = `<div class="standings-info">WNBA standings will appear when the season is in progress. Check ESPN for current standings.</div>`;
+        } else {
+          el.innerHTML = '<div class="loading-placeholder">Standings unavailable — season may be off</div>';
+        }
+      }
+    } catch(_){}
+  })();
+  </script>
+</body>
+</html>

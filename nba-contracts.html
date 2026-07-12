@@ -1,0 +1,2424 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NBA Contracts & Salaries | SPORTSYNC</title>
+        <meta
+            name="description"
+            content="NBA player contracts, salaries, cap space, free agents, and max contracts — Spotrac-style NBA financial hub."
+        />
+        <meta name="theme-color" content="#0a0a10" />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>"
+        />
+        <link rel="stylesheet" href="index.css" />
+        <script src="espn-api.js" defer></script>
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link
+            href="https://fonts.bunny.net/css?family=oswald:400,500,600,700|roboto:400,500,700,900&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+
+        <style>
+            /* ── Base ── */
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            :root {
+                --sc-bg: #0d0d12;
+                --sc-surface: #14141c;
+                --sc-card: #1a1a26;
+                --sc-border: rgba(255, 255, 255, 0.08);
+                --sc-border2: rgba(255, 255, 255, 0.05);
+                --sc-text: #a8c4e8;
+                --sc-muted: #5a7a9e;
+                --sc-accent: #ff5722; /* Spotrac orange */
+                --sc-blue: #2979ff;
+                --sc-green: #00e676;
+                --sc-gold: #ffd740;
+                --sc-red: #ff1744;
+                --sc-purple: #7c4dff;
+                --sc-header-h: 52px;
+            }
+
+            body {
+                background: var(--sc-bg);
+                color: var(--sc-text);
+                font-family:
+                    "Roboto",
+                    -apple-system,
+                    sans-serif;
+                font-size: 14px;
+                line-height: 1.5;
+                min-height: 100vh;
+            }
+
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+            button {
+                cursor: pointer;
+                border: none;
+                background: none;
+                font-family: inherit;
+            }
+
+            /* ── Top nav bar ── */
+            .sc-topbar {
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                height: var(--sc-header-h);
+                background: #0b0b10;
+                border-bottom: 2px solid var(--sc-accent);
+                display: flex;
+                align-items: center;
+                padding: 0 20px;
+                gap: 16px;
+            }
+            .sc-topbar .back-link {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                color: var(--sc-muted);
+                font-size: 13px;
+                font-weight: 500;
+                transition: color 0.15s;
+            }
+            .sc-topbar .back-link:hover {
+                color: #fff;
+            }
+            .sc-topbar .page-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-left: 4px;
+            }
+            .sc-topbar .page-brand .pill {
+                background: var(--sc-accent);
+                color: #fff;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 1px;
+                padding: 3px 9px;
+                border-radius: 4px;
+                text-transform: uppercase;
+            }
+            .sc-topbar .page-title {
+                font-family: "Oswald", sans-serif;
+                font-size: 20px;
+                font-weight: 700;
+                color: #fff;
+                letter-spacing: 0.5px;
+            }
+            .sc-topbar .spacer {
+                flex: 1;
+            }
+            .sc-topbar .hub-link {
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--sc-muted);
+                padding: 5px 12px;
+                border-radius: 6px;
+                border: 1px solid var(--sc-border);
+                transition: all 0.15s;
+            }
+            .sc-topbar .hub-link:hover {
+                color: #fff;
+                border-color: rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            /* ── Season cap bar ── */
+            .cap-banner {
+                background: linear-gradient(
+                    135deg,
+                    #12121e 0%,
+                    #1a1228 50%,
+                    #12121e 100%
+                );
+                border-bottom: 1px solid var(--sc-border);
+                padding: 20px 24px;
+                display: flex;
+                gap: 0;
+                flex-wrap: wrap;
+                align-items: stretch;
+            }
+            .cap-stat {
+                flex: 1;
+                min-width: 140px;
+                padding: 12px 24px;
+                border-right: 1px solid var(--sc-border);
+            }
+            .cap-stat:last-child {
+                border-right: none;
+            }
+            .cap-stat-label {
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--sc-muted);
+                margin-bottom: 6px;
+            }
+            .cap-stat-value {
+                font-family: "Oswald", sans-serif;
+                font-size: 26px;
+                font-weight: 700;
+                color: #fff;
+                line-height: 1;
+            }
+            .cap-stat-value.green {
+                color: var(--sc-green);
+            }
+            .cap-stat-value.orange {
+                color: var(--sc-accent);
+            }
+            .cap-stat-value.gold {
+                color: var(--sc-gold);
+            }
+            .cap-stat-sub {
+                font-size: 11px;
+                color: var(--sc-muted);
+                margin-top: 4px;
+            }
+
+            /* ── Layout ── */
+            .sc-layout {
+                display: grid;
+                grid-template-columns: 240px 1fr;
+                gap: 0;
+                min-height: calc(100vh - var(--sc-header-h));
+            }
+            @media (max-width: 900px) {
+                .sc-layout {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* ── Left nav ── */
+            .sc-nav {
+                background: var(--sc-surface);
+                border-right: 1px solid var(--sc-border);
+                padding: 20px 0;
+                position: sticky;
+                top: var(--sc-header-h);
+                height: calc(100vh - var(--sc-header-h));
+                overflow-y: auto;
+            }
+            @media (max-width: 900px) {
+                .sc-nav {
+                    display: none;
+                }
+            }
+            .sc-nav-group {
+                margin-bottom: 24px;
+            }
+            .sc-nav-group-label {
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--sc-muted);
+                padding: 0 20px;
+                margin-bottom: 6px;
+            }
+            .sc-nav-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 9px 20px;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--sc-muted);
+                cursor: pointer;
+                transition: all 0.12s;
+                border-left: 3px solid transparent;
+            }
+            .sc-nav-item i {
+                font-size: 12px;
+                width: 14px;
+                text-align: center;
+            }
+            .sc-nav-item:hover {
+                background: rgba(255, 255, 255, 0.03);
+                color: #fff;
+            }
+            .sc-nav-item.active {
+                color: var(--sc-accent);
+                border-left-color: var(--sc-accent);
+                background: rgba(255, 87, 34, 0.06);
+                font-weight: 600;
+            }
+
+            /* ── Main content ── */
+            .sc-content {
+                padding: 24px;
+                display: flex;
+                flex-direction: column;
+                gap: 28px;
+            }
+
+            /* ── Section card ── */
+            .sc-card {
+                background: var(--sc-card);
+                border: 1px solid var(--sc-border);
+                border-radius: 10px;
+                overflow: hidden;
+            }
+            .sc-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 14px 20px;
+                background: #15151f;
+                border-bottom: 1px solid var(--sc-border);
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .sc-card-title {
+                font-family: "Oswald", sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .sc-card-title i {
+                color: var(--sc-accent);
+            }
+            .sc-card-meta {
+                font-size: 11px;
+                color: var(--sc-muted);
+            }
+
+            /* ── Toolbar (search + filters) ── */
+            .sc-toolbar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+                padding: 12px 20px;
+                border-bottom: 1px solid var(--sc-border2);
+                background: rgba(0, 0, 0, 0.15);
+            }
+            .sc-search {
+                position: relative;
+                flex: 1;
+                min-width: 180px;
+                max-width: 280px;
+            }
+            .sc-search i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--sc-muted);
+                font-size: 12px;
+            }
+            .sc-search input {
+                width: 100%;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--sc-border);
+                border-radius: 6px;
+                padding: 7px 10px 7px 30px;
+                font-size: 13px;
+                color: #fff;
+                font-family: inherit;
+                outline: none;
+                transition: border-color 0.15s;
+            }
+            .sc-search input:focus {
+                border-color: var(--sc-accent);
+            }
+            .sc-search input::placeholder {
+                color: var(--sc-muted);
+            }
+            .sc-filter-tabs {
+                display: flex;
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+            .sc-filter-tab {
+                padding: 5px 12px;
+                border-radius: 5px;
+                font-size: 12px;
+                font-weight: 600;
+                color: var(--sc-muted);
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid var(--sc-border);
+                transition: all 0.12s;
+            }
+            .sc-filter-tab:hover {
+                color: #fff;
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .sc-filter-tab.active {
+                background: var(--sc-accent);
+                border-color: var(--sc-accent);
+                color: #fff;
+            }
+            .sc-select {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid var(--sc-border);
+                border-radius: 6px;
+                padding: 6px 10px;
+                font-size: 12px;
+                color: var(--sc-text);
+                font-family: inherit;
+                outline: none;
+                cursor: pointer;
+            }
+            .sc-select:focus {
+                border-color: var(--sc-accent);
+            }
+
+            /* ── Salary table ── */
+            .sc-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .sc-table th {
+                padding: 10px 14px;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 1.2px;
+                text-transform: uppercase;
+                color: var(--sc-muted);
+                text-align: left;
+                background: #0f0f18;
+                border-bottom: 1px solid var(--sc-border);
+                white-space: nowrap;
+                cursor: pointer;
+                user-select: none;
+            }
+            .sc-table th:hover {
+                color: #fff;
+            }
+            .sc-table th.sort-asc::after {
+                content: " ▲";
+                font-size: 9px;
+            }
+            .sc-table th.sort-desc::after {
+                content: " ▼";
+                font-size: 9px;
+            }
+            .sc-table th.num,
+            .sc-table td.num {
+                text-align: right;
+            }
+            .sc-table td {
+                padding: 11px 14px;
+                border-bottom: 1px solid var(--sc-border2);
+                font-size: 13px;
+                vertical-align: middle;
+                white-space: nowrap;
+            }
+            .sc-table tr:last-child td {
+                border-bottom: none;
+            }
+            .sc-table tbody tr {
+                transition: background 0.1s;
+            }
+            .sc-table tbody tr:hover {
+                background: rgba(255, 255, 255, 0.03);
+            }
+            .sc-table tbody tr.highlighted {
+                background: rgba(255, 87, 34, 0.06);
+            }
+
+            /* player cell */
+            .player-cell {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .player-avatar-sm {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #2a2a38;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 13px;
+                color: var(--sc-muted);
+                flex-shrink: 0;
+                overflow: hidden;
+            }
+            .player-avatar-sm img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .player-info-cell .player-name-link {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--sc-blue);
+                display: block;
+            }
+            .player-info-cell .player-name-link:hover {
+                text-decoration: underline;
+            }
+            .player-info-cell .player-pos-team {
+                font-size: 11px;
+                color: var(--sc-muted);
+            }
+            .team-logo-cell {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .team-logo-cell img {
+                width: 22px;
+                height: 22px;
+                object-fit: contain;
+            }
+
+            /* salary pill */
+            .salary-val {
+                font-family: "Oswald", sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+            }
+            .salary-tier-max {
+                color: var(--sc-gold);
+            }
+            .salary-tier-high {
+                color: var(--sc-green);
+            }
+            .salary-tier-mid {
+                color: var(--sc-text);
+            }
+            .salary-tier-low {
+                color: var(--sc-muted);
+            }
+
+            /* contract type badge */
+            .ct-badge {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+            }
+            .ct-max {
+                background: rgba(255, 215, 64, 0.15);
+                color: var(--sc-gold);
+            }
+            .ct-supermax {
+                background: rgba(255, 215, 64, 0.25);
+                color: #ffe57f;
+            }
+            .ct-ro {
+                background: rgba(41, 121, 255, 0.15);
+                color: #82b1ff;
+            }
+            .ct-two-way {
+                background: rgba(124, 77, 255, 0.15);
+                color: #b388ff;
+            }
+            .ct-vet {
+                background: rgba(0, 230, 118, 0.12);
+                color: #69f0ae;
+            }
+            .ct-rookie {
+                background: rgba(255, 87, 34, 0.12);
+                color: #ffab91;
+            }
+            .ct-standard {
+                background: rgba(255, 255, 255, 0.06);
+                color: #aaa;
+            }
+            .ct-10day {
+                background: rgba(255, 23, 68, 0.12);
+                color: #ff6090;
+            }
+
+            /* years/option badge */
+            .yr-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                font-size: 11px;
+                color: var(--sc-muted);
+            }
+            .option-tag {
+                font-size: 9px;
+                padding: 1px 5px;
+                border-radius: 3px;
+                font-weight: 700;
+                text-transform: uppercase;
+            }
+            .option-po {
+                background: rgba(0, 230, 118, 0.15);
+                color: var(--sc-green);
+            }
+            .option-to {
+                background: rgba(41, 121, 255, 0.15);
+                color: #82b1ff;
+            }
+            .option-etd {
+                background: rgba(255, 215, 64, 0.15);
+                color: var(--sc-gold);
+            }
+
+            /* cap bar */
+            .cap-bar-wrap {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                min-width: 120px;
+            }
+            .cap-bar-track {
+                flex: 1;
+                height: 5px;
+                border-radius: 3px;
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .cap-bar-fill {
+                height: 100%;
+                border-radius: 3px;
+                transition: width 0.4s ease;
+            }
+
+            /* ── Team cap table ── */
+            .team-cap-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+                gap: 16px;
+                padding: 20px;
+            }
+            .team-cap-card {
+                background: #111119;
+                border: 1px solid var(--sc-border);
+                border-radius: 8px;
+                padding: 16px;
+                cursor: pointer;
+                transition: border-color 0.15s;
+            }
+            .team-cap-card:hover {
+                border-color: rgba(255, 255, 255, 0.18);
+            }
+            .team-cap-card-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 14px;
+            }
+            .team-cap-card-header img {
+                width: 36px;
+                height: 36px;
+                object-fit: contain;
+            }
+            .team-cap-card-header .tc-name {
+                font-family: "Oswald", sans-serif;
+                font-size: 15px;
+                font-weight: 700;
+                color: #fff;
+            }
+            .team-cap-card-header .tc-conf {
+                font-size: 11px;
+                color: var(--sc-muted);
+            }
+            .tc-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 5px 0;
+                border-bottom: 1px solid var(--sc-border2);
+                font-size: 12px;
+            }
+            .tc-row:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .tc-label {
+                color: var(--sc-muted);
+            }
+            .tc-value {
+                font-weight: 600;
+            }
+            .tc-value.over {
+                color: var(--sc-red);
+            }
+            .tc-value.under {
+                color: var(--sc-green);
+            }
+            .tc-value.warning {
+                color: var(--sc-gold);
+            }
+            .tc-bar-wrap {
+                margin-top: 12px;
+            }
+            .tc-bar-label {
+                display: flex;
+                justify-content: space-between;
+                font-size: 10px;
+                color: var(--sc-muted);
+                margin-bottom: 4px;
+            }
+            .tc-bar-track {
+                height: 6px;
+                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .tc-bar-fill {
+                height: 100%;
+                border-radius: 4px;
+            }
+
+            /* ── Free agents ── */
+            .fa-tier-header {
+                padding: 10px 20px;
+                font-family: "Oswald", sans-serif;
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                color: var(--sc-muted);
+                background: rgba(0, 0, 0, 0.2);
+                border-bottom: 1px solid var(--sc-border2);
+            }
+            .fa-tier-header span {
+                color: var(--sc-accent);
+            }
+
+            /* ── Salary breakdown chart ── */
+            .sb-bars {
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .sb-bar-row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .sb-bar-label {
+                width: 130px;
+                font-size: 12px;
+                color: var(--sc-muted);
+                text-align: right;
+                flex-shrink: 0;
+            }
+            .sb-bar-track {
+                flex: 1;
+                height: 22px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 4px;
+                overflow: hidden;
+            }
+            .sb-bar-fill {
+                height: 100%;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding-right: 8px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #fff;
+                transition: width 0.5s ease;
+            }
+            .sb-bar-total {
+                width: 90px;
+                font-family: "Oswald", sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+
+            /* ── Tabs ── */
+            .sc-page-tabs {
+                display: flex;
+                gap: 0;
+                border-bottom: 1px solid var(--sc-border);
+                background: var(--sc-surface);
+            }
+            .sc-page-tab {
+                padding: 13px 22px;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--sc-muted);
+                border-bottom: 2px solid transparent;
+                transition: all 0.15s;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .sc-page-tab:hover {
+                color: #fff;
+            }
+            .sc-page-tab.active {
+                color: var(--sc-accent);
+                border-bottom-color: var(--sc-accent);
+            }
+
+            /* ── Section visibility ── */
+            .sc-section {
+                display: none;
+            }
+            .sc-section.visible {
+                display: block;
+            }
+
+            /* ── Responsive table wrapper ── */
+            .table-wrap {
+                overflow-x: auto;
+            }
+
+            /* ── Inline legend ── */
+            .legend {
+                display: flex;
+                gap: 16px;
+                flex-wrap: wrap;
+                padding: 10px 20px;
+                border-top: 1px solid var(--sc-border2);
+            }
+            .legend-item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 11px;
+                color: var(--sc-muted);
+            }
+            .legend-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+            }
+
+            /* ── Draft rights table highlight ── */
+            .has-rights {
+                background: rgba(124, 77, 255, 0.05);
+            }
+
+            /* ── Responsive ── */
+            @media (max-width: 700px) {
+                .cap-banner {
+                    flex-direction: column;
+                }
+                .cap-stat {
+                    border-right: none;
+                    border-bottom: 1px solid var(--sc-border);
+                    padding: 10px 16px;
+                }
+                .sc-content {
+                    padding: 12px;
+                }
+                .sc-table td,
+                .sc-table th {
+                    padding: 8px 10px;
+                }
+            }
+        
+            /* ── Free Agent Table: Colorful Enhancements ── */
+            #faTbody tr {
+                transition: all 0.2s ease;
+                border-left: 3px solid transparent;
+            }
+            #faTbody tr:hover {
+                border-left-color: var(--sc-accent);
+                background: linear-gradient(135deg, rgba(255,87,34,0.08) 0%, rgba(41,121,255,0.05) 100%) !important;
+                transform: translateX(2px);
+            }
+            #faTbody tr:nth-child(even) {
+                background: rgba(255,255,255,0.03);
+            }
+            #faTbody tr:nth-child(odd) {
+                background: rgba(255,255,255,0.01);
+            }
+            .p-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, var(--sc-card2), var(--sc-surface));
+                border: 2px solid var(--sc-border);
+                flex-shrink: 0;
+                overflow: hidden;
+            }
+            .p-avatar i {
+                font-size: 16px;
+                color: var(--sc-muted);
+            }
+            .pos-dot {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 4px;
+                vertical-align: middle;
+            }
+            #faPosFilter .sc-filter-tab,
+            #faExpFilter .sc-filter-tab {
+                font-size: 12px;
+                padding: 4px 10px;
+                margin: 0 2px;
+            }
+            .sc-toolbar-row {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                padding: 6px 16px 10px;
+                align-items: center;
+            }
+            .sc-toolbar-row .sc-filter-tabs {
+                display: flex;
+                gap: 2px;
+                background: var(--sc-surface);
+                border-radius: 8px;
+                padding: 3px;
+            }
+            .sc-toolbar-row .sc-filter-tab {
+                background: transparent;
+                border: none;
+                color: var(--sc-muted);
+                cursor: pointer;
+                font-family: "Oswald", sans-serif;
+                font-weight: 500;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding: 5px 12px;
+                border-radius: 6px;
+                transition: all 0.2s;
+            }
+            .sc-toolbar-row .sc-filter-tab:hover {
+                color: var(--sc-text);
+                background: rgba(255,255,255,0.05);
+            }
+            .sc-toolbar-row .sc-filter-tab.active {
+                background: linear-gradient(135deg, var(--sc-accent), var(--sc-orange, #ff8c00));
+                color: #fff;
+                box-shadow: 0 2px 8px rgba(255,87,34,0.3);
+            }
+            #faExpFilter .sc-filter-tab.active {
+                background: linear-gradient(135deg, #7c4dff, #2979ff);
+                box-shadow: 0 2px 8px rgba(124,77,255,0.3);
+            }
+            .ct-badge {
+                display: inline-block;
+                border-radius: 4px;
+                font-weight: 600;
+            }
+    
+        </style>
+    </head>
+    <body>
+        <!-- ── Top Bar ── -->
+        <header class="sc-topbar">
+            <a href="nba.html" class="back-link">
+                <i class="fa-solid fa-arrow-left"></i> NBA Hub
+            </a>
+            <div class="page-brand">
+                <span class="pill">NBA</span>
+                <span class="page-title">Contracts &amp; Salaries</span>
+            </div>
+            <div class="spacer"></div>
+            <a href="index.html" class="hub-link"
+                ><i class="fa-solid fa-house"></i> SportSync</a
+            >
+        </header>
+
+        <!-- ── Cap Banner ── -->
+        <div class="cap-banner">
+            <div class="cap-stat">
+                <div class="cap-stat-label">2025–26 Salary Cap</div>
+                <div class="cap-stat-value">$154.6M</div>
+                <div class="cap-stat-sub">
+                    Soft cap — luxury line at $187.9M
+                </div>
+            </div>
+            <div class="cap-stat">
+                <div class="cap-stat-label">Apron (First)</div>
+                <div class="cap-stat-value orange">$195.9M</div>
+                <div class="cap-stat-sub">Hard apron restriction threshold</div>
+            </div>
+            <div class="cap-stat">
+                <div class="cap-stat-label">Apron (Second)</div>
+                <div class="cap-stat-value orange">$207.8M</div>
+                <div class="cap-stat-sub">Penalty apron — max 13 players</div>
+            </div>
+            <div class="cap-stat">
+                <div class="cap-stat-label">Min Salary (Vet)</div>
+                <div class="cap-stat-value">$3.6M</div>
+                <div class="cap-stat-sub">Gross 10+ yr salary; cap charge $2.4M</div>
+            </div>
+            <div class="cap-stat">
+                <div class="cap-stat-label">Max Contract (0–6 yrs)</div>
+                <div class="cap-stat-value green">$38.7M</div>
+                <div class="cap-stat-sub">25% of cap — Year 1 starting max</div>
+            </div>
+            <div class="cap-stat">
+                <div class="cap-stat-label">Supermax (10+ yrs)</div>
+                <div class="cap-stat-value gold">$54.1M</div>
+                <div class="cap-stat-sub">35% of cap — Year 1 starting (older deals grow 8%/yr)</div>
+            </div>
+        </div>
+
+        <!-- ── Page tabs ── -->
+        <div class="sc-page-tabs" id="pageTabs">
+            <div class="sc-page-tab active" data-tab="salaries">
+                <i class="fa-solid fa-dollar-sign"></i> Top Salaries
+            </div>
+            <div class="sc-page-tab" data-tab="teams">
+                <i class="fa-solid fa-layer-group"></i> Team Cap Space
+            </div>
+            <div class="sc-page-tab" data-tab="free-agents">
+                <i class="fa-solid fa-user-check"></i> Free Agents
+            </div>
+            <div class="sc-page-tab" data-tab="extensions">
+                <i class="fa-solid fa-pen-to-square"></i> Extensions &amp;
+                Options
+            </div>
+            <div class="sc-page-tab" data-tab="breakdown">
+                <i class="fa-solid fa-chart-bar"></i> League Breakdown
+            </div>
+        </div>
+
+        <!-- ── Layout ── -->
+        <div class="sc-layout">
+            <!-- Left nav -->
+            <nav class="sc-nav">
+                <div class="sc-nav-group">
+                    <div class="sc-nav-group-label">Salaries</div>
+                    <div class="sc-nav-item active" data-nav="salaries">
+                        <i class="fa-solid fa-dollar-sign"></i> Top Salaries
+                    </div>
+                    <div class="sc-nav-item" data-nav="teams">
+                        <i class="fa-solid fa-layer-group"></i> Team Cap Space
+                    </div>
+                    <div class="sc-nav-item" data-nav="free-agents">
+                        <i class="fa-solid fa-user-check"></i> Free Agents
+                    </div>
+                    <div class="sc-nav-item" data-nav="extensions">
+                        <i class="fa-solid fa-pen-to-square"></i> Extensions
+                        &amp; Options
+                    </div>
+                    <div class="sc-nav-item" data-nav="breakdown">
+                        <i class="fa-solid fa-chart-bar"></i> League Breakdown
+                    </div>
+                </div>
+                <div class="sc-nav-group">
+                    <div class="sc-nav-group-label">Cap Rules</div>
+                    <div class="sc-nav-item" style="cursor: default">
+                        <i class="fa-solid fa-circle-info"></i> Salary Cap:
+                        $154.6M
+                    </div>
+                    <div class="sc-nav-item" style="cursor: default">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Luxury
+                        Tax: $187.9M
+                    </div>
+                    <div class="sc-nav-item" style="cursor: default">
+                        <i class="fa-solid fa-ban"></i> 1st Apron: $195.9M
+                    </div>
+                    <div class="sc-nav-item" style="cursor: default">
+                        <i class="fa-solid fa-ban"></i> 2nd Apron: $207.8M
+                    </div>
+                </div>
+                <div class="sc-nav-group">
+                    <div class="sc-nav-group-label">NBA Hub</div>
+                    <div
+                        class="sc-nav-item"
+                        onclick="location.href = 'nba.html'"
+                    >
+                        <i class="fa-solid fa-basketball"></i> Live Scores
+                    </div>
+                    <div
+                        class="sc-nav-item"
+                        onclick="location.href = 'nba-draft.html'"
+                    >
+                        <i class="fa-solid fa-fire"></i> NBA Draft
+                    </div>
+                    <div
+                        class="sc-nav-item"
+                        onclick="location.href = 'march-madness.html'"
+                    >
+                        <i class="fa-solid fa-trophy"></i> March Madness
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="sc-content">
+                <!-- ══════════════════════════════════
+           TAB: TOP SALARIES
+      ══════════════════════════════════ -->
+                <div class="sc-section visible" id="tab-salaries">
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-dollar-sign"></i> Top NBA
+                                Salaries — 2025–26
+                            </div>
+                            <div class="sc-card-meta">
+                                60 players shown · Data as of July 2025
+                            </div>
+                        </div>
+                        <div class="sc-toolbar">
+                            <div class="sc-search">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input
+                                    type="text"
+                                    id="salarySearch"
+                                    placeholder="Search player or team…"
+                                />
+                            </div>
+                            <div class="sc-filter-tabs" id="posFilter">
+                                <button
+                                    class="sc-filter-tab active"
+                                    data-pos="all"
+                                >
+                                    All
+                                </button>
+                                <button class="sc-filter-tab" data-pos="PG">
+                                    PG
+                                </button>
+                                <button class="sc-filter-tab" data-pos="SG">
+                                    SG
+                                </button>
+                                <button class="sc-filter-tab" data-pos="SF">
+                                    SF
+                                </button>
+                                <button class="sc-filter-tab" data-pos="PF">
+                                    PF
+                                </button>
+                                <button class="sc-filter-tab" data-pos="C">
+                                    C
+                                </button>
+                            </div>
+                            <select class="sc-select" id="yearFilter">
+                                <option value="2026">2025–26</option>
+                                <option value="2027">2026–27</option>
+                                <option value="2028">2027–28</option>
+                            </select>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="sc-table" id="salaryTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px">#</th>
+                                        <th>Player</th>
+                                        <th>Team</th>
+                                        <th class="num" data-col="salary">
+                                            2025–26 Salary
+                                        </th>
+                                        <th class="num" data-col="pct">
+                                            % of Cap
+                                        </th>
+                                        <th>Contract</th>
+                                        <th class="num" data-col="years">
+                                            Yrs Left
+                                        </th>
+                                        <th class="num" data-col="total">
+                                            Total Value
+                                        </th>
+                                        <th>Type</th>
+                                        <th>Cap Hit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salaryTbody"></tbody>
+                            </table>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div
+                                    class="legend-dot"
+                                    style="background: var(--sc-gold)"
+                                ></div>
+                                Supermax / Max contract
+                            </div>
+                            <div class="legend-item">
+                                <div
+                                    class="legend-dot"
+                                    style="background: var(--sc-green)"
+                                ></div>
+                                Above $20M
+                            </div>
+                            <div class="legend-item">
+                                <div
+                                    class="legend-dot"
+                                    style="background: var(--sc-blue)"
+                                ></div>
+                                Rookie scale
+                            </div>
+                            <div class="legend-item">
+                                <span class="option-tag option-po">PO</span>
+                                Player option
+                            </div>
+                            <div class="legend-item">
+                                <span class="option-tag option-to">TO</span>
+                                Team option
+                            </div>
+                            <div class="legend-item">
+                                <span class="option-tag option-etd">ETD</span>
+                                Early termination
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════
+           TAB: TEAM CAP SPACE
+      ══════════════════════════════════ -->
+                <div class="sc-section" id="tab-teams">
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-layer-group"></i> Team Cap
+                                Space — 2025–26
+                            </div>
+                            <div class="sc-card-meta">
+                                All 30 NBA teams · Sorted by cap space
+                            </div>
+                        </div>
+                        <div class="sc-toolbar">
+                            <div class="sc-filter-tabs" id="confFilter">
+                                <button
+                                    class="sc-filter-tab active"
+                                    data-conf="all"
+                                >
+                                    All
+                                </button>
+                                <button class="sc-filter-tab" data-conf="East">
+                                    East
+                                </button>
+                                <button class="sc-filter-tab" data-conf="West">
+                                    West
+                                </button>
+                            </div>
+                            <select class="sc-select" id="capSortSel">
+                                <option value="space">Sort: Cap Space</option>
+                                <option value="committed">
+                                    Sort: Committed
+                                </option>
+                                <option value="players">Sort: # Players</option>
+                            </select>
+                        </div>
+                        <div class="team-cap-grid" id="teamCapGrid"></div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════
+           TAB: FREE AGENTS
+      ══════════════════════════════════ -->
+                <div class="sc-section" id="tab-free-agents">
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-user-check"></i> 2025 NBA
+                                Free Agents
+                            </div>
+                            <div class="sc-card-meta">
+                                Unrestricted &amp; Restricted · July 2025
+                            </div>
+                        </div>
+                        <div class="sc-toolbar">
+                            <div class="sc-search">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input
+                                    type="text"
+                                    id="faSearch"
+                                    placeholder="Search free agent…"
+                                />
+                            </div>
+                            <div class="sc-filter-tabs" id="faTypeFilter">
+                                    <button class="sc-filter-tab active" data-fa="all">All</button>
+                                    <button class="sc-filter-tab" data-fa="UFA">Unrestricted</button>
+                                    <button class="sc-filter-tab" data-fa="RFA">Restricted</button>
+                                </div>
+                            </div>
+                            <div class="sc-toolbar-row">
+                                <div class="sc-filter-tabs" id="faPosFilter">
+                                    <button class="sc-filter-tab active" data-pos="all">All</button>
+                                    <button class="sc-filter-tab" data-pos="PG"><span class="pos-dot" style="background:#ff5722"></span>PG</button>
+                                    <button class="sc-filter-tab" data-pos="SG"><span class="pos-dot" style="background:#2979ff"></span>SG</button>
+                                    <button class="sc-filter-tab" data-pos="SF"><span class="pos-dot" style="background:#00e676"></span>SF</button>
+                                    <button class="sc-filter-tab" data-pos="PF"><span class="pos-dot" style="background:#ffd740"></span>PF</button>
+                                    <button class="sc-filter-tab" data-pos="C"><span class="pos-dot" style="background:#7c4dff"></span>C</button>
+                                </div>
+                                <div class="sc-filter-tabs" id="faExpFilter">
+                                    <button class="sc-filter-tab active" data-exp="all">All</button>
+                                    <button class="sc-filter-tab" data-exp="0-2">0-2 yrs</button>
+                                    <button class="sc-filter-tab" data-exp="3-6">3-6 yrs</button>
+                                    <button class="sc-filter-tab" data-exp="7+">7+ yrs</button>
+                                </div>
+                            </div>
+                        <div class="table-wrap">
+                            <table class="sc-table" id="faTable">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Pos</th>
+                                        <th>Age</th>
+                                        <th>Prior Team</th>
+                                        <th>Current Team</th>
+                                        <th class="num">Prior Salary</th>
+                                        <th class="num">Years</th>
+                                        <th>FA Type</th>
+                                        <th>Bird Rights</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="faTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════
+           TAB: EXTENSIONS & OPTIONS
+      ══════════════════════════════════ -->
+                <div class="sc-section" id="tab-extensions">
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                                Contract Options &amp; Extensions
+                            </div>
+                            <div class="sc-card-meta">
+                                Player options · Team options · Early
+                                terminations · Upcoming extensions
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="sc-table" id="extTable">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Team</th>
+                                        <th>Option Type</th>
+                                        <th class="num">Option Value</th>
+                                        <th>Deadline</th>
+                                        <th>Decision</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="extTbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════
+           TAB: LEAGUE BREAKDOWN
+      ══════════════════════════════════ -->
+                <div class="sc-section" id="tab-breakdown">
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-chart-bar"></i>
+                                League-Wide Salary Breakdown
+                            </div>
+                            <div class="sc-card-meta">
+                                2025–26 Season · $154.6M cap
+                            </div>
+                        </div>
+                        <div class="sb-bars" id="breakdownBars"></div>
+                    </div>
+
+                    <div class="sc-card">
+                        <div class="sc-card-header">
+                            <div class="sc-card-title">
+                                <i class="fa-solid fa-scale-balanced"></i> Cap
+                                Rule Quick Reference
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="sc-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rule</th>
+                                        <th class="num">Threshold</th>
+                                        <th>Effect</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Salary Cap</strong></td>
+                                        <td class="num">$154.6M</td>
+                                        <td>
+                                            Soft cap — exceptions allow teams to
+                                            exceed
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Luxury Tax Line</strong>
+                                        </td>
+                                        <td class="num">$187.9M</td>
+                                        <td>
+                                            Tax applies on every $1 over line
+                                            (repeater penalty)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>1st Apron</strong></td>
+                                        <td class="num">$195.9M</td>
+                                        <td>
+                                            Cannot aggregate salaries in trades;
+                                            no S&amp;T as buyer
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>2nd Apron</strong></td>
+                                        <td class="num">$207.8M</td>
+                                        <td>
+                                            Roster capped at 13; future
+                                            1st-round picks frozen
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>MLE (Non-Tax)</strong></td>
+                                        <td class="num">$14.1M</td>
+                                        <td>
+                                            4-yr exception for below-tax teams
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>MLE (Tax)</strong></td>
+                                        <td class="num">$5.7M</td>
+                                        <td>
+                                            2-yr exception for above-tax teams
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Bi-Annual</strong></td>
+                                        <td class="num">$4.7M</td>
+                                        <td>
+                                            1-yr exception every other year
+                                            (below tax)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Veteran Min</strong></td>
+                                        <td class="num">$3.6M</td>
+                                        <td>
+                                            10+ yrs service — team cap charge
+                                            $2.4M
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <!-- /.sc-layout -->
+
+        <script>
+            /* ══════════════════════════════════════════════════════════
+   DATA — 2025–26 NBA Contract / Salary data (curated)
+══════════════════════════════════════════════════════════ */
+
+            // 2025-26 NBA salary cap (matches the .cap-banner display value)
+            const CAP = 154647000;  // 2025-26 actual
+
+// __cap_freshness_check__
+console.assert(
+  CAP === 154647000,
+  "NBA cap figures are out of date for current season — refresh from https://www.nba.com/news/nba-salary-cap-set-2025-26"
+);
+
+
+            const SALARY_DATA = [
+              { name: "Stephen Curry", pos: "PG", team: "Golden State Warriors", abbr: "GSW", salary: 59606817, years: 2, total: 122193975, type: "supermax" },
+              { name: "Joel Embiid", pos: "C", team: "Philadelphia 76ers", abbr: "PHI", salary: 55224526, years: 4, total: 243468526, type: "supermax" },
+              { name: "Nikola Jokic", pos: "C", team: "Denver Nuggets", abbr: "DEN", salary: 55224526, years: 3, total: 177099342, type: "supermax" },
+              { name: "Kevin Durant", pos: "PF", team: "Houston Rockets", abbr: "HOU", salary: 54708609, years: 3, total: 144708609, type: "supermax" },
+              { name: "Jayson Tatum", pos: "SF", team: "Boston Celtics", abbr: "BOS", salary: 54126450, years: 4, total: 242486496, type: "supermax" },
+              { name: "Anthony Davis", pos: "PF", team: "Washington Wizards", abbr: "WAS", salary: 54126450, years: 3, total: 175369698, type: "supermax" },
+              { name: "Giannis Antetokounmpo", pos: "PF", team: "Milwaukee Bucks", abbr: "MIL", salary: 54126450, years: 3, total: 175369698, type: "supermax" },
+              { name: "Jimmy Butler", pos: "SF", team: "Golden State Warriors", abbr: "GSW", salary: 54126450, years: 2, total: 110959223, type: "supermax" },
+              { name: "Jaylen Brown", pos: "SG", team: "Boston Celtics", abbr: "BOS", salary: 53142264, years: 4, total: 236187840, type: "max" },
+              { name: "Devin Booker", pos: "SG", team: "Phoenix Suns", abbr: "PHX", salary: 53142264, years: 4, total: 235302136, type: "max" },
+              { name: "Karl-Anthony Towns", pos: "C", team: "New York Knicks", abbr: "NYK", salary: 53142264, years: 3, total: 171236184, type: "max" },
+              { name: "LeBron James", pos: "SF", team: "Los Angeles Lakers", abbr: "LAL", salary: 52627153, years: 1, total: 52627153, type: "max" },
+              { name: "Paul George", pos: "SF", team: "Philadelphia 76ers", abbr: "PHI", salary: 51666090, years: 3, total: 162379140, type: "max" },
+              { name: "Kawhi Leonard", pos: "SF", team: "LA Clippers", abbr: "LAC", salary: 50000000, years: 2, total: 100300000, type: "max" },
+              { name: "Zach LaVine", pos: "SG", team: "Sacramento Kings", abbr: "SAC", salary: 47499660, years: 2, total: 96467040, type: "max" },
+              { name: "Cade Cunningham", pos: "PG", team: "Detroit Pistons", abbr: "DET", salary: 46394100, years: 4, total: 207845568, type: "max" },
+              { name: "Evan Mobley", pos: "C", team: "Cleveland Cavaliers", abbr: "CLE", salary: 46394100, years: 4, total: 207845568, type: "max" },
+              { name: "Jamal Murray", pos: "PG", team: "Denver Nuggets", abbr: "DEN", salary: 46394100, years: 4, total: 207845568, type: "max" },
+              { name: "Lauri Markkanen", pos: "PF", team: "Utah Jazz", abbr: "UTA", salary: 46394100, years: 4, total: 195868144, type: "max" },
+              { name: "Donovan Mitchell", pos: "SG", team: "Cleveland Cavaliers", abbr: "CLE", salary: 46394100, years: 3, total: 150316884, type: "max" },
+              { name: "Trae Young", pos: "PG", team: "Washington Wizards", abbr: "WAS", salary: 46394100, years: 1, total: 46394100, type: "max" },
+              { name: "Luka Doncic", pos: "PG", team: "Los Angeles Lakers", abbr: "LAL", salary: 45999660, years: 4, total: 207351660, type: "standard" },
+              { name: "Anthony Edwards", pos: "SG", team: "Minnesota Timberwolves", abbr: "MIN", salary: 45550512, years: 4, total: 202446720, type: "standard" },
+              { name: "Tyrese Haliburton", pos: "PG", team: "Indiana Pacers", abbr: "IND", salary: 45550512, years: 4, total: 202446720, type: "standard" },
+              { name: "Pascal Siakam", pos: "PF", team: "Indiana Pacers", abbr: "IND", salary: 45550512, years: 3, total: 146773872, type: "standard" },
+              { name: "Domantas Sabonis", pos: "C", team: "Sacramento Kings", abbr: "SAC", salary: 42336000, years: 3, total: 136416000, type: "standard" },
+              { name: "OG Anunoby", pos: "SF", team: "New York Knicks", abbr: "NYK", salary: 39568966, years: 4, total: 175862068, type: "standard" },
+              { name: "Zion Williamson", pos: "PF", team: "New Orleans Pelicans", abbr: "NOP", salary: 39446090, years: 3, total: 126499530, type: "standard" },
+              { name: "Darius Garland", pos: "PG", team: "LA Clippers", abbr: "LAC", salary: 39446090, years: 3, total: 126499530, type: "standard" },
+              { name: "Ja Morant", pos: "PG", team: "Memphis Grizzlies", abbr: "MEM", salary: 39446090, years: 3, total: 126499530, type: "standard" },
+              { name: "James Harden", pos: "PG", team: "Cleveland Cavaliers", abbr: "CLE", salary: 39446090, years: 2, total: 81763397, type: "standard" },
+              { name: "Scottie Barnes", pos: "SF", team: "Toronto Raptors", abbr: "TOR", salary: 38661750, years: 4, total: 173204640, type: "rookie" },
+              { name: "Franz Wagner", pos: "SF", team: "Orlando Magic", abbr: "ORL", salary: 38661750, years: 4, total: 173204640, type: "rookie" },
+              { name: "Shai Gilgeous-Alexander", pos: "PG", team: "Oklahoma City Thunder", abbr: "OKC", salary: 38333050, years: 4, total: 206029600, type: "standard" },
+              { name: "Michael Porter Jr.", pos: "SF", team: "Brooklyn Nets", abbr: "BKN", salary: 38333050, years: 2, total: 79139200, type: "standard" },
+              { name: "Brandon Ingram", pos: "SF", team: "Toronto Raptors", abbr: "TOR", salary: 38095238, years: 3, total: 120000000, type: "standard" },
+              { name: "Tyrese Maxey", pos: "PG", team: "Philadelphia 76ers", abbr: "PHI", salary: 37958760, years: 4, total: 168705600, type: "rookie" },
+              { name: "LaMelo Ball", pos: "PG", team: "Charlotte Hornets", abbr: "CHA", salary: 37958760, years: 4, total: 168705600, type: "rookie" },
+              { name: "De'Aaron Fox", pos: "PG", team: "San Antonio Spurs", abbr: "SAS", salary: 37096620, years: 4, total: 198448620, type: "standard" },
+              { name: "Bam Adebayo", pos: "C", team: "Miami Heat", abbr: "MIA", salary: 37096620, years: 4, total: 198448620, type: "standard" },
+              { name: "Desmond Bane", pos: "SG", team: "Orlando Magic", abbr: "ORL", salary: 36725670, years: 4, total: 163225200, type: "standard" },
+              { name: "Kyrie Irving", pos: "PG", team: "Dallas Mavericks", abbr: "DAL", salary: 36566002, years: 3, total: 118473846, type: "standard" },
+              { name: "Jaren Jackson Jr.", pos: "PF", team: "Utah Jazz", abbr: "UTA", salary: 35000000, years: 4, total: 186500000, type: "standard" },
+              { name: "Jalen Suggs", pos: "SG", team: "Orlando Magic", abbr: "ORL", salary: 35000000, years: 4, total: 123800000, type: "rookie" },
+              { name: "Rudy Gobert", pos: "C", team: "Minnesota Timberwolves", abbr: "MIN", salary: 35000000, years: 3, total: 109500000, type: "standard" },
+              { name: "Jalen Brunson", pos: "PG", team: "New York Knicks", abbr: "NYK", salary: 34944001, years: 4, total: 156549124, type: "standard" },
+              { name: "Alperen Şengun", pos: "SF", team: "Houston Rockets", abbr: "HOU", salary: 33944954, years: 4, total: 145963303, type: "standard" },
+              { name: "Jalen Green", pos: "SG", team: "Phoenix Suns", abbr: "PHX", salary: 33584499, years: 3, total: 105835665, type: "rookie" },
+              { name: "Khris Middleton", pos: "SF", team: "Dallas Mavericks", abbr: "DAL", salary: 33296296, years: 1, total: 33296296, type: "standard" },
+              { name: "Immanuel Quickley", pos: "PG", team: "Toronto Raptors", abbr: "TOR", salary: 32500000, years: 4, total: 130000000, type: "standard" },
+              { name: "Jrue Holiday", pos: "PG", team: "Portland Trail Blazers", abbr: "POR", salary: 32400000, years: 3, total: 104400000, type: "standard" },
+              { name: "Jerami Grant", pos: "PF", team: "Portland Trail Blazers", abbr: "POR", salary: 32000001, years: 3, total: 102620689, type: "standard" },
+              { name: "Jordan Poole", pos: "SG", team: "New Orleans Pelicans", abbr: "NOP", salary: 31848215, years: 2, total: 65892857, type: "standard" },
+              { name: "Tyler Herro", pos: "SG", team: "Miami Heat", abbr: "MIA", salary: 31000000, years: 2, total: 64000000, type: "standard" },
+              { name: "Julius Randle", pos: "PF", team: "Minnesota Timberwolves", abbr: "MIN", salary: 30864198, years: 3, total: 100000000, type: "standard" },
+              { name: "Dejounte Murray", pos: "PG", team: "New Orleans Pelicans", abbr: "NOP", salary: 30801103, years: 3, total: 94337678, type: "standard" },
+              { name: "Kristaps Porziņģis", pos: "SF", team: "Golden State Warriors", abbr: "GSW", salary: 30731707, years: 3, total: 70731707, type: "standard" },
+              { name: "CJ McCollum", pos: "SG", team: "Atlanta Hawks", abbr: "ATL", salary: 30666666, years: 2, total: 51666666, type: "standard" },
+              { name: "Jalen Johnson", pos: "SF", team: "Atlanta Hawks", abbr: "ATL", salary: 30000000, years: 4, total: 120000000, type: "standard" },
+              { name: "Isaiah Hartenstein", pos: "C", team: "Oklahoma City Thunder", abbr: "OKC", salary: 28500000, years: 2, total: 57000000, type: "standard" }
+            ];
+
+            // Curated July 2025 snapshot. priorSalary = 2024-25 cap charge
+            // (the salary that counted against the cap for the 2024-25 season).
+            //
+            // Note: the 'prior' field below shows each player's CURRENT/2025-26
+            // team, not their 2024-25 team. For players traded in summer 2025
+            // (e.g. Beal PHX->LAC, Trae ATL->WAS), the 2024-25 cap charge was
+            // sourced from the actual 2024-25 team (which may differ from 'prior').
+            //
+            // priorSalary: 0 is now ONLY used when structurally correct:
+            //   (a) Two-way contracts (do not count against the cap), and
+            //   (b) players with no active NBA contract in 2024-25 (e.g.
+            //       waived + overseas, like Kevin Porter Jr.).
+            // Remaining data holes (RFA TO minors, rookies) flagged in
+            // __RFA_TO_DATA_HOLES__ below the array.
+            const FREE_AGENTS = [
+                /* ══ Unrestricted Free Agents (UFA) ══ */
+ { name: "LeBron James", pos: "PF/SF", age: 41, prior: "LAL", priorSalary: 50_677_999, years: 23, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Zach LaVine", pos: "PG/SG", age: 31, prior: "SAC", priorSalary: 43_031_940, years: 12, faType: "UFA (PO)", birdRights: "Full", status: "Signed (SAC)" },
+ { name: "James Harden", pos: "PG/SG", age: 36, prior: "CLE", priorSalary: 40_750_000, years: 17, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "CJ McCollum", pos: "PG/SG", age: 34, prior: "ATL", priorSalary: 32_000_000, years: 13, faType: "UFA", birdRights: "Full", status: "Signed (ATL)" },
+ { name: "Khris Middleton", pos: "PF/SF", age: 34, prior: "DAL", priorSalary: 31_000_000, years: 14, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Kristaps Porziņģis", pos: "PF/C", age: 30, prior: "GSW", priorSalary: 30_000_000, years: 11, faType: "UFA", birdRights: "Full", status: "Signed (GSW)" },
+ { name: "Isaiah Hartenstein", pos: "C/PF", age: 28, prior: "OKC", priorSalary: 29_000_000, years: 8, faType: "UFA (TO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Andrew Wiggins", pos: "PF/SF", age: 31, prior: "MIA", priorSalary: 27_250_001, years: 12, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Tobias Harris", pos: "PF/SF", age: 33, prior: "DET", priorSalary: 26_000_000, years: 15, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Anfernee Simons", pos: "PG/SG", age: 27, prior: "CHI", priorSalary: 25_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Draymond Green", pos: "PF/SF", age: 36, prior: "GSW", priorSalary: 25_000_000, years: 14, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Fred VanVleet", pos: "PG/SG", age: 32, prior: "HOU", priorSalary: 25_000_000, years: 9, faType: "UFA (PO)", birdRights: "Full", status: "Signed (HOU)" },
+ { name: "John Collins", pos: "PF/C", age: 28, prior: "LAC", priorSalary: 25_000_000, years: 9, faType: "UFA", birdRights: "Full", status: "Signed (DET)" },
+ { name: "Jonathan Kuminga", pos: "PF/SF", age: 23, prior: "ATL", priorSalary: 23_400_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Nikola Vučević", pos: "C", age: 35, prior: "BOS", priorSalary: 20_000_000, years: 15, faType: "UFA", birdRights: "Full", status: "Signed (BOS)" },
+ { name: "Harrison Barnes", pos: "PF/SF", age: 34, prior: "SAS", priorSalary: 18_000_000, years: 14, faType: "UFA", birdRights: "Full", status: "Signed (SAS)" },
+ { name: "Norman Powell", pos: "PG/SG", age: 33, prior: "MIA", priorSalary: 18_000_000, years: 11, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Collin Sexton", pos: "PG/SG", age: 27, prior: "CHI", priorSalary: 17_737_500, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jusuf Nurkić", pos: "C", age: 31, prior: "UTA", priorSalary: 17_500_000, years: 12, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Zach Collins", pos: "PF/C", age: 28, prior: "CHI", priorSalary: 17_410_848, years: 9, faType: "UFA", birdRights: "Full", status: "Signed (CHI)" },
+ { name: "Bogdan Bogdanović", pos: "PG/SG", age: 33, prior: "LAC", priorSalary: 17_000_000, years: 9, faType: "UFA (TO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Rui Hachimura", pos: "PF/SF", age: 28, prior: "LAL", priorSalary: 17_000_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Luguentz Dort", pos: "PG/SG", age: 27, prior: "OKC", priorSalary: 16_500_000, years: 7, faType: "UFA (TO)", birdRights: "Full", status: "Signed (OKC)" },
+ { name: "Kevin Huerter", pos: "SG/SF", age: 27, prior: "DET", priorSalary: 16_250_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Mitchell Robinson", pos: "C/PF", age: 28, prior: "NYK", priorSalary: 15_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Kelly Olynyk", pos: "PF/C", age: 35, prior: "SAS", priorSalary: 13_125_000, years: 13, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Bruce Brown", pos: "SG/SF", age: 29, prior: "DEN", priorSalary: 12_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Coby White", pos: "PG/SG", age: 26, prior: "CHA", priorSalary: 12_000_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Robert Williams III", pos: "C/PF", age: 28, prior: "POR", priorSalary: 12_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Signed (POR)" },
+ { name: "Tyus Jones", pos: "PG/SG", age: 30, prior: "DEN", priorSalary: 12_000_000, years: 11, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Matisse Thybulle", pos: "SG/SF", age: 29, prior: "POR", priorSalary: 11_025_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Gabe Vincent", pos: "PG/SG", age: 30, prior: "ATL", priorSalary: 11_000_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Larry Nance Jr.", pos: "PF/C", age: 33, prior: "CLE", priorSalary: 11_000_000, years: 11, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Luke Kennard", pos: "PG/SG", age: 30, prior: "LAL", priorSalary: 11_000_000, years: 9, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Maxi Kleber", pos: "PF/SF", age: 34, prior: "LAL", priorSalary: 11_000_000, years: 9, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Al Horford", pos: "C/PF", age: 40, prior: "GSW", priorSalary: 10_000_000, years: 19, faType: "UFA (PO)", birdRights: "Full", status: "Signed (GSW)" },
+ { name: "Mike Conley", pos: "PG/SG", age: 38, prior: "MIN", priorSalary: 10_000_000, years: 19, faType: "UFA", birdRights: "Full", status: "Signed (BOS)" },
+ { name: "Kelly Oubre Jr.", pos: "SF/PF", age: 30, prior: "PHI", priorSalary: 8_182_575, years: 11, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Gary Trent Jr.", pos: "PG/SG", age: 27, prior: "MIL", priorSalary: 8_000_000, years: 8, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Kevon Looney", pos: "PF/SF", age: 30, prior: "NOP", priorSalary: 8_000_000, years: 11, faType: "UFA (TO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Quentin Grimes", pos: "PG/SG", age: 26, prior: "PHI", priorSalary: 8_000_000, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Simone Fontecchio", pos: "PF/SF", age: 30, prior: "MIA", priorSalary: 8_000_000, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Ayo Dosunmu", pos: "PG/SG", age: 26, prior: "MIN", priorSalary: 7_000_000, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Signed (MIN)" },
+ { name: "Dean Wade", pos: "PF/C", age: 29, prior: "CLE", priorSalary: 6_166_667, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Kenrich Williams", pos: "SG/SF", age: 31, prior: "OKC", priorSalary: 6_000_000, years: 8, faType: "UFA (TO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Precious Achiuwa", pos: "PF/SF", age: 26, prior: "SAC", priorSalary: 6_000_000, years: 6, faType: "UFA", birdRights: "Early-Bird", status: "Signed (SAC)" },
+ { name: "Tim Hardaway Jr.", pos: "SG/SF", age: 34, prior: "DEN", priorSalary: 6_000_000, years: 13, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jett Howard", pos: "PG/SG", age: 22, prior: "ORL", priorSalary: 5_793_195, years: 3, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Andre Drummond", pos: "C", age: 32, prior: "PHI", priorSalary: 5_000_000, years: 14, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "De'Anthony Melton", pos: "PG/SG", age: 28, prior: "GSW", priorSalary: 5_000_000, years: 8, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Marvin Bagley III", pos: "PF/SF", age: 27, prior: "DAL", priorSalary: 5_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Signed (DEN)" },
+ { name: "Moritz Wagner", pos: "PF/C", age: 29, prior: "ORL", priorSalary: 5_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Nick Richards", pos: "C", age: 28, prior: "CHI", priorSalary: 5_000_000, years: 6, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Kyle Lowry", pos: "PG/SG", age: 40, prior: "PHI", priorSalary: 4_500_000, years: 20, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Day'Ron Sharpe", pos: "C", age: 24, prior: "BKN", priorSalary: 4_000_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (BKN)" },
+ { name: "Dwight Powell", pos: "PF/C", age: 34, prior: "DAL", priorSalary: 4_000_000, years: 12, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jaxson Hayes", pos: "C/PF", age: 26, prior: "LAL", priorSalary: 4_000_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jeremy Sochan", pos: "PF/SF", age: 23, prior: "NYK", priorSalary: 4_000_000, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jose Alvarado", pos: "PG/SG", age: 28, prior: "NYK", priorSalary: 4_000_000, years: 5, faType: "UFA (PO)", birdRights: "Early-Bird", status: "Signed (NYK)" },
+ { name: "Kevin Love", pos: "PF/C", age: 37, prior: "UTA", priorSalary: 4_000_000, years: 18, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Landry Shamet", pos: "PG/SG", age: 29, prior: "NYK", priorSalary: 4_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Nicolas Batum", pos: "SG/SF", age: 37, prior: "LAC", priorSalary: 4_000_000, years: 18, faType: "UFA (TO)", birdRights: "Full", status: "Signed (LAC)" },
+ { name: "Ziaire Williams", pos: "PF/SF", age: 24, prior: "BKN", priorSalary: 4_000_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Garrett Temple", pos: "SG/SF", age: 40, prior: "TOR", priorSalary: 3_634_153, years: 16, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Joe Ingles", pos: "SF/PF", age: 38, prior: "MIN", priorSalary: 3_634_153, years: 12, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jordan Clarkson", pos: "PG/SG", age: 34, prior: "NYK", priorSalary: 3_634_153, years: 12, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Doug McDermott", pos: "PF/SF", age: 34, prior: "SAC", priorSalary: 3_500_000, years: 12, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Mason Plumlee", pos: "PF/C", age: 36, prior: "SAS", priorSalary: 3_500_000, years: 13, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Patrick Baldwin Jr.", pos: "PF/SF", age: 23, prior: "SAC", priorSalary: 3_498_319, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Russell Westbrook", pos: "PG/SG", age: 37, prior: "SAC", priorSalary: 3_303_771, years: 18, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "David Roddy", pos: "PF/SF", age: 25, prior: "DEN", priorSalary: 3_246_472, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Aaron Holiday", pos: "PG/SG", age: 29, prior: "HOU", priorSalary: 3_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Bismack Biyombo", pos: "C", age: 33, prior: "SAS", priorSalary: 3_000_000, years: 15, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "DeAndre Jordan", pos: "C", age: 37, prior: "NOP", priorSalary: 3_000_000, years: 18, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Gary Payton II", pos: "PG/SG", age: 33, prior: "GSW", priorSalary: 3_000_000, years: 10, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jae'Sean Tate", pos: "PF/SF", age: 30, prior: "HOU", priorSalary: 3_000_000, years: 6, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jeff Green", pos: "PF/SF", age: 39, prior: "HOU", priorSalary: 3_000_000, years: 19, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Jevon Carter", pos: "PG/SG", age: 30, prior: "ORL", priorSalary: 3_000_000, years: 8, faType: "UFA", birdRights: "Full", status: "Signed (ORL)" },
+ { name: "Jock Landale", pos: "C", age: 30, prior: "ATL", priorSalary: 3_000_000, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Nick Smith Jr.", pos: "PG/SG", age: 22, prior: "LAL", priorSalary: 3_000_000, years: 3, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Sandro Mamukelashvili", pos: "PF/C", age: 27, prior: "TOR", priorSalary: 3_000_000, years: 5, faType: "UFA (PO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Seth Curry", pos: "PG/SG", age: 35, prior: "GSW", priorSalary: 3_000_000, years: 13, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Wendell Moore Jr.", pos: "PG/SG", age: 24, prior: "DET", priorSalary: 2_959_891, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Thanasis Antetokounmpo", pos: "PF/SF", age: 33, prior: "MIL", priorSalary: 2_874_436, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Charles Bassey", pos: "C/PF", age: 25, prior: "GSW", priorSalary: 2_500_000, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Drew Eubanks", pos: "PF/C", age: 29, prior: "SAC", priorSalary: 2_500_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Josh Okogie", pos: "PG/SG", age: 27, prior: "HOU", priorSalary: 2_500_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Xavier Tillman", pos: "PF/SF", age: 27, prior: "CHA", priorSalary: 2_392_183, years: 6, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Collin Gillespie", pos: "PG/SG", age: 27, prior: "PHX", priorSalary: 2_378_870, years: 3, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Anthony Gill", pos: "PF/SF", age: 33, prior: "WAS", priorSalary: 2_000_000, years: 6, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Blake Wesley", pos: "PG/SG", age: 23, prior: "POR", priorSalary: 2_000_000, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jordan McLaughlin", pos: "PG/SG", age: 30, prior: "SAS", priorSalary: 2_000_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Lindy Waters III", pos: "PF/SF", age: 28, prior: "SAS", priorSalary: 2_000_000, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Trendon Watford", pos: "SG/SF", age: 25, prior: "PHI", priorSalary: 2_000_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Keon Ellis", pos: "PG/SG", age: 26, prior: "CLE", priorSalary: 1_701_903, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Josh Minott", pos: "PF/SF", age: 23, prior: "BKN", priorSalary: 1_500_000, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Killian Hayes", pos: "PG/SG", age: 24, prior: "SAC", priorSalary: 1_500_000, years: 6, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Tony Bradley", pos: "C/PF", age: 28, prior: "ATL", priorSalary: 1_500_000, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Brandon Williams", pos: "PG/SG", age: 26, prior: "DAL", priorSalary: 1_159_362, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Kyle Anderson", pos: "SF/PF", age: 32, prior: "MIN", priorSalary: 898_095, years: 12, faType: "UFA", birdRights: "Full", status: "Signed (TOR)" },
+ { name: "Christian Koloko", pos: "C", age: 26, prior: "ATL", priorSalary: 13_197, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "A.J. Lawson", pos: "PG/SG", age: 25, prior: "TOR", priorSalary: 1_988_598, years: 4, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Amir Coffey", pos: "SG/SF", age: 29, prior: "PHX", priorSalary: 3_942_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "Austin Reaves", pos: "PG/SG", age: 28, prior: "LAL", priorSalary: 12_976_362, years: 5, faType: "UFA (PO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Bones Hyland", pos: "PG/SG", age: 25, prior: "MIN", priorSalary: 2_306_233, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Bradley Beal", pos: "PG/SG", age: 33, prior: "LAC", priorSalary: 50_203_930, years: 14, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "Brook Lopez", pos: "C", age: 38, prior: "LAC", priorSalary: 23_000_000, years: 18, faType: "UFA (TO)", birdRights: "Full", status: "Signed (LAC)" },
+ { name: "D'Angelo Russell", pos: "PG/SG", age: 30, prior: "WAS", priorSalary: 18_692_307, years: 11, faType: "UFA (PO)", birdRights: "Full", status: "Signed (WAS)" },
+ { name: "Dalano Banton", pos: "PF/SF", age: 26, prior: "BOS", priorSalary: 2_165_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (BOS)" },
+ { name: "Dalen Terry", pos: "PF/SF", age: 23, prior: "PHI", priorSalary: 3_529_320, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (PHI)" },
+ { name: "Deandre Ayton", pos: "C", age: 27, prior: "LAL", priorSalary: 34_005_126, years: 8, faType: "UFA (PO)", birdRights: "Full", status: "Signed (WAS)" },
+ { name: "Dillon Jones", pos: "PF/SF", age: 24, prior: "NYK", priorSalary: 0, years: 2, faType: "Two-way UFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Dominick Barlow", pos: "PF/SF", age: 23, prior: "PHI", priorSalary: 2_019_706, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (PHI)" },
+ { name: "Gary Harris", pos: "PG/SG", age: 31, prior: "MIL", priorSalary: 13_000_000, years: 12, faType: "UFA (PO)", birdRights: "Full", status: "Signed (MIL)" },
+ { name: "Jamal Cain", pos: "PF/SF", age: 27, prior: "ORL", priorSalary: 2_019_706, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (ORL)" },
+ { name: "Jamaree Bouyea", pos: "PG/SG", age: 27, prior: "PHX", priorSalary: 0, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (PHX)" },
+ { name: "Javonte Green", pos: "PG/SG", age: 32, prior: "DET", priorSalary: 2_165_000, years: 7, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "JD Davison", pos: "PG/SG", age: 23, prior: "HOU", priorSalary: 2_165_000, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (HOU)" },
+ { name: "Jericho Sims", pos: "C", age: 27, prior: "MIL", priorSalary: 2_092_344, years: 5, faType: "UFA (PO)", birdRights: "Early-Bird", status: "Signed (MIL)" },
+ { name: "Jonathan Isaac", pos: "PF/SF", age: 28, prior: "ORL", priorSalary: 17_400_000, years: 9, faType: "UFA", birdRights: "Full", status: "Signed (ORL)" },
+ { name: "Jordan Goodwin", pos: "PG/SG", age: 27, prior: "PHX", priorSalary: 2_019_706, years: 5, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Julian Champagnie", pos: "PF/SF", age: 25, prior: "SAS", priorSalary: 3_000_000, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (SAS)" },
+ { name: "Kam Jones", pos: "PG/SG", age: 24, prior: "CHI", priorSalary: 0, years: 2, faType: "UFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Kentavious Caldwell-Pope", pos: "PG/SG", age: 33, prior: "MEM", priorSalary: 22_757_000, years: 13, faType: "UFA (PO)", birdRights: "Full", status: "Signed (MEM)" },
+ { name: "Kevin Porter Jr.", pos: "SG/SF", age: 26, prior: "MIL", priorSalary: 0, years: 6, faType: "UFA (PO)", birdRights: "Early-Bird", status: "Signed (MIL)" },
+ { name: "Kobe Brown", pos: "PF/SF", age: 26, prior: "IND", priorSalary: 2_588_400, years: 3, faType: "UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Marcus Smart", pos: "PG/SG", age: 32, prior: "LAL", priorSalary: 19_918_738, years: 12, faType: "UFA (PO)", birdRights: "Full", status: "Unsigned" },
+ { name: "MarJon Beauchamp", pos: "PF/SF", age: 25, prior: "PHI", priorSalary: 0, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Micah Potter", pos: "C", age: 28, prior: "IND", priorSalary: 2_087_519, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (IND)" },
+ { name: "Neemias Queta", pos: "C", age: 26, prior: "BOS", priorSalary: 2_165_000, years: 5, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (BOS)" },
+ { name: "Olivier-Maxence Prosper", pos: "PF/SF", age: 23, prior: "MEM", priorSalary: 2_733_960, years: 3, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (MEM)" },
+ { name: "Pat Connaughton", pos: "PG/SG", age: 33, prior: "CHA", priorSalary: 9_423_866, years: 11, faType: "UFA (TO)", birdRights: "Full", status: "Signed (CHA)" },
+ { name: "Ron Harper Jr.", pos: "SG/SF", age: 26, prior: "BOS", priorSalary: 1_867_722, years: 4, faType: "UFA (TO)", birdRights: "Early-Bird", status: "Signed (BOS)" },
+ { name: "Taurean Prince", pos: "PF/SF", age: 32, prior: "MIL", priorSalary: 4_516_000, years: 10, faType: "UFA (PO)", birdRights: "Full", status: "Signed (MIL)" },
+ { name: "Thomas Bryant", pos: "C/PF", age: 28, prior: "CLE", priorSalary: 2_800_000, years: 9, faType: "UFA", birdRights: "Full", status: "Signed (CLE)" },
+ { name: "Trae Young", pos: "PG/SG", age: 27, prior: "WAS", priorSalary: 43_031_940, years: 8, faType: "UFA", birdRights: "Full", status: "Unsigned" },
+ { name: "TyTy Washington Jr.", pos: "PG/SG", age: 24, prior: "LAC", priorSalary: 0, years: 4, faType: "Two-way UFA", birdRights: "Early-Bird", status: "Unsigned" },
+                /* ══ Restricted Free Agents (RFA) ══ */
+ { name: "Bennedict Mathurin", pos: "SG/SF", age: 24, prior: "LAC", priorSalary: 7_484_043, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Ousmane Dieng", pos: "PF/SF", age: 23, prior: "MIL", priorSalary: 5_266_551, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Signed (MIL)" },
+ { name: "Jalen Duren", pos: "C", age: 22, prior: "DET", priorSalary: 4_868_736, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Ochai Agbaji", pos: "PG/SG", age: 26, prior: "BKN", priorSalary: 4_681_591, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Mark Williams", pos: "C", age: 24, prior: "PHX", priorSalary: 4_500_253, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Tari Eason", pos: "PF/SF", age: 25, prior: "HOU", priorSalary: 4_064_312, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Walker Kessler", pos: "C", age: 24, prior: "UTA", priorSalary: 3_343_105, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Ariel Hukporti", pos: "C", age: 24, prior: "NYK", priorSalary: 2_872_666, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Peyton Watson", pos: "PG/SG", age: 23, prior: "DEN", priorSalary: 2_816_879, years: 4, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Keaton Wallace", pos: "PG/SG", age: 27, prior: "ATL", priorSalary: 2_296_274, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Jamal Shead", pos: "PG/SG", age: 23, prior: "TOR", priorSalary: 2_037_971, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (TOR)" },
+ { name: "Isaiah Livers", pos: "PF/SF", age: 27, prior: "PHX", priorSalary: 2_000_000, years: 4, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Rayan Rupert", pos: "SG/SF", age: 22, prior: "MEM", priorSalary: 1_744_366, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jalen Wilson", pos: "PF/SF", age: 25, prior: "BKN", priorSalary: 1_654_511, years: 3, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jamir Watkins", pos: "PF/SF", age: 24, prior: "WAS", priorSalary: 1_641_444, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (WAS)" },
+ { name: "Jalen Pickett", pos: "PG/SG", age: 26, prior: "DEN", priorSalary: 1_500_000, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Jaylen Clark", pos: "PG/SG", age: 24, prior: "MIN", priorSalary: 1_342_110, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Signed (MIN)" },
+ { name: "Keshad Johnson", pos: "PF/SF", age: 25, prior: "MIA", priorSalary: 1_340_130, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Mohamed Diawara", pos: "PF/SF", age: 21, prior: "NYK", priorSalary: 1_272_870, years: 1, faType: "RFA", birdRights: "Non-Bird", status: "Signed (NYK)" },
+ { name: "Jordan Miller", pos: "PG/SG", age: 26, prior: "LAC", priorSalary: 1_200_000, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Quinten Post", pos: "C", age: 26, prior: "GSW", priorSalary: 1_197_149, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Pat Spencer", pos: "PG/SG", age: 29, prior: "GSW", priorSalary: 857_804, years: 3, faType: "RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Spencer Jones", pos: "PF/SF", age: 25, prior: "DEN", priorSalary: 623_967, years: 2, faType: "RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Trevor Keels", pos: "PG/SG", age: 22, prior: "MIA", priorSalary: 197_514, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Tyrese Martin", pos: "PF/SF", age: 27, prior: "PHI", priorSalary: 193_857, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Norchad Omier", pos: "PF/SF", age: 24, prior: "LAC", priorSalary: 190_199, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Jalen Slawson", pos: "PF/SF", age: 26, prior: "IND", priorSalary: 160_938, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Olivier Sarr", pos: "C", age: 27, prior: "CLE", priorSalary: 149_965, years: 4, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Josh Oduro", pos: "C", age: 25, prior: "NOP", priorSalary: 146_307, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "John Tonje", pos: "PG/SG", age: 25, prior: "BOS", priorSalary: 7_315, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Alex Antetokounmpo", pos: "PF/SF", age: 24, prior: "MIL", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Alijah Martin", pos: "PG/SG", age: 24, prior: "TOR", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Amari Williams", pos: "PF/C", age: 24, prior: "BOS", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (BOS)" },
+ { name: "Andre Jackson Jr.", pos: "PG/SG", age: 24, prior: "MIL", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Antonio Reeves", pos: "PG/SG", age: 25, prior: "CHA", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Bez Mbeng", pos: "PG/SG", age: 23, prior: "UTA", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Branden Carlson", pos: "C", age: 27, prior: "OKC", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Signed (POR)" },
+ { name: "Brooks Barnhizer", pos: "PG/SG", age: 24, prior: "OKC", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Caleb Love", pos: "PG/SG", age: 24, prior: "POR", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Chaney Johnson", pos: "SG/SF", age: 24, prior: "BKN", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Signed (BKN)" },
+ { name: "Chris Mañon", pos: "PG/SG", age: 24, prior: "LAL", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Chucky Hepburn", pos: "PG/SG", age: 23, prior: "TOR", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Signed (TOR)" },
+ { name: "Colin Castleton", pos: "C", age: 26, prior: "ORL", priorSalary: 0, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Signed (ORL)" },
+ { name: "Craig Porter Jr.", pos: "PG/SG", age: 26, prior: "CLE", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (CLE)" },
+ { name: "Curtis Jones", pos: "PG/SG", age: 24, prior: "DEN", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Daeqwon Plowden", pos: "SG/SF", age: 27, prior: "SAC", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Daniss Jenkins", pos: "PG/SG", age: 24, prior: "DET", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (DET)" },
+ { name: "David Jones Garcia", pos: "PG/SG", age: 24, prior: "SAS", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Drew Timme", pos: "PF/SF", age: 25, prior: "LAL", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "E.J. Liddell", pos: "PF/SF", age: 25, prior: "BKN", priorSalary: 0, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Elijah Harkless", pos: "PG/SG", age: 26, prior: "UTA", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Enrique Freeman", pos: "PF/SF", age: 25, prior: "MIN", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "GG Jackson", pos: "PF/SF", age: 21, prior: "MEM", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (MEM)" },
+ { name: "Harrison Ingram", pos: "PF/SF", age: 23, prior: "SAS", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Hayden Gray", pos: "PG/SG", age: 23, prior: "UTA", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Hunter Dickinson", pos: "C", age: 25, prior: "NOP", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Isaiah Crawford", pos: "PF/SF", age: 24, prior: "HOU", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Jahmir Young", pos: "PG/SG", age: 25, prior: "MIA", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Jonathan Mogbo", pos: "PF/SF", age: 24, prior: "TOR", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Jordan Walsh", pos: "PG/SG", age: 22, prior: "BOS", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (BOS)" },
+ { name: "Julian Phillips", pos: "PF/SF", age: 22, prior: "MIN", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Karlo Matković", pos: "PF/C", age: 25, prior: "NOP", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (NOP)" },
+ { name: "Kevin McCullar Jr.", pos: "PG/SG", age: 25, prior: "NYK", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Kobe Sanders", pos: "PG/SG", age: 24, prior: "LAC", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Koby Brea", pos: "PG/SG", age: 23, prior: "PHX", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Signed (PHX)" },
+ { name: "Lachlan Olbrich", pos: "C", age: 22, prior: "CHI", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Leonard Miller", pos: "PF/SF", age: 22, prior: "CHI", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (CHI)" },
+ { name: "Mac McClung", pos: "PG/SG", age: 27, prior: "CHI", priorSalary: 0, years: 4, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Malachi Smith", pos: "PG/SG", age: 26, prior: "BKN", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (BKN)" },
+ { name: "Max Shulga", pos: "PG/SG", age: 24, prior: "BOS", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Mouhamadou Gueye", pos: "PF/SF", age: 27, prior: "CHI", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (CHI)" },
+ { name: "Mouhamed Gueye", pos: "PF/SF", age: 23, prior: "ATL", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (ATL)" },
+ { name: "Moussa Cisse", pos: "C", age: 23, prior: "DAL", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Nate Williams", pos: "PG/SG", age: 27, prior: "GSW", priorSalary: 0, years: 4, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Oscar Tshiebwe", pos: "PF/C", age: 26, prior: "UTA", priorSalary: 0, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Pelle Larsson", pos: "PG/SG", age: 25, prior: "MIA", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (MIA)" },
+ { name: "Ryan Nembhard", pos: "PG/SG", age: 23, prior: "DAL", priorSalary: 0, years: 1, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (DAL)" },
+ { name: "Sharife Cooper", pos: "PG/SG", age: 25, prior: "WAS", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Tolu Smith", pos: "PF/SF", age: 25, prior: "DET", priorSalary: 0, years: 2, faType: "RFA (TO)", birdRights: "Non-Bird", status: "Signed (DET)" },
+ { name: "Trayce Jackson-Davis", pos: "PF/SF", age: 26, prior: "TOR", priorSalary: 0, years: 3, faType: "RFA (TO)", birdRights: "Early-Bird", status: "Signed (TOR)" },
+ { name: "Trey Alexander", pos: "PG/SG", age: 23, prior: "NOP", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Signed (UTA)" },
+ { name: "Trey Jemison III", pos: "C", age: 26, prior: "NYK", priorSalary: 0, years: 3, faType: "Two-way RFA", birdRights: "Early-Bird", status: "Unsigned" },
+ { name: "Tyson Etienne", pos: "PG/SG", age: 26, prior: "BKN", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Vladislav Goldin", pos: "C", age: 25, prior: "MIA", priorSalary: 0, years: 1, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+ { name: "Yuki Kawamura", pos: "PG/SG", age: 25, prior: "CHI", priorSalary: 0, years: 2, faType: "Two-way RFA", birdRights: "Non-Bird", status: "Unsigned" },
+            ];
+// __FA_NORMALIZER_INJECTED__
+window.__faNormalizeContracts=(()=>{const POS={G:"PG/SG",F:"PF/SF",C:"C","G-F":"SG/SF","F-G":"SF/PF","C-F":"C/PF","F-C":"PF/C"};function f(v){if(v==null)return v;const s=String(v).trim().toLowerCase();if(!s)return v;if(s==="ufa")return"UFA";if(s==="rfa")return"RFA";if(s==="ufa 1")return"UFA (PO)";if(s==="ufa 2")return"UFA (TO)";if(s==="ufa 4"||s==="two-way ufa")return"UFA (TW)";if(s==="rfa 4"||s==="two-way rfa")return"RFA (TW)";return v}function p(v){if(!v)return v;const s=String(v).trim();return POS[s]||s}function y(v){if(typeof v==="number"&&Number.isFinite(v))return Math.max(0,Math.round(v));if(v==null||!String(v).trim())return 0;const s=String(v);const m=s.match(/^(\d+)/);if(m)return Math.max(0,parseInt(m[1],10));console.warn("[__faNormalize.years] Non-numeric value coerced to 0:",JSON.stringify(v));return 0}return function normalize(o){if(!o||typeof o!=="object")return;o.faType=f(o.faType);o.pos=p(o.pos);o.years=y(o.years)};})();
+if(Array.isArray(FREE_AGENTS))FREE_AGENTS.forEach(window.__faNormalizeContracts);
+
+            // __RFA_TO_DATA_HOLES__
+            // RFA (TO) entries with priorSalary: 0 are mostly two-way / minimum
+            // contracts or rookies on rookie scale. Their 2024-25 cap charges are
+            // small (~$600K–$2M) and need to be looked up individually. List:
+            //   Amari Williams (BOS), Andre Jackson Jr. (MIL), Bez Mbeng (UTA),
+            //   Craig Porter Jr. (CLE), Daniss Jenkins (DET), GG Jackson (MEM),
+            //   Hayden Gray (UTA), Jahmir Young (MIA), Jonathan Mogbo (TOR),
+            //   Jordan Walsh (BOS), Julian Phillips (MIN), Karlo Matković (NOP),
+            //   Kobe Sanders (LAC), Leonard Miller (CHI), Malachi Smith (BKN),
+            //   Max Shulga (BOS), Mouhamed Gueye (ATL), Pelle Larsson (MIA),
+            //   Ryan Nembhard (DAL), Tolu Smith (DET), Trayce Jackson-Davis (TOR)
+
+
+            const HEADSHOT_BASE = "https://cdn.nba.com/headshots/nba/latest/260x190";
+            const NAME_TO_ID = {};
+            FREE_AGENTS.forEach(p => { NAME_TO_ID[p.name] = p.id; });
+            const PLAYER_IDS = {
+              "Stephen Curry": 201939, "Joel Embiid": 203954, "Nikola Jokic": 203999,
+              "Kevin Durant": 201142, "Jayson Tatum": 1628369, "Anthony Davis": 203076,
+              "Giannis Antetokounmpo": 203507, "Jimmy Butler": 202710, "Jaylen Brown": 1627759,
+              "Devin Booker": 1626164, "Karl-Anthony Towns": 1626157, "LeBron James": 2544,
+              "Paul George": 202331, "Kawhi Leonard": 202695, "Zach LaVine": 203897,
+              "Cade Cunningham": 1630595, "Evan Mobley": 1630596, "Jamal Murray": 1627750,
+              "Lauri Markkanen": 1628374, "Donovan Mitchell": 1628378, "Trae Young": 1629027,
+              "Luka Doncic": 1629029, "Anthony Edwards": 1630162, "Tyrese Haliburton": 1630169,
+              "Pascal Siakam": 1627783, "Domantas Sabonis": 1627734, "OG Anunoby": 1628384,
+              "Zion Williamson": 1629627, "Darius Garland": 1629636, "Ja Morant": 1629630,
+              "James Harden": 201935, "Scottie Barnes": 1630567, "Franz Wagner": 1630532,
+              "Shai Gilgeous-Alexander": 1628983, "Michael Porter Jr.": 1629008, "Brandon Ingram": 1627742,
+              "Tyrese Maxey": 1630178, "LaMelo Ball": 1630163, "De'Aaron Fox": 1628368,
+              "Bam Adebayo": 1628389, "Desmond Bane": 1630217, "Kyrie Irving": 202681,
+              "Jaren Jackson Jr.": 1628991, "Jalen Suggs": 1630598, "Rudy Gobert": 203497,
+              "Jalen Brunson": 1628973, "Alperen Şengun": 1630578, "Jalen Green": 1630224,
+              "Khris Middleton": 203114, "Immanuel Quickley": 1630193, "Jrue Holiday": 201950,
+              "Jerami Grant": 203924, "Jordan Poole": 1629673, "Tyler Herro": 1629639,
+              "Julius Randle": 203944, "Dejounte Murray": 1627749, "Kristaps Porziņģis": 204001,
+              "CJ McCollum": 203468, "Jalen Johnson": 1630553, "Isaiah Hartenstein": 1628392,
+              "Nikola Vucevic": 202696,
+            };
+            Object.assign(NAME_TO_ID, PLAYER_IDS);
+
+            const OPTIONS_DATA = [
+              { name: "Kevin Durant", team: "HOU", optType: "Player Option", value: 53282608, deadline: "Jun 29, 2026", decision: "Opted In", note: "2 yrs remain; traded to HOU mid-season" },
+              { name: "James Harden", team: "CLE", optType: "Player Option", value: 36346154, deadline: "Jun 29, 2026", decision: "Opted Out", note: "Free agent" },
+              { name: "Kyrie Irving", team: "DAL", optType: "Player Option", value: 36566002, deadline: "Jun 24, 2026", decision: "Opted Out", note: "Free agent this summer" },
+              { name: "LeBron James", team: "LAL", optType: "Player Option", value: 52627153, deadline: "Jun 29, 2026", decision: "Opted In", note: "Returning to Lakers" },
+              { name: "Kawhi Leonard", team: "LAC", optType: "Player Option", value: 50000000, deadline: "Jun 29, 2026", decision: "Likely Opt-Out", note: "Pursuing max extension" },
+              { name: "Paul George", team: "PHI", optType: "Player Option", value: 51666090, deadline: "Jun 29, 2026", decision: "TBD", note: "Health dependent" },
+              { name: "Khris Middleton", team: "DAL", optType: "Player Option", value: 33296296, deadline: "Jun 29, 2026", decision: "Opted In", note: "Staying with DAL" },
+              { name: "Zach LaVine", team: "SAC", optType: "Player Option", value: 47499660, deadline: "Jun 29, 2026", decision: "TBD", note: "Could test market" },
+              { name: "Nikola Vucevic", team: "ORL", optType: "Team Option", value: 20000000, deadline: "Jun 29, 2026", decision: "Team will exercise", note: "Y2 of veteran deal" },
+              { name: "Cooper Flagg", team: "WAS", optType: "Team Option", value: 10523040, deadline: "Oct 31, 2026", decision: "Team will exercise", note: "Y4 of rookie deal" }
+            ];
+
+            const TEAM_CAP_DATA = [
+              { name: "Brooklyn Nets", abbr: "BKN", conf: "East", committed: 150960352, players: 15, space: 3686648, status: "under-cap" },
+              { name: "Memphis Grizzlies", abbr: "MEM", conf: "West", committed: 157650285, players: 15, space: 0, status: "over-cap" },
+              { name: "Utah Jazz", abbr: "UTA", conf: "West", committed: 173117343, players: 15, space: 0, status: "over-cap" },
+              { name: "Milwaukee Bucks", abbr: "MIL", conf: "East", committed: 182099997, players: 16, space: 0, status: "over-cap" },
+              { name: "Charlotte Hornets", abbr: "CHA", conf: "East", committed: 183806358, players: 15, space: 0, status: "over-cap" },
+              { name: "San Antonio Spurs", abbr: "SAS", conf: "West", committed: 183990669, players: 15, space: 0, status: "over-cap" },
+              { name: "Chicago Bulls", abbr: "CHI", conf: "East", committed: 187673271, players: 15, space: 0, status: "over-cap" },
+              { name: "Oklahoma City Thunder", abbr: "OKC", conf: "West", committed: 188057857, players: 15, space: 0, status: "over-tax" },
+              { name: "Indiana Pacers", abbr: "IND", conf: "East", committed: 191900207, players: 15, space: 0, status: "over-tax" },
+              { name: "Detroit Pistons", abbr: "DET", conf: "East", committed: 193082507, players: 15, space: 0, status: "over-tax" },
+              { name: "Atlanta Hawks", abbr: "ATL", conf: "East", committed: 193255583, players: 15, space: 0, status: "over-tax" },
+              { name: "Orlando Magic", abbr: "ORL", conf: "East", committed: 194063662, players: 15, space: 0, status: "over-tax" },
+              { name: "Boston Celtics", abbr: "BOS", conf: "East", committed: 194526296, players: 15, space: 0, status: "over-tax" },
+              { name: "Toronto Raptors", abbr: "TOR", conf: "East", committed: 194966020, players: 15, space: 0, status: "over-tax" },
+              { name: "Portland Trail Blazers", abbr: "POR", conf: "West", committed: 197927822, players: 16, space: 0, status: "over-apron1" },
+              { name: "Miami Heat", abbr: "MIA", conf: "East", committed: 197952062, players: 15, space: 0, status: "over-apron1" },
+              { name: "LA Clippers", abbr: "LAC", conf: "West", committed: 199044230, players: 15, space: 0, status: "over-apron1" },
+              { name: "Philadelphia 76ers", abbr: "PHI", conf: "East", committed: 199898431, players: 15, space: 0, status: "over-apron1" },
+              { name: "Dallas Mavericks", abbr: "DAL", conf: "West", committed: 200372430, players: 15, space: 0, status: "over-apron1" },
+              { name: "Denver Nuggets", abbr: "DEN", conf: "West", committed: 200743895, players: 15, space: 0, status: "over-apron1" },
+              { name: "Houston Rockets", abbr: "HOU", conf: "West", committed: 201412484, players: 15, space: 0, status: "over-apron1" },
+              { name: "New Orleans Pelicans", abbr: "NOP", conf: "West", committed: 207453274, players: 15, space: 0, status: "over-apron1" },
+              { name: "Phoenix Suns", abbr: "PHX", conf: "West", committed: 207796989, players: 15, space: 0, status: "over-apron1" },
+              { name: "New York Knicks", abbr: "NYK", conf: "East", committed: 209823691, players: 15, space: 0, status: "over-apron2" },
+              { name: "Los Angeles Lakers", abbr: "LAL", conf: "West", committed: 211399497, players: 15, space: 0, status: "over-apron2" },
+              { name: "Sacramento Kings", abbr: "SAC", conf: "West", committed: 213853369, players: 15, space: 0, status: "over-apron2" },
+              { name: "Cleveland Cavaliers", abbr: "CLE", conf: "East", committed: 226181970, players: 15, space: 0, status: "over-apron2" },
+              { name: "Minnesota Timberwolves", abbr: "MIN", conf: "West", committed: 228841297, players: 15, space: 0, status: "over-apron2" },
+              { name: "Washington Wizards", abbr: "WAS", conf: "East", committed: 232033397, players: 15, space: 0, status: "over-apron2" },
+              { name: "Golden State Warriors", abbr: "GSW", conf: "West", committed: 234222725, players: 15, space: 0, status: "over-apron2" }
+            ];
+
+            /* ══ Helpers ══ */
+            function fmt(n) {
+                if (n >= 1_000_000)
+                    return "$" + (n / 1_000_000).toFixed(1) + "M";
+                if (n >= 1_000) return "$" + (n / 1_000).toFixed(0) + "K";
+                return "$" + n;
+            }
+
+            function salaryTier(s) {
+                if (s >= 48_000_000) return "salary-tier-max";
+                if (s >= 20_000_000) return "salary-tier-high";
+                if (s >= 8_000_000) return "salary-tier-mid";
+                return "salary-tier-low";
+            }
+
+            function typeBadge(t, opt) {
+                const optTag = opt
+                    ? `<span class="option-tag option-${opt === "PO" ? "po" : opt === "TO" ? "to" : "etd"}">${opt}</span>`
+                    : "";
+                const cls =
+                    {
+                        supermax: "ct-supermax",
+                        max: "ct-max",
+                        rookie: "ct-rookie",
+                        vet: "ct-vet",
+                        "two-way": "ct-two-way",
+                        standard: "ct-standard",
+                    }[t] || "ct-standard";
+                const label =
+                    {
+                        supermax: "SUPERMAX",
+                        max: "MAX",
+                        rookie: "ROOKIE",
+                        vet: "VET",
+                        "two-way": "TWO-WAY",
+                        standard: "STD",
+                        ro: "R.O.",
+                    }[t] || t.toUpperCase();
+                return `<span class="ct-badge ${cls}">${label}</span>${optTag}`;
+            }
+
+            function barColor(pct) {
+                if (pct > 32) return "#ffd740";
+                if (pct > 20) return "#00e676";
+                if (pct > 10) return "#2979ff";
+                return "#546e7a";
+            }
+
+            function capBarColor(status) {
+                if (status === "over-apron1" || status === "over-apron2")
+                    return "#ff1744";
+                if (status === "over-tax") return "#ff5722";
+                if (status === "near-tax") return "#ffd740";
+                return "#00e676";
+            }
+
+            /* ══ Tab switching ══ */
+            document.querySelectorAll(".sc-page-tab").forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    document
+                        .querySelectorAll(".sc-page-tab")
+                        .forEach((t) => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    const id = tab.dataset.tab;
+                    document
+                        .querySelectorAll(".sc-section")
+                        .forEach((s) => s.classList.remove("visible"));
+                    document
+                        .getElementById("tab-" + id)
+                        .classList.add("visible");
+                    // sync left nav
+                    document
+                        .querySelectorAll(".sc-nav-item")
+                        .forEach((n) => n.classList.remove("active"));
+                    document
+                        .querySelector(`.sc-nav-item[data-nav="${id}"]`)
+                        ?.classList.add("active");
+                });
+            });
+
+            document
+                .querySelectorAll(".sc-nav-item[data-nav]")
+                .forEach((item) => {
+                    item.addEventListener("click", () => {
+                        document
+                            .querySelectorAll(".sc-page-tab")
+                            .forEach((t) => t.classList.remove("active"));
+                        document
+                            .querySelector(
+                                `.sc-page-tab[data-tab="${item.dataset.nav}"]`,
+                            )
+                            ?.classList.add("active");
+                        document
+                            .querySelectorAll(".sc-section")
+                            .forEach((s) => s.classList.remove("visible"));
+                        document
+                            .getElementById("tab-" + item.dataset.nav)
+                            ?.classList.add("visible");
+                        document
+                            .querySelectorAll(".sc-nav-item")
+                            .forEach((n) => n.classList.remove("active"));
+                        item.classList.add("active");
+                    });
+                });
+
+            /* ══ Salary Table ══ */
+            let salarySort = { col: "salary", dir: "desc" };
+            let salaryPos = "all";
+            let salarySearch = "";
+
+            function renderSalaryTable() {
+                const tbody = document.getElementById("salaryTbody");
+                let rows = [...SALARY_DATA];
+
+                if (salaryPos !== "all")
+                    rows = rows.filter((r) => r.pos === salaryPos);
+                if (salarySearch) {
+                    const q = salarySearch.toLowerCase();
+                    rows = rows.filter(
+                        (r) =>
+                            r.name.toLowerCase().includes(q) ||
+                            r.team.toLowerCase().includes(q) ||
+                            r.abbr.toLowerCase().includes(q),
+                    );
+                }
+
+                rows.sort((a, b) => {
+                    const av =
+                        a[
+                            salarySort.col === "salary"
+                                ? "salary"
+                                : salarySort.col === "total"
+                                  ? "total"
+                                  : salarySort.col === "years"
+                                    ? "years"
+                                    : "salary"
+                        ];
+                    const bv =
+                        b[
+                            salarySort.col === "salary"
+                                ? "salary"
+                                : salarySort.col === "total"
+                                  ? "total"
+                                  : salarySort.col === "years"
+                                    ? "years"
+                                    : "salary"
+                        ];
+                    return salarySort.dir === "desc" ? bv - av : av - bv;
+                });
+
+                const capPct = (s) => ((s / CAP) * 100).toFixed(1);
+                const barW = (s) =>
+                    Math.min(100, (s / 62_000_000) * 100).toFixed(1);
+
+                tbody.innerHTML = rows
+                    .map((p, i) => {
+                        const logo =
+                            typeof TeamLogos !== "undefined"
+                                ? TeamLogos.getLogo("nba", p.abbr)
+                                : null;
+                        const teamCell = logo
+                            ? `<div class="team-logo-cell"><img src="${logo}" alt="${p.abbr}"> ${p.abbr}</div>`
+                            : `<div class="team-logo-cell">${p.abbr}</div>`;
+
+                        const pct = capPct(p.salary);
+                        const bw = barW(p.salary);
+                        const col = barColor(parseFloat(pct));
+                        const pid = NAME_TO_ID[p.name];
+                        const fav = pid ? `<img src="${HEADSHOT_BASE}/${pid}.png" alt="${p.name}" loading="lazy" onerror='this.outerHTML="<i class=\\"fa-solid fa-user\\"></i>"' style="width:32px;height:32px;object-fit:cover;border-radius:50%;">` : `<i class="fa-solid fa-user"></i>`;
+
+                        return `<tr class="${p.type === "supermax" ? "highlighted" : ""}">
+      <td style="color:var(--sc-muted);font-size:12px;">${i + 1}</td>
+      <td>
+        <div class="player-cell">
+          <div class="player-avatar-sm">${fav}</div>
+          <div class="player-info-cell">
+            <span class="player-name-link">${p.name}</span>
+            <span class="player-pos-team">${p.pos}</span>
+          </div>
+        </div>
+      </td>
+      <td>${teamCell}</td>
+      <td class="num"><span class="salary-val ${salaryTier(p.salary)}">${fmt(p.salary)}</span></td>
+      <td class="num">
+        <div class="cap-bar-wrap">
+          <div class="cap-bar-track"><div class="cap-bar-fill" style="width:${bw}%;background:${col};"></div></div>
+          <span style="font-size:12px;color:${col};min-width:38px;text-align:right;">${pct}%</span>
+        </div>
+      </td>
+      <td>${typeBadge(p.type, p.option)}</td>
+      <td class="num" style="color:var(--sc-muted);">${p.years}y</td>
+      <td class="num" style="font-size:12px;color:var(--sc-muted);">${fmt(p.total)}</td>
+      <td><span class="ct-badge ct-standard" style="font-size:9px;">${p.type.toUpperCase()}</span></td>
+      <td class="num" style="font-size:12px;color:var(--sc-muted);">${fmt(p.salary)}</td>
+    </tr>`;
+                    })
+                    .join("");
+            }
+
+            document
+                .getElementById("salarySearch")
+                .addEventListener("input", (e) => {
+                    salarySearch = e.target.value;
+                    renderSalaryTable();
+                });
+
+            document
+                .querySelectorAll("#posFilter .sc-filter-tab")
+                .forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll("#posFilter .sc-filter-tab")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        salaryPos = btn.dataset.pos;
+                        renderSalaryTable();
+                    });
+                });
+
+            document
+                .querySelectorAll(".sc-table th[data-col]")
+                .forEach((th) => {
+                    th.addEventListener("click", () => {
+                        const col = th.dataset.col;
+                        if (salarySort.col === col) {
+                            salarySort.dir =
+                                salarySort.dir === "desc" ? "asc" : "desc";
+                        } else {
+                            salarySort = { col, dir: "desc" };
+                        }
+                        document
+                            .querySelectorAll(".sc-table th")
+                            .forEach((h) =>
+                                h.classList.remove("sort-asc", "sort-desc"),
+                            );
+                        th.classList.add(
+                            salarySort.dir === "asc" ? "sort-asc" : "sort-desc",
+                        );
+                        renderSalaryTable();
+                    });
+                });
+
+            /* ══ Team Cap Grid ══ */
+            function renderTeamCap(conf = "all", sortBy = "space") {
+                const grid = document.getElementById("teamCapGrid");
+                let teams = [...TEAM_CAP_DATA];
+                if (conf !== "all")
+                    teams = teams.filter((t) => t.conf === conf);
+                teams.sort((a, b) =>
+                    sortBy === "space"
+                        ? b.space - a.space
+                        : sortBy === "committed"
+                          ? b.committed - a.committed
+                          : b.players - a.players,
+                );
+
+                grid.innerHTML = teams
+                    .map((t) => {
+                        const logo =
+                            typeof TeamLogos !== "undefined"
+                                ? TeamLogos.getLogo("nba", t.abbr)
+                                : null;
+                        const logoEl = logo
+                            ? `<img src="${logo}" alt="${t.abbr}">`
+                            : `<span style="width:36px;height:36px;background:#333;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${t.abbr}</span>`;
+                        const spaceColor = t.space > 0 ? "under" : "over";
+                        const barPct = Math.min(
+                            100,
+                            (t.committed / 200_000_000) * 100,
+                        );
+                        const barFill = capBarColor(t.status);
+                        const taxLine = 170_500_000;
+                        const isOverTax = t.committed > taxLine;
+                        const taxDiff = isOverTax
+                            ? `+${fmt(t.committed - taxLine)} over tax`
+                            : `${fmt(taxLine - t.committed)} under tax`;
+
+                        return `<div class="team-cap-card">
+      <div class="team-cap-card-header">
+        ${logoEl}
+        <div>
+          <div class="tc-name">${t.name}</div>
+          <div class="tc-conf">${t.conf}ern Conference · ${t.players} players</div>
+        </div>
+      </div>
+      <div class="tc-row"><span class="tc-label">Total Committed</span><span class="tc-value">${fmt(t.committed)}</span></div>
+      <div class="tc-row"><span class="tc-label">Cap Space</span><span class="tc-value ${spaceColor}">${t.space > 0 ? fmt(t.space) : "—"}</span></div>
+      <div class="tc-row"><span class="tc-label">Tax Status</span><span class="tc-value ${isOverTax ? "over" : "under"}">${isOverTax ? "Over Tax" : "Under Tax"}</span></div>
+      <div class="tc-row"><span class="tc-label">Tax Diff</span><span class="tc-value ${isOverTax ? "warning" : ""}" style="font-size:11px;">${taxDiff}</span></div>
+      <div class="tc-bar-wrap">
+        <div class="tc-bar-label"><span>Cap %</span><span>${Math.round(barPct)}%</span></div>
+        <div class="tc-bar-track"><div class="tc-bar-fill" style="width:${barPct}%;background:${barFill};"></div></div>
+      </div>
+    </div>`;
+                    })
+                    .join("");
+            }
+
+            document
+                .querySelectorAll("#confFilter .sc-filter-tab")
+                .forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll("#confFilter .sc-filter-tab")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        renderTeamCap(
+                            btn.dataset.conf,
+                            document.getElementById("capSortSel").value,
+                        );
+                    });
+                });
+            document
+                .getElementById("capSortSel")
+                .addEventListener("change", (e) => {
+                    const activeConf =
+                        document.querySelector(
+                            "#confFilter .sc-filter-tab.active",
+                        )?.dataset.conf || "all";
+                    renderTeamCap(activeConf, e.target.value);
+                });
+
+            /* ══ Free Agents Table ══ */
+            let faFilter = "all";
+            let faSearch = "";
+            let faPosFilter = "all";
+            let faExpFilter = "all";
+
+            function teamColor(t) {
+                const colors = {
+                    ATL:"#e03a3e", BOS:"#007a33", BKN:"#000000", CHA:"#1d1160", CHI:"#ce1141",
+                    CLE:"#860038", DAL:"#00538c", DEN:"#0e2240", DET:"#c8102e", GSW:"#1d428a",
+                    HOU:"#ce1141", IND:"#002d62", LAC:"#c8102e", LAL:"#552583", MEM:"#5d76a9",
+                    MIA:"#98002e", MIL:"#00471b", MIN:"#0c2340", NOP:"#c8102e", NYK:"#f58426",
+                    OKC:"#007ac1", ORL:"#0077c0", PHI:"#006bb6", PHX:"#1d1160", POR:"#e03a3e",
+                    SAC:"#5a2d82", SAS:"#c4ced4", TOR:"#ce1141", UTA:"#002b5c", WAS:"#002b5c"
+                };
+                return colors[t] || "#666";
+            }
+
+            function renderFATable() {
+                const tbody = document.getElementById("faTbody");
+                let rows = [...FREE_AGENTS];
+                if (faFilter !== "all")
+                    rows = rows.filter((r) => r.faType === faFilter || r.faType.includes(faFilter));
+                if (faPosFilter !== "all")
+                    rows = rows.filter((r) => r.pos.includes(faPosFilter));
+                if (faExpFilter !== "all") {
+                    const [lo, hi] = faExpFilter === "7+"
+                        ? [7, Infinity]
+                        : faExpFilter.split("-").map(Number);
+                    rows = rows.filter((r) => r.years >= lo && r.years <= hi);
+                }
+                if (faSearch) {
+                    const q = faSearch.toLowerCase();
+                    rows = rows.filter(
+                        (r) =>
+                            r.name.toLowerCase().includes(q) ||
+                            r.prior.toLowerCase().includes(q),
+                    );
+                }
+                tbody.innerHTML = rows
+                    .map((p) => {
+                        const logo =
+                            typeof TeamLogos !== "undefined"
+                                ? TeamLogos.getLogo("nba", p.prior)
+                                : null;
+                        const teamEl = logo
+                            ? `<img src="${logo}" alt="${p.prior}" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:5px;">${p.prior}`
+                            : p.prior;
+                        const statusColor =
+                            p.status === "Pending"
+                                ? "var(--sc-gold)"
+                                : p.status === "Unsigned"
+                                  ? "var(--sc-muted)"
+                                  : "var(--sc-green)";
+                        const typeCls =
+                            p.faType.startsWith("UFA") ? "ct-standard" : "ct-ro";
+                        return `<tr>
+      <td>
+        <div class="player-cell">
+          <div class="player-avatar-sm"><img src="${HEADSHOT_BASE}/${p.id}.png" alt="${p.name}" loading="lazy" onerror='this.outerHTML="<i class=\\"fa-solid fa-user\\"></i>"' style="width:32px;height:32px;object-fit:cover;border-radius:50%;"></div>
+          <div class="player-info-cell">
+            <span class="player-name-link">${p.name}</span>
+            <span class="player-pos-team">${p.pos}</span>
+          </div>
+        </div>
+      </td>
+      <td><strong>${p.pos}</strong></td>
+      <td>${p.age}</td>
+      <td>${teamEl}</td>
+      <td><span class="ct-badge" style="background:${teamColor(p.team)};color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;">${p.team}</span></td>
+      <td class="num"><span class="salary-val ${salaryTier(p.priorSalary)}">${fmt(p.priorSalary)}</span></td>
+      <td class="num">${p.years || 0}</td>
+      <td><span class="ct-badge ${typeCls}">${p.faType}</span></td>
+      <td style="font-size:12px;color:var(--sc-muted);">${p.birdRights}</td>
+      <td><span style="font-size:12px;font-weight:600;color:${statusColor};">${p.status}</span></td>
+    </tr>`;
+                    })
+                    .join("");
+            }
+
+            document
+                .getElementById("faSearch")
+                .addEventListener("input", (e) => {
+                    faSearch = e.target.value;
+                    renderFATable();
+                });
+            document
+                .querySelectorAll("#faTypeFilter .sc-filter-tab")
+                .forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll("#faTypeFilter .sc-filter-tab")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        faFilter = btn.dataset.fa;
+                        renderFATable();
+                    });
+                });
+            document
+                .getElementById("faPosFilter")
+                ?.querySelectorAll(".sc-filter-tab")
+                .forEach((btn) =>
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll("#faPosFilter .sc-filter-tab")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        faPosFilter = btn.dataset.pos;
+                        renderFATable();
+                    }),
+                );
+            document
+                .getElementById("faExpFilter")
+                ?.querySelectorAll(".sc-filter-tab")
+                .forEach((btn) =>
+                    btn.addEventListener("click", () => {
+                        document
+                            .querySelectorAll("#faExpFilter .sc-filter-tab")
+                            .forEach((b) => b.classList.remove("active"));
+                        btn.classList.add("active");
+                        faExpFilter = btn.dataset.exp;
+                        renderFATable();
+                    }),
+                );
+
+            /* ══ Extensions / Options Table ══ */
+            function renderExtTable() {
+                const tbody = document.getElementById("extTbody");
+                tbody.innerHTML = OPTIONS_DATA.map((p) => {
+                    const logo =
+                        typeof TeamLogos !== "undefined"
+                            ? TeamLogos.getLogo("nba", p.team)
+                            : null;
+                    const teamEl = logo
+                        ? `<img src="${logo}" alt="${p.team}" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:5px;">${p.team}`
+                        : p.team;
+                    const decColor = p.decision.includes("Opt-In")
+                        ? "var(--sc-green)"
+                        : p.decision.includes("Opt-Out")
+                          ? "var(--sc-red)"
+                          : p.decision.includes("exercise")
+                            ? "var(--sc-blue)"
+                            : "var(--sc-gold)";
+                    const optType = p.optType;
+                    const optCls = optType.includes("Player")
+                        ? "ct-ro"
+                        : optType.includes("Team")
+                          ? "ct-max"
+                          : "ct-standard";
+                    const pid = NAME_TO_ID[p.name];
+                    const fav = pid ? `<img src="${HEADSHOT_BASE}/${pid}.png" alt="${p.name}" loading="lazy" onerror='this.outerHTML="<i class=\\"fa-solid fa-user\\"></i>"' style="width:32px;height:32px;object-fit:cover;border-radius:50%;">` : `<i class="fa-solid fa-user"></i>`;
+                    return `<tr>
+      <td>
+        <div class="player-cell">
+          <div class="player-avatar-sm">${fav}</div>
+          <div class="player-info-cell">
+            <span class="player-name-link">${p.name}</span>
+          </div>
+        </div>
+      </td>
+      <td>${teamEl}</td>
+      <td><span class="ct-badge ${optCls}" style="font-size:10px;">${optType}</span></td>
+      <td class="num"><span class="salary-val ${salaryTier(p.value)}">${fmt(p.value)}</span></td>
+      <td style="font-size:12px;color:var(--sc-muted);">${p.deadline}</td>
+      <td style="font-size:12px;font-weight:600;color:${decColor};">${p.decision}</td>
+      <td style="font-size:11px;color:var(--sc-muted);">${p.note}</td>
+    </tr>`;
+                }).join("");
+            }
+
+            /* ══ League Breakdown ══ */
+            function renderBreakdown() {
+                const bars = document.getElementById("breakdownBars");
+                const breakdown = [
+                    {
+                        label: "Point Guards",
+                        total: SALARY_DATA.filter((p) => p.pos === "PG").reduce(
+                            (a, b) => a + b.salary,
+                            0,
+                        ),
+                        color: "#2979ff",
+                    },
+                    {
+                        label: "Shooting Guards",
+                        total: SALARY_DATA.filter((p) => p.pos === "SG").reduce(
+                            (a, b) => a + b.salary,
+                            0,
+                        ),
+                        color: "#00e676",
+                    },
+                    {
+                        label: "Small Forwards",
+                        total: SALARY_DATA.filter((p) => p.pos === "SF").reduce(
+                            (a, b) => a + b.salary,
+                            0,
+                        ),
+                        color: "#ff5722",
+                    },
+                    {
+                        label: "Power Forwards",
+                        total: SALARY_DATA.filter((p) => p.pos === "PF").reduce(
+                            (a, b) => a + b.salary,
+                            0,
+                        ),
+                        color: "#ffd740",
+                    },
+                    {
+                        label: "Centers",
+                        total: SALARY_DATA.filter((p) => p.pos === "C").reduce(
+                            (a, b) => a + b.salary,
+                            0,
+                        ),
+                        color: "#e040fb",
+                    },
+                    {
+                        label: "Max Contracts",
+                        total: SALARY_DATA.filter(
+                            (p) => p.type === "max" || p.type === "supermax",
+                        ).reduce((a, b) => a + b.salary, 0),
+                        color: "#ffd740",
+                    },
+                    {
+                        label: "Rookie Scale",
+                        total: SALARY_DATA.filter(
+                            (p) => p.type === "rookie",
+                        ).reduce((a, b) => a + b.salary, 0),
+                        color: "#ff5722",
+                    },
+                    {
+                        label: "Veteran Min",
+                        total: SALARY_DATA.filter(
+                            (p) => p.type === "vet",
+                        ).reduce((a, b) => a + b.salary, 0),
+                        color: "#546e7a",
+                    },
+                ];
+                const max = Math.max(...breakdown.map((b) => b.total));
+                bars.innerHTML = breakdown
+                    .map((b) => {
+                        const pct = ((b.total / max) * 100).toFixed(1);
+                        return `<div class="sb-bar-row">
+      <div class="sb-bar-label">${b.label}</div>
+      <div class="sb-bar-track">
+        <div class="sb-bar-fill" style="width:${pct}%;background:${b.color};">${fmt(b.total)}</div>
+      </div>
+      <div class="sb-bar-total" style="color:${b.color};">${fmt(b.total)}</div>
+    </div>`;
+                    })
+                    .join("");
+            }
+
+            /* ══ Init ══ */
+            async function init() {
+                if (typeof TeamLogos !== "undefined") {
+                    await TeamLogos.loadAll();
+                }
+                renderSalaryTable();
+                renderTeamCap();
+                renderFATable();
+                renderExtTable();
+                renderBreakdown();
+            }
+            init();
+        </script>
+    </body>
+</html>
