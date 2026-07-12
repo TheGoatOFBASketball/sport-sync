@@ -170,9 +170,111 @@ async function fetchJSON(url, options = {}) {
   }
 }
 
+// ═══ PROXY URL CONFIG (localStorage-configurable, default localhost:8000) ═══
+// The katana_server proxy base URL is now user-configurable so a deploy on a
+// non-default host/port (e.g. https://my-proxy.example.com) doesn't require
+// editing source. Default fallback is localhost:8000 for the local-dev case.
+// Constants live in module scope (no globals on window) so other sport proxy
+// callers can read the same value.
+const PROXY_URL_KEY = 'SPORTSYNC_PROXY_URL';
+const PROXY_URL_DEFAULT = 'http://localhost:8000';
+const PROXY_DISMISS_KEY = 'SPORTSYNC_PROXY_BANNER_DISMISSED';
+
+function getProxyBaseUrl() {
+  try {
+    const raw = localStorage.getItem(PROXY_URL_KEY);
+    if (!raw) return PROXY_URL_DEFAULT;
+    const trimmed = String(raw).trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//.test(trimmed)) return PROXY_URL_DEFAULT;
+    return trimmed;
+  } catch (_) {
+    return PROXY_URL_DEFAULT;
+  }
+}
+
+function setProxyBaseUrl(url) {
+  try {
+    const trimmed = String(url || '').trim().replace(/\/+$/, '');
+    if (!/^https?:\/\//.test(trimmed)) return false;
+    localStorage.setItem(PROXY_URL_KEY, trimmed);
+    // Reset the per-URL dismiss so the user sees the banner again on a new
+    // URL (otherwise the same dismissed flag would silently swallow the
+    // warning for the new endpoint until refresh).
+    try {
+      const cur = localStorage.getItem(PROXY_DISMISS_KEY);
+      if (cur && cur !== trimmed) localStorage.removeItem(PROXY_DISMISS_KEY);
+    } catch (_) {}
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+// Side-channel that the frontend reads to decide whether to surface the
+// "nba.com proxy unreachable" banner. Banner UX inherently needs
+// module-level coordination (the parser runs in a different function from
+// the renderer) so a small explicitly-named namespace is cleaner than
+// passing tuple-return-values everywhere. The badge itself still reads
+// `__provenance` off each parsed game, so this is isolated to banner UX.
+// Module-local request sequence counter so concurrent fetches don't trample
+// the URL the user just saved (a slow fetch landing AFTER Save back to the
+// old URL would otherwise re-show the wrong proxy in the banner).
+const PROXY_STATUS = { url: PROXY_URL_DEFAULT, fellBack: false, date: null, _reqSeq: 0 };
+let _activeFetchSeq = 0;
+function setProxyStatus(addr) {
+  // Only accept the update if its reqSeq matches the current active fetch.
+  // Saves bump _activeFetchSeq so any stale fetches in flight become ignored.
+  if (typeof addr.seq === 'number' && addr.seq !== _activeFetchSeq) return;
+  if (typeof addr.url === 'string') PROXY_STATUS.url = addr.url;
+  PROXY_STATUS.fellBack = !!addr.fellBack;
+  if (typeof addr.date === 'string' || addr.date === null) PROXY_STATUS.date = addr.date || null;
+}
+function bumpProxyFetchSeq() {
+  _activeFetchSeq += 1;
+  return _activeFetchSeq;
+}
+function resetProxyFetchSeq() {
+  _activeFetchSeq = 0;
+}
+
 // ═══ ESPN FUNCTIONS ═══
 async function getESPN_Scoreboard(sport = 'nba', date = null) {
   const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
+  // NBA: prefer the local katana_server proxy that scrapes nba.com/games
+  // (the source of truth for the daily schedule + team logos) and merges
+  // in ESPN for numeric scores. Falls back to direct ESPN if the proxy
+  // is offline so the panel never goes empty. Same-origin pattern used
+  // by getESPN_Teams / getESPN_TeamSchedule above.
+  if (sport === 'nba') {
+    // Bump the active fetch seq so any prior in-flight call's writes become
+    // invalid (avoids PROXY_STATUS.url clobber on rapid-fire Save+refresh).
+    const fetchSeq = bumpProxyFetchSeq();
+    try {
+      // The proxy accepts YYYY-MM-DD; ESPN-style callers pass compact
+      // YYYYMMDD (or a full ISO timestamp), so reformat once here so the
+      // proxy's regex accepts it. Anything we can't normalize falls
+      // through silently to the direct ESPN call below.
+      const d = date || '';
+      let isoDate = d;
+      const compactM = d.match(/^(\d{4})(\d{2})(\d{2})$/);
+      if (compactM) isoDate = `${compactM[1]}-${compactM[2]}-${compactM[3]}`;
+      else {
+        const isoM = d.match(/^(\d{4}-\d{2}-\d{2})T/);
+        if (isoM) isoDate = isoM[1];
+      }
+      const baseUrl = getProxyBaseUrl();
+      const local = await fetchJSON(
+        `${baseUrl}/katana/nba/scoreboard?date=${isoDate}`
+      );
+      if (local && !local.error && Array.isArray(local.events)) {
+        setProxyStatus({ url: baseUrl, fellBack: false, date: isoDate || null, seq: _activeFetchSeq });
+        return local;
+      }
+    } catch (_) { /* fall through to direct */ }
+    // Proxy attempt failed (network error OR envelope error OR non-array events).
+    // Mark fellBack=true so the banner gets a chance to surface on this path.
+    setProxyStatus({ url: getProxyBaseUrl(), fellBack: true, date: date || null, seq: _activeFetchSeq });
+  }
   let url = `${ESPN_BASE}/sports/${config.sport}/${config.league}/scoreboard`;
   if (date) url += `?dates=${date}`;
   return await fetchJSON(url);
@@ -188,7 +290,8 @@ async function getESPN_Teams(sport = 'nba') {
   // Try local katana_server proxy first (no CORS, single-origin hop). Fall
   // back to direct ESPN if the local server isn't running.
   try {
-    const local = await fetchJSON(`http://localhost:8000/katana/espn/teams?sport=${config.sport}&league=${config.league}`);
+    const baseUrl = getProxyBaseUrl();
+    const local = await fetchJSON(`${baseUrl}/katana/espn/teams?sport=${config.sport}&league=${config.league}`);
     if (local && !local.error) return local;
   } catch (_) { /* fall through to direct */ }
   return await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/teams`);
@@ -198,7 +301,8 @@ async function getESPN_TeamSchedule(teamId, sport = 'nba') {
   const config = ESPN_SPORTS[sport] || ESPN_SPORTS.nba;
   // Try local katana_server proxy first (no CORS). Fall back to direct ESPN.
   try {
-    const local = await fetchJSON(`http://localhost:8000/katana/espn/teams/${teamId}/schedule?sport=${config.sport}&league=${config.league}`);
+    const baseUrl = getProxyBaseUrl();
+    const local = await fetchJSON(`${baseUrl}/katana/espn/teams/${teamId}/schedule?sport=${config.sport}&league=${config.league}`);
     if (local && !local.error) return local;
   } catch (_) { /* fall through to direct */ }
   return await fetchJSON(`${ESPN_BASE}/sports/${config.sport}/${config.league}/teams/${teamId}/schedule`);
@@ -469,12 +573,21 @@ async function getSportsDB_SearchTeam(teamName) {
 // ═══ DATA PARSERS ═══
 function parseESPN_Scoreboard(data) {
   if (!data?.events) return [];
+  // Provenance wiring: the local katana_server proxy exposes its source
+  // as `data.source` (e.g. "nba.com", "nba.com+espn", "espn"). Direct ESPN
+  // responses don't have that envelope, so default to `espn`. The proxy
+  // also stamps individual events with `_source` after a merge — prefer
+  // that granular value when present so a single day's mixed sources
+  // are reflected accurately. The result is a tiny `__provenance` field
+  // on each parsed game, no global state required.
+  const prov = (data && data.source) || 'espn';
   return data.events.map(event => {
     const comp = event.competitions[0];
     const home = comp.competitors.find(c => c.homeAway === 'home');
     const away = comp.competitors.find(c => c.homeAway === 'away');
     const status = event.status;
     return {
+      __provenance: event._source || prov,
       id: event.id,
       name: event.name,
       date: event.date,
@@ -697,7 +810,21 @@ window.SPORTSYNC_API = {
   
   // Utilities
   fetch: fetchJSON,
-  
+
+  // Proxy configuration + status (defaults configurable via localStorage).
+  PROXY: {
+    getUrl: getProxyBaseUrl,
+    setUrl: setProxyBaseUrl,
+    status: PROXY_STATUS,
+    defaultUrl: PROXY_URL_DEFAULT,
+    dismissKey: PROXY_DISMISS_KEY,
+    // Invalidate any in-flight fetches (their seq writes will no-op). Called
+    // from Save so a new URL is reflected immediately, not after a stale 1s+
+    // fetch to the previous host completes.
+    invalidateInFlight: bumpProxyFetchSeq,
+    resetInFlight: resetProxyFetchSeq
+  },
+
   // Quick access sports list
   SPORTS_LIST: Object.entries(ESPN_SPORTS).map(([key, val]) => ({
     id: key,
