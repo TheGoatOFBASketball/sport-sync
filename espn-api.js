@@ -177,37 +177,75 @@ async function fetchJSON(url, options = {}) {
 // Constants live in module scope (no globals on window) so other sport proxy
 // callers can read the same value.
 const PROXY_URL_KEY = 'SPORTSYNC_PROXY_URL';
-const PROXY_URL_DEFAULT = 'http://localhost:8000';
+// Allow deployers to override the proxy base URL via a runtime global
+// (set window.SPORTSYNC_PROXY_BASE = 'https://...' *before* this script loads)
+// or via a <meta name="sportsync-proxy-base" content="..."> tag. Falls back to
+// localhost:8000 for local dev. On Vercel the override is undefined so direct
+// ESPN CDN calls are used. The typeof guards cover SSR / Node tests where
+// window and document both exist as globals (jsdom) or only one (real browser).
+const _PROXY_URL_RE = /^https?:\/\//i;
+const _PROXY_TRIM_RE = /\/$/;
+const _PROXY_TRIM_END_RE = /\/+$/;
+// Pure normalizer for candidate proxy URLs: trim whitespace, strip one-or-
+// more trailing slashes, validate scheme, return the cleaned string or
+// null. Used by the runtime helpers below so the validate-and-trim pipeline
+// lives in exactly one place. Deliberately does NOT touch localStorage so
+// any exception path stays a pure-validate failure (no side effects).
+// NOTE: the load-time wire-in _resolveProxyBaseUrl() deliberately keeps
+// its own inline single-slash trim (no whitespace tolerance) so a future
+// maintainer can NOT silently fold it into this helper and quietly start
+// accepting whitespace-padded window.SPORTSYNC_PROXY_BASE — that would
+// be a behavior change against the existing wire-in contract.
+function _normalizeProxyUrl(raw){
+  if(typeof raw !== 'string') return null;
+  const trimmed = raw.trim().replace(_PROXY_TRIM_END_RE, '');
+  return _PROXY_URL_RE.test(trimmed) ? trimmed : null;
+}
+function _resolveProxyBaseUrl(){
+  if(typeof window!=='undefined'){
+    const w = window.SPORTSYNC_PROXY_BASE;
+    if(typeof w==='string' && _PROXY_URL_RE.test(w)) return w.replace(_PROXY_TRIM_RE, '');
+  }
+  if(typeof document!=='undefined' && document.querySelector){
+    const m = document.querySelector('meta[name="sportsync-proxy-base"]');
+    if(m && m.content && _PROXY_URL_RE.test(m.content)) return m.content.replace(_PROXY_TRIM_RE, '');
+  }
+  return 'http://localhost:8000';
+}
+const PROXY_URL_DEFAULT = _resolveProxyBaseUrl();
 const PROXY_DISMISS_KEY = 'SPORTSYNC_PROXY_BANNER_DISMISSED';
 
 function getProxyBaseUrl() {
-  try {
-    const raw = localStorage.getItem(PROXY_URL_KEY);
-    if (!raw) return PROXY_URL_DEFAULT;
-    const trimmed = String(raw).trim().replace(/\/+$/, '');
-    if (!/^https?:\/\//.test(trimmed)) return PROXY_URL_DEFAULT;
-    return trimmed;
-  } catch (_) {
-    return PROXY_URL_DEFAULT;
-  }
+  // Storage can throw in private mode / quota-exceeded scenarios; the
+  // validate-and-trim pipeline is delegated to _normalizeProxyUrl so it
+  // never executes the localStorage write path itself.
+  let raw;
+  try { raw = localStorage.getItem(PROXY_URL_KEY); }
+  catch (_) { return PROXY_URL_DEFAULT; }
+  return _normalizeProxyUrl(raw) || PROXY_URL_DEFAULT;
 }
 
 function setProxyBaseUrl(url) {
+  // Validation lives in _normalizeProxyUrl so the success path can't be
+  // confused with a storage-rejection path (helper never reads or writes
+  // localStorage). Storage I/O is split into two narrow try/catches so a
+  // dismiss-flag write failure is reported as success (the user-initiated
+  // save already landed) rather than getting swallowed by one big try.
+  const trimmed = _normalizeProxyUrl(url);
+  if (!trimmed) return false;
   try {
-    const trimmed = String(url || '').trim().replace(/\/+$/, '');
-    if (!/^https?:\/\//.test(trimmed)) return false;
     localStorage.setItem(PROXY_URL_KEY, trimmed);
-    // Reset the per-URL dismiss so the user sees the banner again on a new
-    // URL (otherwise the same dismissed flag would silently swallow the
-    // warning for the new endpoint until refresh).
-    try {
-      const cur = localStorage.getItem(PROXY_DISMISS_KEY);
-      if (cur && cur !== trimmed) localStorage.removeItem(PROXY_DISMISS_KEY);
-    } catch (_) {}
-    return true;
   } catch (_) {
     return false;
   }
+  // Reset the per-URL dismiss so the user sees the banner again on a new
+  // URL (otherwise the same dismissed flag would silently swallow the
+  // warning for the new endpoint until refresh). Best-effort.
+  try {
+    const cur = localStorage.getItem(PROXY_DISMISS_KEY);
+    if (cur && cur !== trimmed) localStorage.removeItem(PROXY_DISMISS_KEY);
+  } catch (_) {}
+  return true;
 }
 
 // Side-channel that the frontend reads to decide whether to surface the

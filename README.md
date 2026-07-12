@@ -103,5 +103,39 @@ sports-sync/
   - **NFL Draft** - 7-round mock draft, trades, big board, position rankings
   - **March Madness** - Bracket, live games, upset alerts, predictions
 
+## Deploy to Vercel
+
+The repo is a static site — no build step required.
+
+### One-time setup
+```bash
+npm i -g vercel            # install Vercel CLI
+vercel login               # authenticate
+```
+
+### Deploy
+From the project root:
+```bash
+vercel                     # preview deploy (interactive)
+# or
+vercel --prod              # production deploy
+```
+Accept the prompts: Framework = **Other**, Root Directory = **./**, Build Command = (leave blank), Output Directory = (leave blank).
+
+`vercel.json` already enables:
+- `cleanUrls` → `/nba` resolves to `nba.html`, `/index` to `index.html`, etc.
+- Immutable `Cache-Control` for `*.js / *.css / images`.
+- `must-revalidate` cache for `*.html`.
+
+### URLs after deploy
+- `/` → landing dashboard
+- `/nba` → NBA Summer League 2026 hub (light theme)
+- `/nba-draft`, `/nfl-hub`, `/mlb-hub`, `/wnba-hub`, `/soccer-hub`, `/nhl-hub`, `/march-madness`, `/nba-contracts`, `/nfl-draft`, `/mock-draft` → sibling hubs
+
+### Proxy caveat
+The optional `backend/katana_server/` FastAPI scraper runs on `localhost:8000` and is **not** deployed to Vercel (servers aren't supported on the static plan). On Vercel the page automatically falls back to direct ESPN/CDN calls — no code changes needed.
+
+If you ever want a proxy in production, deploy `backend/` to Render/Fly.io and set `window.SPORTSYNC_PROXY_BASE = "https://your-proxy.onrender.com"` *before* `espn-api.js` loads.
+
 ## License
 For educational and personal use only. Data from ESPN is property of ESPN Inc.
