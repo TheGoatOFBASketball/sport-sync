@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SportSync My Teams</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      min-height: 400px;
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 13px;
+    }
+    .header {
+      background: #000;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand { font-size: 1.1rem; font-weight: 800; color: #fff; }
+    .brand span { color: #00ff9d; }
+    .section { padding: 12px; }
+    .section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .team-list { display: flex; flex-direction: column; gap: 4px; }
+    .team-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .team-item:hover { border-color: #00ff9d; }
+    .team-item img { width: 24px; height: 24px; border-radius: 50%; }
+    .team-name { flex: 1; font-weight: 600; }
+    .team-remove {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .team-remove:hover { background: #ff4444; color: #fff; }
+    .add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      background: #00ff9d;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+    .add-btn:hover { filter: brightness(1.1); }
+    .empty { color: #666; text-align: center; padding: 20px; }
+    .search-box {
+      width: 100%;
+      padding: 10px 12px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+    .search-box:focus { outline: none; border-color: #00ff9d; }
+    .search-box::placeholder { color: #666; }
+    .league-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+    .league-tab {
+      flex: 1;
+      padding: 6px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      color: #888;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .league-tab.active { background: #00ff9d; color: #000; border-color: #00ff9d; }
+    .search-results { max-height: 200px; overflow-y: auto; }
+    .search-result {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .search-result:hover { border-color: #00ff9d; }
+    .search-result img { width: 24px; height: 24px; border-radius: 50%; }
+    .search-result span { font-weight: 600; }
+    .search-result .add-icon { color: #00ff9d; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="brand"><span>⚡</span> SportSync</span>
+  </div>
+  
+  <div class="section" id="myTeamsSection">
+    <div class="section-title">My Teams</div>
+    <div class="team-list" id="teamList">
+      <div class="empty">No teams added yet</div>
+    </div>
+    <button class="add-btn" id="openAddModal">
+      <i class="fa-solid fa-plus"></i> Add Team
+    </button>
+  </div>
+
+  <div class="section" id="addTeamSection" style="display: none;">
+    <div class="section-title">Add Team</div>
+    <input type="text" class="search-box" id="searchBox" placeholder="Search teams...">
+    <div class="league-tabs" id="leagueTabs">
+      <button class="league-tab active" data-league="nba">NBA</button>
+      <button class="league-tab" data-league="nfl">NFL</button>
+      <button class="league-tab" data-league="mlb">MLB</button>
+      <button class="league-tab" data-league="nhl">NHL</button>
+      <button class="league-tab" data-league="wnba">WNBA</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+    <button class="add-btn" id="closeAddModal" style="background: #333; color: #fff; margin-top: 8px;">
+      Cancel
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

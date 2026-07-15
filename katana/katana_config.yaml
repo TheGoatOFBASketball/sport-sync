@@ -1,0 +1,23 @@
+version: 1
+leagues:
+  nfl:
+    - url: https://example.com/nfl
+      type: scoreboard
+  mlb:
+    - url: https://example.com/mlb
+      type: scoreboard
+  wnba:
+    - url: https://example.com/wnba
+      type: scoreboard
+  nhl:
+    - url: https://example.com/nhl
+      type: scoreboard
+tasks:
+  fetch_all:
+    - league: nfl
+      endpoint: live-scores
+    - league: nfl
+      endpoint: standings
+    - league: nfl
+      endpoint: news
+  # Additional task definitions can be added here

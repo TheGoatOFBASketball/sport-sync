@@ -1,0 +1,6 @@
+{
+  "nfl": {"liveScores": [], "standings": [], "news": [], "schedule": []},
+  "mlb": {"liveScores": [], "standings": [], "news": [], "schedule": []},
+  "wnba": {"liveScores": [], "standings": [], "news": [], "schedule": []},
+  "nhl": {"liveScores": [], "standings": [], "news": [], "schedule": []}
+}

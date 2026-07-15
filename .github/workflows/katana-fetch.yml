@@ -1,0 +1,46 @@
+name: Katana Fetch Data
+on:
+  push:
+  # Covers all branches in active use right now:
+  #   main        - legacy / cron-driven data commits
+  #   master      - the branch Vercel Git Integration watches after wiring
+  #   hub-live-full-v1 - the working branch this checkpoint is on
+  - main
+  - master
+  - hub-live-full-v1
+  schedule:
+    - cron: '*/15 * * * *'
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - name: Install Katana
+        run: go install github.com/projectdiscovery/katana/cmd/katana@latest
+      - name: Run Katana (configured)
+        run: |
+          katana --config katana/katana_config.yaml -o data/katana_output.json
+      - name: Commit hub data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+noreply@github.com"
+          git add data/katana_output.json
+          # `[skip ci]` breaks the recursion loop across all 3 trigger branches
+          # (main on cron, master / hub-live-full-v1 on push). Without it, every
+          # 15-min cron + every push re-triggers this workflow itself and burns
+          # free-tier minutes until GitHub's same-SHA protection finally stops it.
+          # `git diff --staged --quiet && echo skip || commit` quietly skips
+          # the commit when Katana produces byte-identical output to the prior
+          # run — without this, `git commit` would exit 1 ("nothing to commit")
+          # and fail the job.
+          (git diff --staged --quiet && echo "no data change, skipping commit") || git commit -m "Katana data update [skip ci]: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          # Push the auto-data-commit back to whichever branch triggered the
+          # run (main on cron, master / hub-live-full-v1 on push), instead of
+          # always landing on `main`. Prevents a stale `main` from being
+          # recreated on remotes that don't carry it.
+          git push origin "${{ github.ref_name }}"
