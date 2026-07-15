@@ -1,0 +1,26 @@
+# Throwaway debug scripts (not part of the shipped site)
+__*.py
+__*.js
+__*.txt
+
+# Python + local cache artifacts
+__pycache__/
+
+# GitHub Actions config (not needed at runtime)
+.github/
+
+# Backups and intermediate outputs
+nba.html.bak
+nba.html.bak2
+output.json
+
+# Large regenerated data asset (rebuilt by CI every 15 min)
+/data/katana_output.json
+
+# Lockfile + dependencies (no package.json deps to install)
+package-lock.json
+node_modules/
+
+# Local Vercel state and editor noise
+.vercel/
+.DS_Store

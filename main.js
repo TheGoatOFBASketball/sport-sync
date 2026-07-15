@@ -2420,16 +2420,29 @@
   // ═══ Poll ═══
   function initPoll() {
     const buttons = document.querySelectorAll(".poll-btn");
-    const votes = { duke: 38, houston: 25, ariz: 20, mich: 17 };
+    // Keys MUST match the `data-vote="..."` attrs on the .poll-btn elements
+    // in index.html — click handler derives its target from btn.dataset.vote
+    // and the percentage recompute reads votes[key]. Mismatch sets every pct
+    // label to "NaN%" on the first click. Baseline numbers mirror the static
+    // percentages hardcoded in the markup so the post-click recompute lands
+    // back on 28/24/22/26 with no vote, instead of jumping to whatever these
+    // happen to be.
+    const votes = { celtics: 28, nuggets: 24, thunder: 22, lakers: 26 };
 
     buttons.forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.classList.contains("voted")) return;
         const v = btn.dataset.vote;
-        votes[v]++;
-        const total = votes.duke + votes.houston + votes.ariz + votes.mich;
+        // `?? 0` keeps the increment honest for any future data-vote value
+        // not yet seeded in `votes` — undefined+? silently becomes 0+1 instead
+        // of NaN, so the click handler degrades gracefully on markup drift.
+        votes[v] = (votes[v] ?? 0) + 1;
+        // Derive total from votes itself so adding/removing a button in the
+        // markup can't reintroduce the same "undefined/100 = NaN" failure
+        // mode this fix originally patched.
+        const total = Object.values(votes).reduce((s, n) => s + n, 0);
         buttons.forEach((b) => {
-          const pct = Math.round((votes[b.dataset.vote] / total) * 100);
+          const pct = Math.round(((votes[b.dataset.vote] ?? 0) / total) * 100);
           b.querySelector(".poll-pct").textContent = pct + "%";
           b.classList.add("voted");
         });

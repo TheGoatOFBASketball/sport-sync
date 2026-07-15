@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="60" viewBox="0 0 180 60" role="img" aria-label="SportSync minimal logo">
+  <defs>
+    <linearGradient id="minGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e63e0"/>
+      <stop offset="1" stop-color="#4a89ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="168" height="48" rx="10" fill="none" stroke="url(#minGrad)" stroke-width="2"/>
+  <path d="M40 20 Q60 8 80 20 T120 20" fill="none" stroke="url(#minGrad)" stroke-width="4" stroke-linecap="round"/>
+  <text x="60" y="42" font-family="Arial Black, Arial" font-size="22" fill="url(#minGrad)">SPORTSYNC</text>
+</svg>

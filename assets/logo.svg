@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="SportSync multi-sport logo">
+  <defs>
+    <linearGradient id="gBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e63e0"/>
+      <stop offset="1" stop-color="#4a89ff"/>
+    </linearGradient>
+  </defs>
+  <!-- Subtle blue glow behind -->
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#1e63e0" stroke-width="4" opacity="0.25"/>
+  <!-- Blue core bolt -->
+  <path d="M22 14 L38 28 L28 28 L36 46 L22 30 L28 30 Z" fill="url(#gBlue)"/>
+  <!-- Orange ball/orb -->
+  <circle cx="34" cy="30" r="10" fill="#f2994a" opacity="0.55"/>
+  <!-- White accent circle -->
+  <circle cx="34" cy="30" r="5" fill="#fff" opacity="0.85"/>
+  <!-- Red accent piece -->
+  <path d="M46 18 L50 22 L46 26 L42 22 Z" fill="#e31c3d"/>
+  <!-- Hockey puck hint -->
+  <circle cx="18" cy="46" r="5" fill="#000" opacity="0.12"/>
+</svg>

@@ -634,5 +634,99 @@
         <script src="espn-api.js" defer></script>
         <script src="thesportsdb-api.js" defer></script>
         <script src="main.js" defer></script>
+
+        <!-- JS-load watchdog: shows a visible error banner if the dashboard
+             scripts above fail to load/execute within 10s of DOM ready.
+             Without this, a 404 deploy (like the one that caused this branch
+             to exist) leaves users staring at perpetual "Loading…" content.
+             Inline + non-deferred so it runs even when the three defer'd
+             scripts above are missing.
+
+             CSP note: this is inline because `vercel.json` doesn't set a
+             Content-Security-Policy yet. If a future security pass adds
+             `script-src 'self'`, move this block to `assets/watchdog.js`
+             and load it via `<script src="assets/watchdog.js" defer>`. -->
+        <script>
+            (function () {
+                function dashboardReady() {
+                    // Primary signal: espn-api.js sets `window.SPORTSYNC_API`
+                    // as its last executable statement, so this is true iff
+                    // the API bundle ran to completion.
+                    if (typeof window.SPORTSYNC_API === "undefined") {
+                        return false;
+                    }
+                    // Confirmation signal: main.js's initTicker() writes the
+                    // synchronous "Loading…" fallback into #tickerTrack
+                    // before its async ESPN fetch resolves, so a populated
+                    // ticker means init() at least reached the ticker init.
+                    return (
+                        document.querySelectorAll(
+                            "#tickerTrack > .ticker-item",
+                        ).length > 0
+                    );
+                }
+                function showErrorBanner() {
+                    if (dashboardReady()) return; // false alarm, healthy load
+                    const banner = document.createElement("div");
+                    banner.id = "js-watchdog-banner";
+                    banner.setAttribute("role", "alert");
+                    banner.style.cssText = [
+                        "position:fixed",
+                        "top:0",
+                        "left:0",
+                        "right:0",
+                        "background:#c9082a",
+                        "color:#fff",
+                        "padding:14px 18px",
+                        "display:flex",
+                        "flex-wrap:wrap",
+                        "align-items:center",
+                        "justify-content:space-between",
+                        "gap:12px",
+                        "z-index:99999",
+                        "font:600 14px/1.45 var(--font-body, system-ui, -apple-system, sans-serif)",
+                        "box-shadow:0 4px 16px rgba(0,0,0,.4)",
+                    ].join(";");
+                    const message = document.createElement("span");
+                    // min-width:200px so the message wraps to its own line
+                    // on narrow phones instead of squeezing against buttons.
+                    message.style.cssText =
+                        "flex:1 1 200px;min-width:200px;text-align:left;";
+                    message.textContent =
+                        "\u26A0 Dashboard failed to load \u2014 hard refresh (Ctrl+Shift+R) or check the browser console for script errors.";
+                    const reloadBtn = document.createElement("button");
+                    reloadBtn.type = "button";
+                    reloadBtn.style.cssText =
+                        "background:#fff;color:#c9082a;border:0;padding:8px 14px;border-radius:4px;font:600 13px/1 inherit;cursor:pointer;white-space:nowrap;";
+                    reloadBtn.textContent = "Reload";
+                    reloadBtn.addEventListener("click", () => {
+                        window.location.reload();
+                    });
+                    const closeBtn = document.createElement("button");
+                    closeBtn.type = "button";
+                    closeBtn.setAttribute("aria-label", "Dismiss dashboard error");
+                    closeBtn.setAttribute("aria-controls", "js-watchdog-banner");
+                    closeBtn.style.cssText =
+                        "background:transparent;color:#fff;border:0;padding:4px 10px;font:700 18px/1 inherit;cursor:pointer;";
+                    closeBtn.textContent = "\u2715";
+                    closeBtn.addEventListener("click", () => {
+                        banner.remove();
+                    });
+                    banner.appendChild(message);
+                    banner.appendChild(reloadBtn);
+                    banner.appendChild(closeBtn);
+                    const host = document.body || document.documentElement;
+                    host.insertBefore(banner, host.firstChild);
+                }
+                function start() {
+                    setTimeout(showErrorBanner, 10000);
+                }
+                if (document.readyState === "loading") {
+                    document.addEventListener("DOMContentLoaded", start);
+                } else {
+                    start();
+                }
+            })();
+        </script>
     </body>
 </html>

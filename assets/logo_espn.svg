@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="44" viewBox="0 0 220 44" role="img" aria-label="SportSync ESPN-style logo">
+  <defs>
+    <!-- Red pill background gradient -->
+    <linearGradient id="espnBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#cc0000"/>
+      <stop offset="100%" stop-color="#990000"/>
+    </linearGradient>
+    <!-- Shine overlay -->
+    <linearGradient id="espnShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Text gradient white-to-offwhite -->
+    <linearGradient id="espnText" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#dddddd"/>
+    </linearGradient>
+    <!-- Subtle drop shadow filter -->
+    <filter id="espnShadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+    <!-- Glow for the "S" icon -->
+    <filter id="iconGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ff4444" flood-opacity="0.7"/>
+    </filter>
+    <clipPath id="pillClip">
+      <rect x="0" y="0" width="44" height="44" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── "S" icon pill (left block, ESPN-style square) ── -->
+  <g filter="url(#espnShadow)">
+    <rect x="0" y="0" width="44" height="44" rx="8" fill="url(#espnBg)"/>
+    <rect x="0" y="0" width="44" height="44" rx="8" fill="url(#espnShine)"/>
+    <!-- Bold italic S -->
+    <text
+      x="22" y="33"
+      font-family="Arial Black, Impact, sans-serif"
+      font-size="34"
+      font-weight="900"
+      font-style="italic"
+      text-anchor="middle"
+      fill="url(#espnText)"
+      letter-spacing="-1"
+    >S</text>
+    <!-- thin bottom rule line inside pill -->
+    <rect x="6" y="38" width="32" height="2" rx="1" fill="#ffffff" opacity="0.25"/>
+  </g>
+
+  <!-- ── Wordmark: "SPORT" ── -->
+  <text
+    x="54" y="29"
+    font-family="Arial Black, Impact, sans-serif"
+    font-size="21"
+    font-weight="900"
+    font-style="italic"
+    fill="#ffffff"
+    filter="url(#espnShadow)"
+    letter-spacing="0.5"
+  >SPORT</text>
+
+  <!-- ── Red separator bar ── -->
+  <rect x="127" y="8" width="3" height="28" rx="1.5" fill="#cc0000" opacity="0.85"/>
+
+  <!-- ── Wordmark: "SYNC" ── -->
+  <text
+    x="136" y="29"
+    font-family="Arial Black, Impact, sans-serif"
+    font-size="21"
+    font-weight="900"
+    font-style="italic"
+    fill="#cc0000"
+    filter="url(#espnShadow)"
+    letter-spacing="0.5"
+  >SYNC</text>
+
+  <!-- ── Bottom tagline ── -->
+  <text
+    x="54" y="40"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="7.5"
+    font-weight="700"
+    fill="#aaaaaa"
+    letter-spacing="2.5"
+  >LIVE SPORTS NETWORK</text>
+</svg>

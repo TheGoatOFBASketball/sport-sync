@@ -1,0 +1,13 @@
+{
+  "name": "sports-sync",
+  "version": "1.0.0",
+  "description": "Live multi-API sports dashboard (ESPN-first) with NBA Summer League 2026 hub. Static site, no build step.",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/copy-public.js",
+    "dev": "npx --yes http-server -p 8080 -c-1 .",
+    "start": "npx --yes http-server -p 8080 -c-1 .",
+    "test": "node --test espn-api.test.js"
+  },
+  "dependencies": {}
+}
