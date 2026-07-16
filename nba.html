@@ -17770,7 +17770,7 @@ function _bindScoreboardModeToggle(){
 // One-time binding — script tag uses `defer` so DOM is ready when we run.
 _bindScoreboardModeToggle();
 
-  return '<div class="espn-game-card'+cls+'" onclick="window.open(\'https://www.espn.com/nba/scoreboard\',\'_blank\')">'+
+  return '<a href="https://www.espn.com/nba/scoreboard" target="_blank" rel="noopener" class="espn-game-card'+cls+'">'+
     '<div class="egc-header"><span class="egc-status'+(isLive?' live':'')+'">'+(isLive?'LIVE':statusText||(isFinal?'Final':g.shortDetail||'Scheduled'))+'</span>'+
     '<span class="egc-head-right">'+
     (g.broadcast?'<span class="egc-tv">'+g.broadcast+'</span>':'')+
@@ -17783,7 +17783,7 @@ _bindScoreboardModeToggle();
     '<div class="egc-score'+(homeWin?' winner':'')+'">'+(homeScore||'')+'</div></div>'+
     '</div>'+
     (g.odds?'<div class="egc-divider"></div><div style="font-size:10px;color:var(--nb-muted);margin-top:6px">'+g.odds+(g.overUnder?' | O/U '+g.overUnder:'')+'</div>':'')+
-    '</div>';
+    '</a>';
 }
 
 /* ===== FILTER BAR ===== */
