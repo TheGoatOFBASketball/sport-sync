@@ -666,7 +666,7 @@ body[data-theme="dark"]{background:#051c2d !important;font-family:"Inter",-apple
     <div class="nba-hero-top">
       <div class="nba-hero-text">
         <h1>Scores<em>.</em></h1>
-        <p style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><span id="heroDateLabel" style="color:#fff;font-weight:800">July 11</span><span style="color:rgba(255,255,255,.35)">|</span><span id="heroGameCount" style="color:var(--nb-red);font-weight:800">5 Live</span><span style="color:rgba(255,255,255,.35)">|</span><a href="#" id="refreshLink" style="color:#fff;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.4)"><i class="fas fa-sync-alt"></i> Refresh</a></p>
+        <p style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><span id="heroDateLabel" style="color:#fff;font-weight:800">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><span id="heroGameCount" style="color:var(--nb-red);font-weight:800">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><a href="#" id="refreshLink" style="color:#fff;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.4)"><i class="fas fa-sync-alt"></i> Refresh</a></p>
       </div>
       <div class="hero-cap-row">
         <div class="hero-cap-stat"><div class="hero-cap-label">Salary Cap</div><div class="hero-cap-value gold" id="heroCap">$154.6M</div></div>
@@ -17638,9 +17638,11 @@ async function loadScores(date){
       renderGames(games);
     }else{
       grid.innerHTML='<div class="scoreboard-empty"><i class="fas fa-basketball-ball"></i> No games scheduled for this date</div>';
+      updateHeroFromGames([]);
     }
   }catch(e){
     grid.innerHTML='<div class="scoreboard-empty"><i class="fas fa-exclamation-triangle"></i> Error loading scores</div>';
+    updateHeroFromGames(null);
   }
 }
 
@@ -17687,14 +17689,16 @@ function renderGames(games){
   function updateHeroFromGames(games){
     var countEl=document.getElementById('heroGameCount');
     var dateLabel=document.getElementById('heroDateLabel');
-    if(games&&games.length){
-      var liveCount=games.filter(function(g){return g.state==='in'||g.state==='live'}).length;
-      if(countEl)countEl.textContent=liveCount>0?liveCount+' Live':games.length+' Games';
-    }
     if(dateLabel){
-      var d=new Date();
+      var d=new Date(NBA_STATE.selectedDate||Date.now());
       dateLabel.textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
     }
+    if(!games||!games.length){
+      if(countEl)countEl.textContent='No games';
+      return;
+    }
+    var liveCount=games.filter(function(g){return g.state==='in'||g.state==='live'}).length;
+    if(countEl)countEl.textContent=liveCount>0?liveCount+' Live':games.length+' Games';
   }
 
 function renderGameCard(g){
@@ -17771,9 +17775,11 @@ for(let i=0;i<results.length;i++){
   if(NBA_STATE.scheduleSeq!==mySeq)return;
   if(!totalGames){
     grid.innerHTML='<div class="scoreboard-empty"><i class="fas fa-calendar-times"></i> No upcoming games scheduled.</div>';
+    updateHeroFromGames([]);
     return;
   }
   grid.innerHTML=frag.join('');
+  updateHeroFromGames([]);
 }
 
 // Mode toggle wiring: switches between Today (date-strip + filter bar)
