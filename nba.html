@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://cdnjs.cloudflare.com; font-src 'self' https://fonts.bunny.net https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:8000 https://site.api.espn.com https://site.web.api.espn.com https://sports.core.api.espn.com https://www.thesportsdb.com https://api.rss2json.com https://api.allorigins.win https://balldontlie.io https://v3.football.api-sports.io; frame-ancestors 'none'; base-uri 'self'">
 <title>NBA Games — Live NBA Scores | NBA.com</title>
 <meta name="description" content="Complete NBA coverage — Live scores, standings, player stats, contracts, salary cap, free agents, March Madness, and Draft."/>
@@ -522,27 +522,42 @@ html{overflow-x:hidden}
 
 /* RESPONSIVE */
 @media(max-width:700px){
-.nba-hero{padding:14px 14px 12px}
-.nba-hero-text h1{font-size:1.4rem}
+.nba-hero{padding:10px 10px 8px}
+.nba-hero-text h1{font-size:1.2rem}
 .hero-cap-row{display:none}
-.nba-content{padding:10px}
-.sc-table td,.sc-table th{padding:5px 7px}
+.nba-content{padding:6px}
+.sc-table td,.sc-table th{padding:4px 5px}
 .cap-banner{flex-direction:column}
 .cap-stat{border-right:none;border-bottom:1px solid var(--nb-border)}
-.standings-header{font-size:7px;grid-template-columns:20px 1fr 30px 30px 36px;padding:4px 8px}
-.standings-row{font-size:10px;grid-template-columns:20px 1fr 30px 30px 36px;padding:5px 8px}
+.standings-header{font-size:7px;grid-template-columns:20px 1fr 30px 30px 36px;padding:3px 6px}
+.standings-row{font-size:10px;grid-template-columns:20px 1fr 30px 30px 36px;padding:4px 6px}
 .team-cell strong{font-size:10px}
 .team-cell .team-logo-sm{width:16px;height:16px}
 .stat-cell{font-size:10px}
 .sc-table td{font-size:10px;padding:4px 5px}
 .sc-table th{font-size:7px;padding:4px 5px}
+.espn-scoreboard-grid{gap:6px}
+.sc-card-header{padding:6px 10px}
+.sc-card-title{font-size:11px}
+.score-date-chip{min-width:34px;padding:2px 6px;font-size:9px}
+.score-date-chip .chip-day{font-size:7px}
+.score-date-chip .chip-date{font-size:10px}
+.scoreboard-mode-toggle button{padding:4px 8px;font-size:9px}
 }
 @media(max-width:480px){
-.standings-header{grid-template-columns:16px 1fr 26px 26px 30px;padding:3px 6px}
-.standings-row{grid-template-columns:16px 1fr 26px 26px 30px;padding:4px 6px}
-.espn-scoreboard-grid{grid-template-columns:1fr}
-.sc-table td{font-size:9px;padding:3px 4px}
-.sc-table th{font-size:6px;padding:3px 4px}
+.standings-header{grid-template-columns:16px 1fr 26px 26px 30px;padding:2px 4px}
+.standings-row{grid-template-columns:16px 1fr 26px 26px 30px;padding:3px 4px}
+.espn-scoreboard-grid{grid-template-columns:1fr;gap:4px}
+.nba-content{padding:4px}
+.sc-table td{font-size:9px;padding:2px 3px}
+.sc-table th{font-size:6px;padding:2px 3px}
+.sc-card-header{padding:4px 8px}
+.sc-card-title{font-size:10px}
+.espn-game-card{padding:8px 10px}
+.score-date-chip{min-width:30px;padding:2px 4px;font-size:8px}
+.nba-hero{padding:8px 8px 6px}
+.nba-hero-text h1{font-size:1rem}
+.hero-cap-stat{min-width:60px;padding:4px 8px}
 }
 </style>
 <style id="nba-com-redesign">
