@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -34,9 +34,6 @@
 [data-theme="dark"] .playoff-badge.e{background:var(--nb-border);color:var(--nb-muted)}
 [data-theme="dark"] .player-avatar,.news-img{background:linear-gradient(135deg,var(--nb-card2),var(--nb-border))}
 [data-theme="dark"] .sc-select{background:var(--nb-card2);color:var(--nb-text);border-color:var(--nb-border)}
-[data-theme="dark"] .standings-decade-btn{background:var(--nb-card2);color:var(--nb-muted);border-color:var(--nb-border)}
-[data-theme="dark"] .standings-decade-btn:hover{color:var(--nb-text);border-color:var(--nb-red)}
-[data-theme="dark"] .standings-decade-btn.active{color:#fff;background:var(--nb-red);border-color:var(--nb-red)}
 [data-theme="dark"] .leftnav-item:hover{background:rgba(200,16,46,0.1)}
 [data-theme="dark"] .leftnav-item.active{background:rgba(200,16,46,0.15)}
 body{background:var(--nb-bg);color:var(--nb-text);font-family:"Roboto",-apple-system,sans-serif;font-size:13px;line-height:1.4;min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -424,15 +421,14 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .sc-filter-tab.active{background:var(--nb-red);border-color:var(--nb-red);color:#fff;box-shadow:0 1px 6px rgba(200,16,46,0.2)}
 .sc-select{background:#f0f2f5;border:1px solid var(--nb-border);border-radius:5px;padding:5px 8px;font-size:10px;font-weight:600;color:var(--nb-text);font-family:inherit;outline:none;cursor:pointer}
 .sc-select:focus{border-color:var(--nb-red)}
-.standings-decade-btn{flex-shrink:0;padding:4px 12px;border-radius:4px;font-size:11px;font-weight:600;color:var(--nb-muted);border:1px solid var(--nb-border);cursor:pointer;transition:all .12s;white-space:nowrap;background:var(--nb-card)}
-.standings-decade-btn:hover{color:var(--nb-text);border-color:var(--nb-red)}
-.standings-decade-btn.active{color:#fff;background:var(--nb-red);border-color:var(--nb-red)}
 .sc-select option{background:#fff;color:#111;font-weight:500}
 .sc-select optgroup{background:#e8e8ee;color:#222;font-weight:700}
 .sc-select optgroup option{background:#fff;color:#111;font-weight:500;padding:3px 6px}
 .table-wrap{overflow-x:auto}
 .sc-table{width:100%;border-collapse:collapse}
 .sc-table th{padding:7px 11px;font-size:8px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--nb-muted);text-align:left;background:linear-gradient(135deg,#f8f9fb,#f0f2f5);border-bottom:1px solid var(--nb-border);white-space:nowrap;cursor:pointer;user-select:none}
+.yr-nav-btn{background:var(--nb-card2);border:1px solid var(--nb-border);border-radius:4px;color:var(--nb-text);cursor:pointer;padding:4px 8px;font-size:11px;display:flex;align-items:center;transition:.12s}
+.yr-nav-btn:hover{background:var(--nb-border);border-color:var(--nb-red);color:var(--nb-red)}
 .sc-table th:hover{color:var(--nb-text)}
 .sc-table th.sort-asc::after{content:" ▲";font-size:7px}
 .sc-table th.sort-desc::after{content:" ▼";font-size:7px}
@@ -740,11 +736,12 @@ body[data-theme="dark"]{background:#051c2d !important;font-family:"Inter",-apple
       <div class="sc-card">
         <div class="sc-card-header">
           <span class="sc-card-title"><i class="fas fa-list-ol"></i> NBA Standings</span>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div style="display:flex;gap:6px;align-items:center">
+            <button id="standingsPrev" class="yr-nav-btn" title="Previous year"><i class="fas fa-chevron-left"></i></button>
             <select id="standingsYear" class="sc-select"></select>
+            <button id="standingsNext" class="yr-nav-btn" title="Next year"><i class="fas fa-chevron-right"></i></button>
           </div>
         </div>
-        <div class="standings-decade-bar" id="standingsDecadeBar" style="display:flex;gap:3px;padding:6px 14px;border-bottom:1px solid var(--nb-border2);overflow-x:auto"></div>
         <div id="seasonHighlightsBar" style="margin:0 0 10px;display:flex;gap:20px;flex-wrap:wrap;padding:0 14px"></div>
         <div class="standings-conference-grid">
           <div class="standings-conference">
@@ -17361,7 +17358,67 @@ const NBA_STATE = {
 
 
 
-function getStandingsData(year){
+const ESPN_TEAM_IDS={
+  "1":"ATL","2":"BOS","3":"NOP","4":"CHI","5":"CLE","6":"DAL","7":"DEN",
+  "8":"DET","9":"GSW","10":"HOU","11":"IND","12":"LAC","13":"LAL","14":"MIA",
+  "15":"MIL","16":"MIN","17":"BKN","18":"NYK","19":"ORL","20":"PHI","21":"PHX",
+  "22":"POR","23":"SAC","24":"SAS","25":"OKC","26":"UTA","27":"WAS","28":"TOR",
+  "29":"MEM","30":"CHA"
+};
+const ESPN_CONF={
+  ATL:'e',BOS:'e',BKN:'e',CHA:'e',CHI:'e',CLE:'e',DET:'e',IND:'e',
+  MIA:'e',MIL:'e',NYK:'e',ORL:'e',PHI:'e',TOR:'e',WAS:'e',
+  DAL:'w',DEN:'w',GSW:'w',HOU:'w',LAC:'w',LAL:'w',MEM:'w',MIN:'w',
+  NOP:'w',OKC:'w',PHX:'w',POR:'w',SAC:'w',SAS:'w',UTA:'w'
+};
+const ESPN_STANDINGS_URL='https://sports.core.api.espn.com/v3/sports/basketball/nba/standings';
+function currentSeasonYear(){
+  const d=new Date();
+  return String(d.getFullYear()+(d.getMonth()<8?0:1));
+}
+async function fetchESPNStandings(year){
+  try{
+    const p1=await fetchJSON(ESPN_STANDINGS_URL+'?page=1&season='+year);
+    const p2=await fetchJSON(ESPN_STANDINGS_URL+'?page=2&season='+year);
+    const all=[...(p1?.items||[]),...(p2?.items||[])];
+    if(!all.length)return null;
+    const data={e:[],w:[]};
+    all.forEach(item=>{
+      const abbr=ESPN_TEAM_IDS[item.id];
+      if(!abbr)return;
+      const s=item.records.total.stats;
+      const wins=parseInt(s.wins?.value||0);
+      const losses=parseInt(s.losses?.value||0);
+      const tot=wins+losses;
+      const pct=tot>0?'.'+String(Math.round((wins/tot)*1000)).padStart(3,'0'):'.000';
+      const ppg=s.avgPointsFor?.value!=null?s.avgPointsFor.value.toFixed(1):'—';
+      const opp=s.avgPointsAgainst?.value!=null?s.avgPointsAgainst.value.toFixed(1):'—';
+      const diff=ppg!=='—'&&opp!=='—'?(parseFloat(ppg)-parseFloat(opp)).toFixed(2):'—';
+      const strk=s.streak?.displayValue||null;
+      data[ESPN_CONF[abbr]||'e'].push({
+        team:ABBR_TEAM_NAME[abbr]||abbr,wins:String(wins),losses:String(losses),pct:pct,gb:'—',ppg:ppg,opp:opp,diff:String(diff),abbr:abbr,strk:strk
+      });
+    });
+    ['e','w'].forEach(c=>{
+      data[c].sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
+      if(data[c].length>0){
+        const lW=parseInt(data[c][0].wins),lL=parseInt(data[c][0].losses);
+        data[c].forEach(t=>{
+          const tw=parseInt(t.wins),tl=parseInt(t.losses);
+          const gb=((lW-tw)+(tl-lL))/2;
+          t.gb=gb>0?String(gb):'—';
+        });
+      }
+    });
+    return data;
+  }catch(e){return null}
+}
+async function getStandingsData(year){
+  if(!year)year=currentSeasonYear();
+  if(parseInt(year)>=2003){
+    const espn=await fetchESPNStandings(year);
+    if(espn&&espn.e.length)return espn;
+  }
   const bbref=window.BBREF_STANDINGS;
   if(!bbref||!bbref[year])return null;
   const yd=bbref[year];
@@ -17372,6 +17429,15 @@ function getStandingsData(year){
         team:t.team,wins:t.wins,losses:t.losses,pct:t.pct,gb:t.gb==='—'?'—':t.gb,
         ppg:t.ppg,opp:t.opp,diff:t.diff,abbr:teamAbbr(t.team)
       }));
+      data[c].sort((a,b)=>parseFloat(b.pct)-parseFloat(a.pct));
+      if(data[c].length>0){
+        const lW=parseInt(data[c][0].wins),lL=parseInt(data[c][0].losses);
+        data[c].forEach(t=>{
+          const tw=parseInt(t.wins),tl=parseInt(t.losses);
+          const gb=((lW-tw)+(tl-lL))/2;
+          t.gb=gb>0?String(gb):'—';
+        });
+      }
     }
   });
   return data.e||data.w?data:null;
@@ -17428,7 +17494,7 @@ function renderDateStrip(selected){
 function teamLogoHTML(abbr,size,year){
   if(!size)size=36;
   const eraKey=teamEraLogo(abbr,year);
-  const src=eraKey&&YEAR_SPECIFIC_LOGOS[eraKey]?YEAR_SPECIFIC_LOGOS[eraKey]:HISTORICAL_LOGOS[abbr];
+  const src=eraKey&&YEAR_SPECIFIC_LOGOS[eraKey]?YEAR_SPECIFIC_LOGOS[eraKey]:eraKey&&HISTORICAL_LOGOS[eraKey]?HISTORICAL_LOGOS[eraKey]:HISTORICAL_LOGOS[abbr];
   if(src)return '<img src="'+src+'" alt="'+abbr+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain">';
   const espnAbbr=ESPN_CDN_ABBR[abbr]||ESPN_CDN_ABBR[FRANCHISE_MAP[abbr]];
   if(espnAbbr)return '<img src="'+ESPN_CDN+espnAbbr+'.png" alt="'+abbr+'" style="width:'+size+'px;height:'+size+'px;object-fit:contain">';
@@ -17844,6 +17910,8 @@ const TEAM_ABBR = {
   "Detroit Falcons":"DTF","St. Louis Bombers":"STB","Chicago Stags":"CHS","Indianapolis Jets":"INJ",
   "Chicago Packers":"CHP","Chicago Zephyrs":"CHZ","Philadelphia 76ers":"PHI"
 };
+const ABBR_TEAM_NAME={};
+Object.keys(TEAM_ABBR).forEach(k=>{const v=TEAM_ABBR[k];if(!ABBR_TEAM_NAME[v])ABBR_TEAM_NAME[v]=k});
 
 const ESPN_CDN='https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500/';
 const ESPN_CDN_ABBR={
@@ -17871,7 +17939,7 @@ const HISTORICAL_LOGOS={
   "INO":"https://upload.wikimedia.org/wikipedia/commons/4/44/Indianapolis_Olympians_logo.svg",
   "SDC":"https://upload.wikimedia.org/wikipedia/commons/0/0e/Logo_san_diego_clippers_1982_bis_1984.png",
   "NOJ":"https://upload.wikimedia.org/wikipedia/commons/2/29/New_Orleans_Jazz_Logo%2C_1975-1979.png",
-  "KCK":"https://upload.wikimedia.org/wikipedia/commons/c/c2/Kansas_City_Omaha_Kings_logo.png",
+  "KCK":"https://content.sportslogos.net/logos/6/248/full/5383.png",
   "STL":"https://upload.wikimedia.org/wikipedia/commons/3/3f/St.Louis_Hawks_57-68.gif",
   "CLR":"https://upload.wikimedia.org/wikipedia/commons/0/03/Cleveland_Rebels_logo.png",
   "AND":"https://upload.wikimedia.org/wikipedia/commons/9/92/Anderson_Packers_logo.PNG",
@@ -17893,11 +17961,52 @@ const YEAR_SPECIFIC_LOGOS={
   "2016_UTA":"https://upload.wikimedia.org/wikipedia/commons/7/7e/Utah_Jazz_Logo%2C_2016-2022.png",
   "1977_POR":"https://upload.wikimedia.org/wikipedia/commons/3/35/Portland-Trail-Blazers-Logo-1970_01.png",
   "1992_POR":"https://upload.wikimedia.org/wikipedia/commons/c/c0/Portland-Trail-Blazers-Logo-1990.png",
-  "2004_POR":"https://upload.wikimedia.org/wikipedia/commons/6/65/Portland-Trail-Blazers-Logo-2003.png"
+  "2004_POR":"https://upload.wikimedia.org/wikipedia/commons/6/65/Portland-Trail-Blazers-Logo-2003.png",
+  "1976_DEN":"https://upload.wikimedia.org/wikipedia/en/7/76/Denver_Nuggets.svg",
+  "2005_DEN":"https://upload.wikimedia.org/wikipedia/de/9/99/Denver_Nuggets_logo.svg",
+  "2018_DEN":"https://upload.wikimedia.org/wikipedia/de/9/99/Denver_Nuggets_logo.svg",
+  "1971_GSW":"https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg",
+  "1991_GSW":"https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg",
+  "2010_GSW":"https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg",
+  "2004_ATL":"https://upload.wikimedia.org/wikipedia/en/2/24/Atlanta_Hawks_logo.svg",
+  "2007_ATL":"https://upload.wikimedia.org/wikipedia/en/2/24/Atlanta_Hawks_logo.svg",
+  "2015_ATL":"https://upload.wikimedia.org/wikipedia/en/2/24/Atlanta_Hawks_logo.svg",
+  "2017_SAS":"https://upload.wikimedia.org/wikipedia/en/0/0e/San_Antonio_Spurs_logo.svg",
+  "1994_SAC":"https://upload.wikimedia.org/wikipedia/en/c/c7/SacramentoKings.svg",
+  "2003_SAC":"https://upload.wikimedia.org/wikipedia/en/c/c7/SacramentoKings.svg",
+  "2016_SAC":"https://upload.wikimedia.org/wikipedia/en/c/c7/SacramentoKings.svg",
+  "1989_MIL":"https://upload.wikimedia.org/wikipedia/en/4/4a/Milwaukee_Bucks_logo.svg",
+  "2006_MIL":"https://upload.wikimedia.org/wikipedia/en/4/4a/Milwaukee_Bucks_logo.svg",
+  "2015_MIL":"https://upload.wikimedia.org/wikipedia/en/4/4a/Milwaukee_Bucks_logo.svg",
+  "1993_PHX":"https://upload.wikimedia.org/wikipedia/en/d/dc/Phoenix_Suns_logo.svg",
+  "2001_PHX":"https://upload.wikimedia.org/wikipedia/en/d/dc/Phoenix_Suns_logo.svg",
+  "2004_TOR":"https://upload.wikimedia.org/wikipedia/en/3/36/Toronto_Raptors_logo.svg",
+  "2008_TOR":"https://upload.wikimedia.org/wikipedia/en/3/36/Toronto_Raptors_logo.svg",
+  "2015_TOR":"https://upload.wikimedia.org/wikipedia/en/3/36/Toronto_Raptors_logo.svg",
+  "2005_UTA":"https://upload.wikimedia.org/wikipedia/commons/7/7e/Utah_Jazz_Logo%2C_2016-2022.png",
+  "1989_ORL":"https://upload.wikimedia.org/wikipedia/en/1/10/Orlando_Magic_logo.svg",
+  "2001_ORL":"https://upload.wikimedia.org/wikipedia/en/1/10/Orlando_Magic_logo.svg",
+  "2010_ORL":"https://upload.wikimedia.org/wikipedia/en/1/10/Orlando_Magic_logo.svg",
+  "1988_MIA":"https://upload.wikimedia.org/wikipedia/en/f/fb/Miami_Heat_logo.svg",
+  "2000_MIA":"https://upload.wikimedia.org/wikipedia/en/f/fb/Miami_Heat_logo.svg",
+  "2012_MIA":"https://upload.wikimedia.org/wikipedia/en/f/fb/Miami_Heat_logo.svg",
+  "1994_IND":"https://upload.wikimedia.org/wikipedia/en/1/1b/Indiana_Pacers.svg",
+  "2005_IND":"https://upload.wikimedia.org/wikipedia/en/1/1b/Indiana_Pacers.svg",
+  "1983_CLE":"https://upload.wikimedia.org/wikipedia/commons/4/4b/Cleveland_Cavaliers_logo.svg",
+  "1994_CLE":"https://upload.wikimedia.org/wikipedia/commons/4/4b/Cleveland_Cavaliers_logo.svg",
+  "2003_CLE":"https://upload.wikimedia.org/wikipedia/commons/4/4b/Cleveland_Cavaliers_logo.svg",
+  "2017_CLE":"https://upload.wikimedia.org/wikipedia/commons/4/4b/Cleveland_Cavaliers_logo.svg",
+  "1999_LAL":"https://upload.wikimedia.org/wikipedia/commons/3/3c/Los_Angeles_Lakers_logo.svg"
 };
 function teamEraLogo(abbr,year){
   if(!year)return null;
   const y=parseInt(year);
+  if(abbr==='OKC'&&y<=2008)return'SEA';
+  if(abbr==='MEM'&&y<=2001)return'VAN';
+  if(abbr==='BKN'&&y<=2011)return'NJN';
+  if(abbr==='LAC'&&y<=1984)return y<=1978?'BUF':'SDC';
+  if(abbr==='SAC'&&y<=1984)return'KCK';
+  if(abbr==='UTA'&&y<=1978)return'NOJ';
   if(abbr==='WAS')return y<=1997?null:'1998_WAS';
   if(abbr==='NOP')return y<=2013?'2003_NOP':'2014_NOP';
   if(abbr==='CHA')return y<=2002?'1989_CHA':y<=2014?null:'2015_CHA';
@@ -17935,23 +18044,8 @@ function teamLogoOrName(name,size){
 }
 
 function streakLabel(t,i,teams){
-  const diff=parseFloat(t.diff);
-  if(isNaN(diff))return'—';
-  const prev=teams[i-1];
-  if(prev){
-    const prevDiff=parseFloat(prev.diff);
-    if(!isNaN(prevDiff)){
-      if(prevDiff>diff)return'L1';
-    }
-  }
-  const next=teams[i+1];
-  if(next){
-    const nextDiff=parseFloat(next.diff);
-    if(!isNaN(nextDiff)){
-      if(nextDiff<diff)return'W1';
-    }
-  }
-  return diff>0?'W2':diff<0?'L2':'—';
+  if(t.strk)return t.strk;
+  return '—';
 }
 
 async function renderStandingsSidebar(year){
@@ -17964,7 +18058,7 @@ async function renderStandingsSidebar(year){
     const today=new Date();
     year=String(today.getFullYear()+(today.getMonth()<8?0:1));
   }
-  const allData=getStandingsData(year);
+  const allData=await getStandingsData(year);
   confs.forEach(conf=>{
     const container=document.getElementById(conf==='east'?'standingsSidebar':'standingsSidebarWest');
     if(!container)return;
@@ -18034,7 +18128,7 @@ async function renderStandingsFull(){
   const yearSelect=document.getElementById('standingsYear');
   const year=yearSelect?yearSelect.value:null;
   const cyear=year||String(new Date().getFullYear());
-  const data=getStandingsData(cyear);
+  const data=await getStandingsData(cyear);
   if(!data||(!data.e&&!data.w)){
     ['standingsEastContainer','standingsWestContainer'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<div class="standings-loading">No data for '+cyear+'</div>'});
     return;
@@ -18070,44 +18164,19 @@ function initStandings(){
   if(!bbref)return;
   const years=Object.keys(bbref).map(Number).sort((a,b)=>b-a);
   yearSelect.innerHTML=years.map(y=>'<option value="'+y+'">'+(y-1)+'-'+String(y).slice(2)+'</option>').join('');
-  const decadeBar=document.getElementById('standingsDecadeBar');
-  if(decadeBar){
-    const decades=[];
-    years.forEach(y=>{
-      const d=Math.floor(y/10)*10;
-      if(!decades.includes(d))decades.push(d);
-    });
-    decades.sort((a,b)=>b-a);
-    const today=new Date();
-    const currentDecade=Math.floor((today.getFullYear()+(today.getMonth()<8?0:1))/10)*10;
-    decadeBar.innerHTML=decades.map(d=>'<span class="standings-decade-btn'+(d===currentDecade?' active':'')+'" data-decade="'+d+'">'+d+'s</span>').join('');
-    decadeBar.querySelectorAll('.standings-decade-btn').forEach(btn=>{
-      btn.addEventListener('click',function(){
-        decadeBar.querySelectorAll('.standings-decade-btn').forEach(b=>b.classList.remove('active'));
-        this.classList.add('active');
-        const dec=parseInt(this.dataset.decade);
-        const opts=yearSelect.options;
-        for(let i=0;i<opts.length;i++){
-          const y=parseInt(opts[i].value);
-          if(y>=dec&&y<dec+10){
-            yearSelect.value=opts[i].value;
-            renderStandingsFull();
-            return;
-          }
-        }
-      });
-    });
-  }
-  yearSelect.addEventListener('change',()=>{
-    const y=parseInt(yearSelect.value);
-    const d=Math.floor(y/10)*10;
-    if(decadeBar){
-      decadeBar.querySelectorAll('.standings-decade-btn').forEach(b=>{
-        b.classList.toggle('active',parseInt(b.dataset.decade)===d);
-      });
-    }
+  const prevBtn=document.getElementById('standingsPrev');
+  const nextBtn=document.getElementById('standingsNext');
+  const navigateYear=(dir)=>{
+    const idx=years.indexOf(parseInt(yearSelect.value));
+    if(idx<0)return;
+    const target=idx+dir;
+    if(target<0||target>=years.length)return;
+    yearSelect.value=years[target];
     renderStandingsFull();
-  });
+  };
+  if(prevBtn)prevBtn.addEventListener('click',()=>navigateYear(-1));
+  if(nextBtn)nextBtn.addEventListener('click',()=>navigateYear(1));
+  yearSelect.addEventListener('change',()=>{renderStandingsFull();});
   renderStandingsFull();
 }
 
