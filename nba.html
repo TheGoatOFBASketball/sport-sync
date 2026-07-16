@@ -54,6 +54,18 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .nba-topbar .topbar-links{display:flex;gap:6px}
 .nba-topbar .topbar-link{font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);transition:all .15s}
 .nba-topbar .topbar-link:hover{color:#fff;border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)}
+/* THEME TOGGLE */
+.theme-toggle-btn{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);transition:all .15s;cursor:pointer;background:none;font-family:inherit}
+.theme-toggle-btn:hover{color:#fff;border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)}
+.theme-toggle-btn i{font-size:12px}
+
+/* MOBILE NAV (hidden on desktop, shown at <=768px) */
+.nba-mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:#000;border-top:1px solid var(--nb-border);padding:6px 0 8px}
+@media(max-width:768px){.nba-body{padding-bottom:54px}.nba-mobile-nav{display:flex;justify-content:space-around}}
+[data-theme="dark"] .nba-mobile-nav{background:#000;border-top-color:var(--nb-border)}
+.nba-mobile-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;font-size:9px;font-weight:600;color:var(--nb-muted);transition:color .15s;cursor:pointer}
+.nba-mobile-nav-item i{font-size:1.1rem}
+.nba-mobile-nav-item.active,.nba-mobile-nav-item:hover{color:var(--nb-red)}
 
 /* HERO */
 .nba-hero{background:linear-gradient(135deg,#051c2d 0%,#0d2b4a 40%,#1d428a 100%);padding:20px 24px 18px;position:relative;overflow:hidden}
@@ -516,6 +528,20 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .sc-table td,.sc-table th{padding:5px 7px}
 .cap-banner{flex-direction:column}
 .cap-stat{border-right:none;border-bottom:1px solid var(--nb-border)}
+.standings-header{font-size:7px;grid-template-columns:20px 1fr 30px 30px 36px;padding:4px 8px}
+.standings-row{font-size:10px;grid-template-columns:20px 1fr 30px 30px 36px;padding:5px 8px}
+.team-cell strong{font-size:10px}
+.team-cell .team-logo-sm{width:16px;height:16px}
+.stat-cell{font-size:10px}
+.sc-table td{font-size:10px;padding:4px 5px}
+.sc-table th{font-size:7px;padding:4px 5px}
+}
+@media(max-width:480px){
+.standings-header{grid-template-columns:16px 1fr 26px 26px 30px;padding:3px 6px}
+.standings-row{grid-template-columns:16px 1fr 26px 26px 30px;padding:4px 6px}
+.espn-scoreboard-grid{grid-template-columns:1fr}
+.sc-table td{font-size:9px;padding:3px 4px}
+.sc-table th{font-size:6px;padding:3px 4px}
 }
 </style>
 <style id="nba-com-redesign">
@@ -627,6 +653,7 @@ body[data-theme="dark"]{background:#051c2d !important;font-family:"Inter",-apple
   <span class="page-title">Scores &amp; Schedule</span>
   <span class="live-pill" id="livePill"><span class="dot"></span> Live</span>
   <div class="spacer"></div>
+    <button class="theme-toggle-btn" id="themeToggle" title="Toggle theme"><i class="fas fa-moon"></i> <span id="themeLabel">Dark</span></button>
   <div class="topbar-links">
     <a href="https://www.nba.com" target="_blank" class="topbar-link">NBA.com</a>
     <a href="https://www.espn.com/nba/scoreboard" target="_blank" class="topbar-link">ESPN</a>
@@ -17653,7 +17680,22 @@ function renderGames(games){
     return;
   }
   grid.innerHTML=filtered.map(g=>renderGameCard(g)).join('');
+  updateHeroFromGames(filtered);
 }
+
+  // Update hero game count and date label from loaded games
+  function updateHeroFromGames(games){
+    var countEl=document.getElementById('heroGameCount');
+    var dateLabel=document.getElementById('heroDateLabel');
+    if(games&&games.length){
+      var liveCount=games.filter(function(g){return g.state==='in'||g.state==='live'}).length;
+      if(countEl)countEl.textContent=liveCount>0?liveCount+' Live':games.length+' Games';
+    }
+    if(dateLabel){
+      var d=new Date();
+      dateLabel.textContent=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+  }
 
 function renderGameCard(g){
   const isLive=g.state==='in'||g.state=='live';
@@ -17799,7 +17841,7 @@ function initFilterBar(){
       if(grid&&grid.dataset.games){
         try{renderGames(JSON.parse(grid.dataset.games))}catch(e){}
       }
-      loadScores(NBA_STATE.selectedDate);
+      // Data already cached; renderGames() above handles filtering
     });
   });
 }
@@ -27129,13 +27171,66 @@ document.addEventListener('DOMContentLoaded',async function(){
   // Today label
   const todayLabel=document.getElementById('todayLabel');
   if(todayLabel)todayLabel.textContent='Today';
-  // Live pill visibility
-  setInterval(()=>{
+  // Live pill visibility - data-driven
+  function updateLivePill(){
     const pill=document.getElementById('livePill');
-    if(pill)pill.style.display=Math.random()>0.3?'flex':'none';
-  },30000);
+    if(!pill)return;
+    const grid=document.getElementById('scoreboardGrid');
+    if(grid&&grid.dataset.games){
+      try{
+        const games=JSON.parse(grid.dataset.games);
+        const hasLive=games.some(function(g){return g.state==='in'||g.state==='live'});
+        pill.style.display=hasLive?'flex':'none';
+      }catch(e){pill.style.display='none'}
+    }else{
+      pill.style.display='none';
+    }
+  }
+  updateLivePill();
+  setInterval(updateLivePill,30000);
+
+  // Theme toggle
+  var themeToggle=document.getElementById('themeToggle');
+  var themeLabel=document.getElementById('themeLabel');
+  var htm=document.documentElement;
+  function setTheme(theme){
+    htm.setAttribute('data-theme',theme);
+    localStorage.setItem('nba-theme',theme);
+    if(themeToggle){
+      var icon=themeToggle.querySelector('i');
+      icon.className=theme==='dark'?'fas fa-moon':'fas fa-sun';
+      if(themeLabel)themeLabel.textContent=theme==='dark'?'Dark':'Light';
+    }
+  }
+  var savedTheme=localStorage.getItem('nba-theme');
+  if(savedTheme){
+    setTheme(savedTheme);
+  }else{
+    if(window.matchMedia('(prefers-color-scheme: light)').matches)setTheme('light');
+  }
+  if(themeToggle){
+    themeToggle.addEventListener('click',function(){
+      setTheme(htm.getAttribute('data-theme')==='dark'?'light':'dark');
+    });
+  }
+
+  // Wire mobile nav
+  document.querySelectorAll('.nba-mobile-nav-item').forEach(function(el){
+    el.addEventListener('click',function(){
+      var tab=this.dataset.tab;
+      if(tab&&typeof switchTab==='function')switchTab(tab);
+    });
+  });
 });
 </script>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="nba-mobile-nav" id="mobileNav">
+  <div class="nba-mobile-nav-item active" data-tab="scores"><i class="fas fa-basketball-ball"></i><span>Scores</span></div>
+  <div class="nba-mobile-nav-item" data-tab="standings"><i class="fas fa-list-ol"></i><span>Standings</span></div>
+  <div class="nba-mobile-nav-item" data-tab="players"><i class="fas fa-users"></i><span>Players</span></div>
+  <div class="nba-mobile-nav-item" data-tab="news"><i class="fas fa-newspaper"></i><span>News</span></div>
+  <div class="nba-mobile-nav-item" data-tab="draft"><i class="fas fa-user-graduate"></i><span>Draft</span></div>
+</nav>
 </body>
 </html>
