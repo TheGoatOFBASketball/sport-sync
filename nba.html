@@ -17634,6 +17634,18 @@ async function loadScores(date){
       const games=api&&api.ESPN&&api.ESPN.parse?api.ESPN.parse.scoreboard(data):parseGames(data);
       renderGames(games);
     }else{
+      // No NBA games — try Summer League
+      try{
+        var slData=await fetchJSON('https://site.api.espn.com/apis/site/v2/sports/basketball/nba-summer/scoreboard?dates='+date);
+        if(slData&&slData.events&&slData.events.length){
+          var slGames=parseGames(slData);
+          slGames.forEach(function(g){g.__provenance='summer-league'});
+          renderGames(slGames);
+          if(document.getElementById('heroGameCount'))document.getElementById('heroGameCount').textContent=slGames.length+' Games';
+          if(document.getElementById('heroDateLabel'))document.getElementById('heroDateLabel').textContent='Summer League';
+          return;
+        }
+      }catch(_){}
       grid.innerHTML='<div class="scoreboard-empty"><i class="fas fa-basketball-ball"></i> No games scheduled for this date</div>';
       updateHeroFromGames([]);
     }
@@ -17819,7 +17831,7 @@ _bindScoreboardModeToggle();
     '<div class="egc-header"><span class="egc-status'+(isLive?' live':'')+'">'+(isLive?'LIVE':statusText||(isFinal?'Final':g.shortDetail||'Scheduled'))+'</span>'+
     '<span class="egc-head-right">'+
     (g.broadcast?'<span class="egc-tv">'+g.broadcast+'</span>':'')+
-    '<span class="prov-pill" data-prov="'+(g.__provenance||'espn')+'" title="Source: '+(g.__provenance||'espn')+'">'+(g.__provenance==='nba.com+espn'?'NBA + ESPN':(g.__provenance||'espn'))+'</span>'+
+    '<span class="prov-pill" data-prov="'+(g.__provenance||'espn')+'" title="Source: '+(g.__provenance||'espn')+'">'+(g.__provenance==='nba.com+espn'?'NBA + ESPN':g.__provenance==='summer-league'?'Summer League':(g.__provenance||'espn'))+'</span>'+
     '</span></div>'+
     '<div class="egc-teams">'+
     '<div class="egc-team-row"><div class="egc-logo">'+awayLogo+'</div><div class="egc-team-info"><div class="egc-team-name'+(awayWin?' winner':'')+'">'+g.away.name+'</div>'+(g.away.record?'<div class="egc-record">'+g.away.record+'</div>':'')+'</div>'+
