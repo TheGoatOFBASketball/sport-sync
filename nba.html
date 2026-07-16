@@ -173,7 +173,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .score-date-label{flex-shrink:0;font-size:9px;font-weight:700;color:var(--nb-muted);padding:3px 6px 3px 3px;display:flex;align-items:center;letter-spacing:.2px;text-transform:uppercase}
 
 /* GAME CARDS */
-.espn-scoreboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.espn-scoreboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px;min-height:120px}
 .espn-game-card{background:var(--nb-card);border:1px solid var(--nb-border);border-radius:8px;padding:12px 14px;display:block;text-decoration:none;color:inherit;transition:all .15s;position:relative;box-shadow:var(--nb-shadow)}
 @media(hover:hover){.espn-game-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.12);border-color:#c8102e;transform:translateY(-2px)}}
 .espn-game-card.is-live{border-left:3px solid var(--nb-red);background:linear-gradient(135deg,#fff,#fff5f5)}
@@ -666,7 +666,7 @@ body[data-theme="dark"]{background:#051c2d !important;font-family:"Inter",-apple
     <div class="nba-hero-top">
       <div class="nba-hero-text">
         <h1>Scores<em>.</em></h1>
-        <p style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><span id="heroDateLabel" style="color:#fff;font-weight:800">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><span id="heroGameCount" style="color:var(--nb-red);font-weight:800">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><a href="#" id="refreshLink" style="color:#fff;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.4)"><i class="fas fa-sync-alt"></i> Refresh</a></p>
+        <p style="display:flex;flex-wrap:wrap;align-items:center;gap:8px"><span id="heroDateLabel" style="color:#fff;font-weight:800;min-width:60px;display:inline-block">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><span id="heroGameCount" style="color:var(--nb-red);font-weight:800;min-width:60px;display:inline-block;text-align:center">Loading...</span><span style="color:rgba(255,255,255,.35)">|</span><a href="#" id="refreshLink" style="color:#fff;font-weight:600;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.4)"><i class="fas fa-sync-alt"></i> Refresh</a></p>
       </div>
       <div class="hero-cap-row">
         <div class="hero-cap-stat"><div class="hero-cap-label">Salary Cap</div><div class="hero-cap-value gold" id="heroCap">$154.6M</div></div>
@@ -17510,7 +17510,7 @@ function renderDateStrip(selected){
     });
   });
   const activeChip=strip.querySelector('.score-date-chip.active');
-  if(activeChip)activeChip.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  if(activeChip)activeChip.scrollIntoView({inline:'center',block:'nearest'});
   const prevBtn=document.getElementById('sdsPrev');
   const nextBtn=document.getElementById('sdsNext');
   if(prevBtn)prevBtn.onclick=()=>{strip.scrollLeft-=200};
