@@ -121,7 +121,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 /* FILTER BAR */
 .filter-bar{display:flex;gap:5px;padding:9px 14px;overflow-x:auto;border-bottom:1px solid var(--nb-border2)}
 .filter-bar::-webkit-scrollbar{display:none}
-.filter-btn{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:600;color:var(--nb-muted);background:#f0f2f5;border:1px solid var(--nb-border);white-space:nowrap;transition:.15s}
+.filter-btn{padding:5px 12px;border-radius:5px;font-size:11px;font-weight:600;color:var(--nb-muted);background:#f0f2f5;border:1px solid var(--nb-border);white-space:nowrap;transition:.15s;touch-action:manipulation}
 .filter-btn:hover{color:var(--nb-text);background:#e4e7ec}
 .filter-btn.active{background:var(--nb-red);color:#fff;border-color:var(--nb-red);box-shadow:0 1px 6px rgba(200,16,46,0.25)}
 .live-badge-sm{display:inline-flex;align-items:center;gap:3px;background:rgba(200,16,46,0.1);color:var(--nb-red);padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700}
@@ -152,7 +152,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 .sds-scroll-btn:hover{background:#e4e7ec;color:var(--nb-text)}
 .scoreboard-date-strip{display:flex;overflow-x:auto;gap:3px;padding:6px 10px;border-bottom:1px solid var(--nb-border2);background:#f8f9fb;scroll-behavior:smooth}
 .scoreboard-date-strip::-webkit-scrollbar{display:none}
-.score-date-chip{flex-shrink:0;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;color:var(--nb-muted);background:var(--nb-card);border:1px solid var(--nb-border);cursor:pointer;transition:all .12s;text-align:center;min-width:42px}
+.score-date-chip{flex-shrink:0;padding:3px 9px;border-radius:4px;font-size:10px;font-weight:600;color:var(--nb-muted);background:var(--nb-card);border:1px solid var(--nb-border);cursor:pointer;transition:all .12s;text-align:center;min-width:42px;touch-action:manipulation}
 .score-date-chip:hover{color:var(--nb-text);background:#f0f2f5}
 .score-date-chip.active{background:linear-gradient(135deg,var(--nb-red),#ff4500);border-color:var(--nb-red);color:#fff;box-shadow:0 1px 6px rgba(200,16,46,0.2)}
 .score-date-chip .chip-day{font-size:8px;display:block;letter-spacing:.4px;text-transform:uppercase}
@@ -162,7 +162,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 
 /* GAME CARDS */
 .espn-scoreboard-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
-.espn-game-card{background:var(--nb-card);border:1px solid var(--nb-border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;box-shadow:var(--nb-shadow)}
+.espn-game-card{background:var(--nb-card);border:1px solid var(--nb-border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;box-shadow:var(--nb-shadow);touch-action:manipulation}
 .espn-game-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.12);border-color:#c8102e;transform:translateY(-2px)}
 .espn-game-card.is-live{border-left:3px solid var(--nb-red);background:linear-gradient(135deg,#fff,#fff5f5)}
 .espn-game-card.is-final{opacity:.85}
@@ -206,7 +206,7 @@ button{cursor:pointer;border:none;background:none;font-family:inherit;color:inhe
 /* MODE TOGGLE (Today | 7-Day Schedule) */
 .scoreboard-mode-toggle{display:inline-flex;background:var(--nb-card2);border:1px solid var(--nb-border);border-radius:5px;overflow:hidden;font-size:10px;font-weight:700;margin-left:auto}
 [data-theme="dark"] .scoreboard-mode-toggle{background:var(--nb-card2)}
-.scoreboard-mode-toggle button{padding:5px 11px;color:var(--nb-muted);transition:.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
+.scoreboard-mode-toggle button{padding:5px 11px;color:var(--nb-muted);transition:.15s;display:inline-flex;align-items:center;gap:4px;font-family:inherit;touch-action:manipulation}
 .scoreboard-mode-toggle button:hover{color:var(--nb-text);background:var(--nb-border)}
 .scoreboard-mode-toggle button.active{background:linear-gradient(135deg,var(--nb-red),var(--nb-orange));color:#fff;box-shadow:0 1px 4px rgba(200,16,46,0.3)}
 /* SCHEDULE MODE — date group dividers */
